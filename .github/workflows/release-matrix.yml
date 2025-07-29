@@ -1,0 +1,185 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  get-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      previous_tag: ${{ steps.get_tags.outputs.previous_tag }}
+      current_tag: ${{ steps.get_tags.outputs.current_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: 获取当前和上一个标签
+        id: get_tags
+        run: |
+          git fetch --prune --unshallow
+          tags=($(git tag -l --sort=-committerdate));
+          current_tag=${tags[0]};
+          previous_tag=${tags[1]};
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+          echo "current_tag=$current_tag" >> $GITHUB_OUTPUT
+
+  build:
+    needs: get-tags
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+      - name: Build
+        run: |
+          go build -ldflags "-w -s -X main.VERSION=${{ needs.get-tags.outputs.current_tag }}" -o "${{ github.event.repository.name }}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}"
+    
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+          path: ${{ github.event.repository.name }}-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.ext }}
+          overwrite: true
+
+  extract-commit-messages:
+    needs: get-tags
+    runs-on: ubuntu-latest
+    outputs:
+      feat_messages: ${{ steps.extract_commit_messages.outputs.feat_messages }}
+      fix_messages: ${{ steps.extract_commit_messages.outputs.fix_messages }}
+      docs_messages: ${{ steps.extract_commit_messages.outputs.docs_messages }}
+      perf_messages: ${{ steps.extract_commit_messages.outputs.perf_messages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: 提取并分类提交消息
+        id: extract_commit_messages
+        run: |
+          set -e
+          current_tag="${{ needs.get-tags.outputs.current_tag }}"
+          previous_tag="${{ needs.get-tags.outputs.previous_tag }}"
+          if [ -z "$previous_tag" ]; then
+            commit_messages=$(git log --pretty=format:"%s - by @%an (%h)" "$current_tag" | grep -E 'feat|fix|docs|perf' || true)
+          else
+            commit_messages=$(git log --pretty=format:"%s - by @%an (%h)" "$previous_tag".."$current_tag" | grep -E 'feat|fix|docs|perf' || true)
+          fi
+
+          # 转义 ` 字符
+          commit_messages=$(echo "$commit_messages" | sed 's/`/\\\`/g')
+
+          {
+            echo 'feat_messages<<EOF'
+            echo "$commit_messages" | grep 'feat' || true
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+          {
+            echo 'fix_messages<<EOF'
+            echo "$commit_messages" | grep 'fix' || true
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+          {
+            echo 'docs_messages<<EOF'
+            echo "$commit_messages" | grep 'docs' || true
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+          {
+            echo 'perf_messages<<EOF'
+            echo "$commit_messages" | grep 'perf' || true
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+  generate-release-notes:
+    needs: [get-tags, extract-commit-messages]
+    runs-on: ubuntu-latest
+    outputs:
+      release_notes: ${{ steps.generate_release_notes.outputs.release_notes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: 发版详情
+        id: generate_release_notes
+        run: |
+          feat_messages=("${{ needs.extract-commit-messages.outputs.feat_messages }}")
+          fix_messages=("${{ needs.extract-commit-messages.outputs.fix_messages }}")
+          docs_messages=("${{ needs.extract-commit-messages.outputs.docs_messages }}")
+          perf_messages=("${{ needs.extract-commit-messages.outputs.perf_messages }}")
+
+          release_notes=""
+
+          if [[ -n "$feat_messages" ]]; then
+            release_notes="$release_notes\n### 🚀 Features 新功能:  \n"
+            while IFS= read -r message; do
+              release_notes="$release_notes\n- $message"
+            done <<< "$feat_messages"
+          fi
+
+          if [[ -n "$fix_messages" ]]; then
+            release_notes="$release_notes\n### 🩹 Fixes 缺陷修复:  \n"
+            while IFS= read -r message; do
+              release_notes="$release_notes\n- $message"
+            done <<< "$fix_messages"
+          fi
+
+          if [[ -n "$docs_messages" ]]; then
+            release_notes="$release_notes\n### 📖 Documentation 文档:  \n"
+            while IFS= read -r message; do
+              release_notes="$release_notes\n- $message"
+            done <<< "$docs_messages"
+          fi
+
+          if [[ -n "$perf_messages" ]]; then
+            release_notes="$release_notes\n### 🔥 Performance 性能优化:  \n"
+            while IFS= read -r message; do
+              release_notes="$release_notes\n- $message"
+            done <<< "$perf_messages"
+          fi
+
+          # 转义 ` 字符
+          release_notes=$(echo "$release_notes" | sed 's/`/\\\`/g')
+          echo "release_notes=$release_notes" >> $GITHUB_OUTPUT
+
+  create-release:
+    needs: [build, generate-release-notes]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: 写入生成的发布说明到 changelog.md
+        run: |
+          echo -e "${{ needs.generate-release-notes.outputs.release_notes }}" > changelog.md
+          cat changelog.md
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: 引用 changelog.md 创建发版
+        id: release_tag
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          bodyFile: changelog.md
+          artifacts: "dist/*"
+          tag: ${{ needs.get-tags.outputs.current_tag }}

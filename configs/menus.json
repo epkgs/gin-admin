@@ -1,0 +1,315 @@
+[
+    {
+        "name": "dashboard",
+        "type": "catalog",
+        "path": "/dashboard",
+        "status": "enabled",
+        "children": [
+            {
+                "name": "analytics",
+                "type": "menu",
+                "path": "/analytics",
+                "component": "/dashboard/analytics",
+                "status": "enabled",
+                "meta": {
+                    "affixTab": true,
+                    "icon": "lucide:area-chart",
+                    "order": 2,
+                    "title": "分析页"
+                }
+            }
+        ],
+        "meta": {
+            "icon": "lucide:layout-dashboard",
+            "order": 999,
+            "title": "概览"
+        }
+    },
+    {
+        "name": "system",
+        "type": "catalog",
+        "path": "/system",
+        "status": "enabled",
+        "children": [
+            {
+                "name": "menus",
+                "type": "menu",
+                "path": "/system/menus",
+                "status": "enabled",
+                "children": [
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/menus",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 100,
+                            "title": "列表"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "POST",
+                        "path": "/api/v1/menus",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 90,
+                            "title": "新增"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "PUT",
+                        "path": "/api/v1/menus/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 70,
+                            "title": "编辑"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/menus/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 50,
+                            "title": "详情"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "DELETE",
+                        "path": "/api/v1/menus/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 40,
+                            "title": "删除"
+                        }
+                    }
+                ],
+                "meta": {
+                    "icon": "lucide:square-menu",
+                    "keepAlive": true,
+                    "order": 90,
+                    "title": "菜单管理"
+                }
+            },
+            {
+                "name": "roles",
+                "type": "menu",
+                "path": "/system/roles",
+                "status": "enabled",
+                "children": [
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/roles",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 100,
+                            "title": "列表"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "POST",
+                        "path": "/api/v1/roles",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 80,
+                            "title": "新增"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "PUT",
+                        "path": "/api/v1/roles/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 60,
+                            "title": "编辑"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/roles/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 40,
+                            "title": "详情"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "DELETE",
+                        "path": "/api/v1/roles/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 20,
+                            "title": "删除"
+                        }
+                    }
+                ],
+                "meta": {
+                    "icon": "lucide:shirt",
+                    "keepAlive": true,
+                    "order": 80,
+                    "title": "角色管理"
+                }
+            },
+            {
+                "name": "users",
+                "type": "menu",
+                "path": "/system/users",
+                "status": "enabled",
+                "children": [
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/users",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 100,
+                            "title": "列表"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "POST",
+                        "path": "/api/v1/users",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 90,
+                            "title": "新增"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "PUT",
+                        "path": "/api/v1/users/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 70,
+                            "title": "编辑"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/users/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 50,
+                            "title": "查看"
+                        }
+                    },
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "DELETE",
+                        "path": "/api/v1/users/{id}",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 30,
+                            "title": "删除"
+                        }
+                    }
+                ],
+                "meta": {
+                    "icon": "lucide:users",
+                    "keepAlive": true,
+                    "order": 70,
+                    "title": "用户管理"
+                }
+            },
+            {
+                "name": "user_detail",
+                "type": "menu",
+                "path": "/system/users/:id",
+                "component": "/system/users/detail",
+                "status": "enabled",
+                "meta": {
+                    "hideInMenu": true,
+                    "order": 1,
+                    "title": "用户详情"
+                }
+            }
+        ],
+        "meta": {
+            "icon": "lucide:settings",
+            "order": 80,
+            "title": "系统设置"
+        }
+    },
+    {
+        "name": "logger",
+        "type": "catalog",
+        "path": "/logger",
+        "status": "enabled",
+        "children": [
+            {
+                "name": "logger_request",
+                "type": "menu",
+                "path": "/logger",
+                "status": "enabled",
+                "children": [
+                    {
+                        "name": "",
+                        "type": "button",
+                        "method": "GET",
+                        "path": "/api/v1/loggers",
+                        "status": "enabled",
+                        "meta": {
+                            "icon": "lucide:arrow-up-down",
+                            "order": 99,
+                            "title": "列表"
+                        }
+                    }
+                ],
+                "meta": {
+                    "icon": "lucide:arrow-down-up",
+                    "keepAlive": true,
+                    "order": 190,
+                    "title": "请求日志"
+                }
+            }
+        ],
+        "meta": {
+            "icon": "lucide:logs",
+            "keepAlive": true,
+            "order": 70,
+            "title": "日志管理"
+        }
+    }
+]

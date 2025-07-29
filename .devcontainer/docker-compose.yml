@@ -1,0 +1,48 @@
+
+services:
+  app:
+    image: edwinhuish/go-dev:1.23
+    command: sleep infinity
+    env_file:
+      - .env
+    # ports:
+    #   - '8787:8787'
+    working_dir: $PWD
+    volumes:
+      - $PWD/../:$PWD/../
+      - ~/go:/go
+      - ~/.ssh:/home/vscode/.ssh
+      - ~/.gitconfig:/home/vscode/.gitconfig
+    depends_on:
+      - db
+      - redis
+    networks:
+      - db
+      - redis
+
+  db:
+    image: postgres:15.3-alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    networks:
+      - db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    networks:
+      - redis
+
+volumes:
+  postgres-data:
+
+networks:
+  db:
+  redis:

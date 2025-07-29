@@ -1,0 +1,213 @@
+# General Configuration
+AppName: "ginadmin"                    # Application name
+Version: "v1.0.0"                      # Application version
+AppEnv: "dev"                          # dev/debug/test/prod (default: "dev")
+PrintConfig: true                      # Print config on startup
+DefaultLoginPwd: "6351623c8cef86fefabfa7da046fc619"  # MD5("abc-123") - Default login password
+Super:                                 # Super Administrator Account
+  ID: "super"                          # Super admin ID (default: "super")
+  Username: "super"                    # Super admin username (default: "super")
+  Password: "6351623c8cef86fefabfa7da046fc619"  # MD5("abc-123") - Super admin password
+  NickName: "Super Admin"              # Super admin nickname (default: "Super Admin")
+
+# HTTP Configuration
+HTTP:
+  Addr: ":8080"                        # HTTP service address (default: ":8080")
+  ShutdownTimeout: 10                  # Shutdown timeout in seconds (default: 10)
+  ReadTimeout: 60                      # Read timeout in seconds (default: 60)
+  WriteTimeout: 60                     # Write timeout in seconds (default: 60)
+  IdleTimeout: 10                      # Idle timeout in seconds (default: 10)
+  CertFile: ""                         # SSL certificate file path
+  KeyFile: ""                          # SSL private key file path
+  StaticDir: ""                        # Directory for static files 
+
+
+# Cache Configuration
+Cache:
+  Type: "memory"                     # Cache type: memory/badger/redis (default: "memory")
+  Delimiter: ":"                     # Delimiter for key (default: ":")
+
+  Memory:
+    CleanupInterval: 60              # Cleanup interval in seconds (default: 60)
+
+  Badger:
+    Path: "data/cache"               # Badger database path (default: "data/cache")
+
+  Redis:
+    Addr: "127.0.0.1:6379"           # Redis address
+    Username: ""                     # Redis username
+    Password: ""                     # Redis password
+    DB: 1                            # Redis database number
+  
+  Expiration:
+    User: 4                          # User cache expiration time in hours (default: 4)
+
+# Database Configuration
+DB:
+  Debug: true                        # Database debug mode
+  Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres (default: "sqlite3")
+  # SQLite3 DSN
+  DSN: "data/ginadmin.db"            # Database connection string (default: "data/app.db")
+  # MySQL DSN
+  # DSN: "root:123@tcp(127.0.0.1:3306)/ginadmin?charset=utf8mb4&parseTime=True&loc=Local"
+  # PostgreSQL DSN
+  # DSN: "host=db user=postgres password=123456 dbname=ginadmin port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+  MaxLifetime: 86400                 # Maximum connection lifetime in seconds (default: 86400)
+  MaxIdleTime: 3600                  # Maximum connection idle time in seconds (default: 3600)
+  MaxOpenConns: 100                  # Maximum open connections (default: 100)
+  MaxIdleConns: 50                   # Maximum idle connections (default: 50)
+  TablePrefix: ""                    # Table prefix
+  AutoMigrate: true                  # Auto migrate database tables
+  PrepareStmt: false                 # Prepare SQL statements
+
+# Upload Configuration
+Upload:
+  Path: "uploads"                    # Upload directory path (default: "uploads")
+  UseDateDir: true                   # Use date directory (default: true)
+
+
+# Util Configuration
+Captcha:
+  Length: 4                          # Captcha length (default: 4)
+  Width: 400                         # Captcha width (default: 400)
+  Height: 160                        # Captcha height (default: 160)   
+  CatchType: "menory"                # Captcha storage type: memory/redis (default: "memory")
+  Redis:
+    Addr: ""                         # If empty, then use the same configuration as Cache.Redis
+    Username: ""
+    Password: ""
+    DB: 1
+    KeyPrefix: "captcha:"
+
+Prometheus:
+  Enable: false
+  Port: 9100
+  BasicUsername: "admin"
+  BasicPassword: "admin"
+  LogApis: []                        # Log APIs, e.g. ["/api/v1/users"]
+  LogMethods: []                     # Log HTTP methods, e.g. ["GET"]
+  DefaultCollect: true
+
+Swagger:
+  Disable: false                     # Disable swagger UI (default: false)  
+  StaticFile: "configs/openapi.json" # Static file for openapi.json (default: "configs/openapi.json")
+
+
+Pprof:
+  Addr: ""                          # Pprof monitor address, "localhost:6060"
+
+Menu:
+  File: "configs/menus.json"         # Data to restore model.Menus (default: "configs/menus.json")
+  DenyOperate: false                 # Deny menu operations (default: false)
+
+# Logger Configuration
+Logger:
+  Debug: true                            # Debug mode
+  Level: "debug"                         # Log level: debug/info/warn/error/dpanic/panic/fatal
+  CallerSkip: 1                          # Number of caller stack frames to skip
+
+  File:
+    Enable: false                        # Enable file logging
+    Path: "data/log/ginadmin.log"        # Log file path
+    MaxBackups: 20                       # Maximum number of backup log files (default: 20)
+    MaxSize: 64                          # Maximum size of each log file in MB (default: 64)
+
+  Database:
+    Enable: true                       # Enable log hook
+    Level: "info"                      # Hook log level
+    Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres
+    DSN: "data/ginadmin.db"            # Database connection string
+    TablePrefix: ""                    # Table prefix
+    MaxBuffer: 1024                    # Maximum buffer size
+    MaxThread: 2                       # Maximum number of threads
+    MaxOpenConns: 16                   # Maximum open connections
+    MaxIdleConns: 4                    # Maximum idle connections
+    MaxLifetime: 86400                 # Maximum connection lifetime in seconds
+    MaxIdleTime: 7200                  # Maximum connection idle time in seconds
+
+# Middleware Configuration
+Middleware:
+  Recovery:
+    Skip: 3                            # Skip the first n stack frames (default: 3)
+
+  CORS:
+    Enable: true                       # Enable CORS middleware
+    AllowOrigins:
+      - "*"                            # Allowed origins
+    AllowMethods:                      # Allowed HTTP methods
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "HEAD"
+      - "OPTIONS"
+    AllowHeaders:                      # Allowed headers
+      - "*"
+    ExposeHeaders:
+      - "Content-Disposition"          # Exposed headers
+    MaxAge: 86400                      # Access-Control-Max-Age in seconds
+    AllowWildcard: true                # Allow wildcard matching
+    AllowWebSockets: true              # Allow WebSocket connections
+    AllowFiles: true                   # Allow file access
+
+  Trace:
+    RequestHeaderKey: "X-Request-Id"   # Request header key for trace ID (default: "X-Request-Id")
+    ResponseTraceKey: "X-Trace-Id"     # Response header key for trace ID (default: "X-Trace-Id")
+
+  Logger:
+    MaxOutputRequestBodyLen: 4096      # Maximum request body length to output in logs (default: 4096)
+    MaxOutputResponseBodyLen: 4096     # Maximum response body length to output in logs (default: 1024)
+
+  CopyBody:
+    MaxContentLen: 134217728           # Maximum content length (default 32MB = 33554432, here 128MB)
+
+  Auth:
+    Disable: false                     # Disable auth middleware
+    SigningMethod: "HS512"             # JWT signing method: HS256/HS384/HS512 (default: "HS512")
+    SigningKey: "XnEsT0S@"             # JWT secret key (default: "XnEsT0S@")
+    OldSigningKey: ""                  # Old secret key (for migration)
+    RefreshKey: "TfYOj6Tf"             # Secret key for refresh token (default: "TfYOj6Tf")
+    Expired: 86400                     # Token expiration time in seconds (default: 86400)
+
+    Store:
+      Type: "badger"                   # Token store type: memory/badger/redis (default: "memory")
+      Delimiter: ":"                   # Delimiter for key (default: ":")
+
+      Memory:
+        CleanupInterval: 60            # Cleanup interval in seconds (default: 60)
+
+      Badger:
+        Path: "data/auth"              # Badger database path (default: "data/auth")
+
+      Redis:
+        Addr: ""                       # Redis address (if empty, use the same configuration as Cache.Redis)
+        Username: ""                   # Redis username
+        Password: ""                   # Redis password
+        DB: 2                          # Redis database number
+
+  RateLimiter:
+    Enable: false                      # Enable rate limiter
+    Period: 10                         # Time period in seconds
+    MaxRequestsPerIP: 1000             # Maximum requests per IP
+    MaxRequestsPerUser: 500            # Maximum requests per user
+
+    Store:
+      Type: "memory"                   # Store type: memory/redis
+
+      Memory:
+        Expiration: 3600               # Expiration time in seconds (default: 3600)
+        CleanupInterval: 60            # Cleanup interval in seconds (default: 60)
+
+      Redis:
+        Addr: ""                       # Redis address (if empty, use the same configuration as Cache.Redis)
+        Username: ""                   # Redis username
+        Password: ""                   # Redis password
+        DB: 10                         # Redis database number
+
+  Casbin:
+    Disable: false                     # Disable Casbin middleware
+    LoadThread: 2                      # Number of loading threads (default: 2)
+    AutoLoadInterval: 3                # Auto load interval in seconds (default: 3)
+    ModelFile: "rbac_model.conf"       # Casbin model file path (default: "rbac_model.conf")
+    GenPolicyFile: "data/gen_rbac_policy.csv"  # Generated policy file path (default: "data/gen_rbac_policy.csv")

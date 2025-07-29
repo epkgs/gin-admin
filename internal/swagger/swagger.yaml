@@ -1,0 +1,1451 @@
+definitions:
+  dtos.AuthUpdatePasswordReq:
+    properties:
+      newPassword:
+        description: New password (md5 hash)
+        type: string
+      oldPassword:
+        description: Old password (md5 hash)
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  dtos.AuthUpdateUserReq:
+    properties:
+      email:
+        description: Email of user
+        maxLength: 128
+        type: string
+      name:
+        description: Name of user
+        maxLength: 64
+        type: string
+      phone:
+        description: Phone number of user
+        maxLength: 32
+        type: string
+      remark:
+        description: Remark of user
+        maxLength: 1024
+        type: string
+      wechat:
+        description: Wechat account
+        maxLength: 64
+        type: string
+    type: object
+  dtos.Captcha:
+    properties:
+      captchaId:
+        description: Captcha ID
+        type: string
+    type: object
+  dtos.List-models_Logger:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Logger'
+        type: array
+      limit:
+        description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        type: integer
+      page:
+        description: pagination index. default(1)
+        type: integer
+      total:
+        description: total number of items
+        type: integer
+    type: object
+  dtos.List-models_Menu:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Menu'
+        type: array
+      limit:
+        description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        type: integer
+      page:
+        description: pagination index. default(1)
+        type: integer
+      total:
+        description: total number of items
+        type: integer
+    type: object
+  dtos.List-models_Role:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
+      limit:
+        description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        type: integer
+      page:
+        description: pagination index. default(1)
+        type: integer
+      total:
+        description: total number of items
+        type: integer
+    type: object
+  dtos.List-models_User:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+      limit:
+        description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        type: integer
+      page:
+        description: pagination index. default(1)
+        type: integer
+      total:
+        description: total number of items
+        type: integer
+    type: object
+  dtos.Login:
+    properties:
+      password:
+        description: Login password (md5 hash)
+        type: string
+      username:
+        description: Login name
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dtos.LoginToken:
+    properties:
+      accessToken:
+        description: Access token (JWT)
+        type: string
+      expires:
+        description: Expired time (second)s
+        type: integer
+      refreshToken:
+        description: Refresh token (JWT)
+        type: string
+      tokenType:
+        description: 'Token type (Usage: Authorization=${token_type} ${access_token})'
+        type: string
+    type: object
+  dtos.MenuCreateReq:
+    properties:
+      component:
+        description: Component path of view
+        type: string
+      meta:
+        allOf:
+        - $ref: '#/definitions/models.MenuMeta'
+        description: Meta of menu (JSON)
+      method:
+        description: Http method of resource
+        type: string
+      name:
+        description: Display name of menu
+        maxLength: 128
+        type: string
+      parentId:
+        description: Parent ID (From Menu.ID)
+        type: string
+      path:
+        description: Access path of menu
+        type: string
+      status:
+        description: Status of menu (enabled, disabled)
+        enum:
+        - disabled
+        - enabled
+        type: string
+      type:
+        description: Type of menu (catalog menu, button)
+        enum:
+        - catalog
+        - menu
+        - button
+        type: string
+    required:
+    - status
+    - type
+    type: object
+  dtos.MenuUpdateReq:
+    properties:
+      component:
+        description: Component path of view
+        type: string
+      meta:
+        allOf:
+        - $ref: '#/definitions/models.MenuMeta'
+        description: Meta of menu (JSON)
+      method:
+        description: Http method of resource
+        type: string
+      name:
+        description: Display name of menu
+        maxLength: 128
+        type: string
+      parentId:
+        description: Parent ID (From Menu.ID)
+        type: string
+      path:
+        description: Access path of menu
+        type: string
+      status:
+        description: Status of menu (enabled, disabled)
+        enum:
+        - disabled
+        - enabled
+        type: string
+      type:
+        description: Type of menu (catalog menu, button)
+        enum:
+        - catalog
+        - menu
+        - button
+        type: string
+    type: object
+  dtos.Result-any:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  dtos.Result-dtos_Captcha:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/dtos.Captcha'
+      message:
+        type: string
+    type: object
+  dtos.Result-dtos_LoginToken:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/dtos.LoginToken'
+      message:
+        type: string
+    type: object
+  dtos.Result-models_Menu:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/models.Menu'
+      message:
+        type: string
+    type: object
+  dtos.Result-models_Menus:
+    properties:
+      code:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/models.Menu'
+        type: array
+      message:
+        type: string
+    type: object
+  dtos.Result-models_Role:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/models.Role'
+      message:
+        type: string
+    type: object
+  dtos.Result-models_User:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/models.User'
+      message:
+        type: string
+    type: object
+  dtos.ResultList-models_Logger:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/dtos.List-models_Logger'
+      message:
+        type: string
+    type: object
+  dtos.ResultList-models_Menu:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/dtos.List-models_Menu'
+      message:
+        type: string
+    type: object
+  dtos.ResultList-models_Role:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/dtos.List-models_Role'
+      message:
+        type: string
+    type: object
+  dtos.ResultList-models_User:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/dtos.List-models_User'
+      message:
+        type: string
+    type: object
+  dtos.RoleCreateReq:
+    properties:
+      code:
+        description: Code of role (unique)
+        maxLength: 32
+        type: string
+      description:
+        description: Details about role
+        type: string
+      menuIds:
+        description: Menu ids
+        items:
+          type: string
+        type: array
+      name:
+        description: Display name of role
+        maxLength: 128
+        type: string
+      rank:
+        description: Rank for sorting
+        type: integer
+      status:
+        description: Status of role (enabled, disabled)
+        enum:
+        - disabled
+        - enabled
+        type: string
+    required:
+    - code
+    - name
+    - status
+    type: object
+  dtos.RoleUpdateReq:
+    properties:
+      code:
+        description: Code of role (unique)
+        maxLength: 32
+        type: string
+      description:
+        description: Details about role
+        type: string
+      menuIds:
+        description: Menu ids
+        items:
+          type: string
+        type: array
+      name:
+        description: Display name of role
+        maxLength: 128
+        type: string
+      rank:
+        description: Rank for sorting
+        type: integer
+      status:
+        description: Status of role (enabled, disabled)
+        enum:
+        - disabled
+        - enabled
+        type: string
+    type: object
+  dtos.UserCreateReq:
+    properties:
+      description:
+        description: Description of user
+        maxLength: 1024
+        type: string
+      email:
+        description: Email of user
+        maxLength: 128
+        type: string
+      nickName:
+        description: Name of user
+        maxLength: 64
+        type: string
+      password:
+        description: Password for login (md5 hash)
+        maxLength: 64
+        type: string
+      phone:
+        description: Phone number of user
+        maxLength: 32
+        type: string
+      realName:
+        description: Real name of user
+        maxLength: 64
+        type: string
+      roles:
+        description: Roles of user
+        items:
+          type: string
+        type: array
+      status:
+        description: Status of user (activated, freezed)
+        enum:
+        - activated
+        - freezed
+        type: string
+      username:
+        description: Username for login
+        maxLength: 64
+        type: string
+      wechat:
+        description: Wechat account
+        maxLength: 64
+        type: string
+    required:
+    - nickName
+    - roles
+    - status
+    - username
+    type: object
+  dtos.UserUpdateReq:
+    properties:
+      description:
+        description: Description of user
+        maxLength: 1024
+        type: string
+      email:
+        description: Email of user
+        maxLength: 128
+        type: string
+      nickName:
+        description: Name of user
+        maxLength: 64
+        type: string
+      password:
+        description: Password for login (md5 hash)
+        maxLength: 64
+        type: string
+      phone:
+        description: Phone number of user
+        maxLength: 32
+        type: string
+      realName:
+        description: Real name of user
+        maxLength: 64
+        type: string
+      roles:
+        description: Roles of user
+        items:
+          type: string
+        type: array
+      status:
+        description: Status of user (activated, freezed)
+        enum:
+        - activated
+        - freezed
+        type: string
+      username:
+        description: Username for login
+        maxLength: 64
+        type: string
+      wechat:
+        description: Wechat account
+        maxLength: 64
+        type: string
+    type: object
+  models.Logger:
+    properties:
+      createdAt:
+        description: Create time
+        type: string
+      id:
+        description: Unique ID
+        type: string
+      level:
+        description: Log level
+        type: string
+      message:
+        description: Log message
+        type: string
+      meta:
+        additionalProperties: {}
+        description: Log data
+        type: object
+      nickName:
+        description: From User.NickName
+        type: string
+      stack:
+        description: Error stack
+        type: string
+      tag:
+        description: Log tag
+        type: string
+      traceId:
+        description: Trace ID
+        type: string
+      userId:
+        description: User ID
+        type: string
+      username:
+        description: From User.Name
+        type: string
+    type: object
+  models.Menu:
+    properties:
+      children:
+        allOf:
+        - $ref: '#/definitions/models.Menus'
+        description: Child menus
+      component:
+        description: Component path of view
+        type: string
+      createdAt:
+        description: Create time
+        type: string
+      id:
+        description: Unique ID
+        type: string
+      meta:
+        allOf:
+        - $ref: '#/definitions/models.MenuMeta'
+        description: Meta of menu
+      method:
+        description: Http method of resource
+        type: string
+      name:
+        description: Display name of menu
+        type: string
+      parentId:
+        description: Parent ID (From Menu.ID)
+        type: string
+      parentPath:
+        description: Parent path (split by .)
+        type: string
+      path:
+        description: Access path of menu
+        type: string
+      redirect:
+        description: Redirect path of menu
+        type: string
+      roles:
+        $ref: '#/definitions/models.Roles'
+      status:
+        description: Status of menu (enabled, disabled)
+        type: string
+      type:
+        description: Type of menu (catalog, menu, button)
+        type: string
+      updatedAt:
+        description: Update time
+        type: string
+    type: object
+  models.MenuMeta:
+    properties:
+      order:
+        description: Rank for sorting (Order by desc)
+        type: integer
+      title:
+        description: Menu title
+        type: string
+    type: object
+  models.Menus:
+    items:
+      $ref: '#/definitions/models.Menu'
+    type: array
+  models.Role:
+    properties:
+      code:
+        description: Code of role (unique)
+        type: string
+      createdAt:
+        description: Create time
+        type: string
+      description:
+        description: Details about role
+        type: string
+      id:
+        description: Unique ID
+        type: string
+      menus:
+        items:
+          $ref: '#/definitions/models.Menu'
+        type: array
+      name:
+        description: Display name of role
+        type: string
+      rank:
+        description: Rank for sorting
+        type: integer
+      status:
+        description: Status of role (disabled, enabled)
+        type: string
+      updatedAt:
+        description: Update time
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.Roles:
+    items:
+      $ref: '#/definitions/models.Role'
+    type: array
+  models.User:
+    properties:
+      avatar:
+        description: Avatar URL
+        type: string
+      createdAt:
+        description: Create time
+        type: string
+      description:
+        description: Details about user
+        type: string
+      email:
+        description: Email of user
+        type: string
+      id:
+        description: Unique ID
+        type: string
+      nickName:
+        description: Name of user
+        type: string
+      phone:
+        description: Phone number of user
+        type: string
+      realName:
+        description: Real name of user
+        type: string
+      roles:
+        description: Roles of user
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
+      status:
+        description: Status of user (activated, freezed)
+        type: string
+      updatedAt:
+        description: Update time
+        type: string
+      username:
+        description: Username for login
+        type: string
+      wechat:
+        description: Wechat account
+        type: string
+    type: object
+info:
+  contact: {}
+  description: 基于 Gin 的快速启动项目
+  title: Gin Admin
+  version: v1.0.0
+paths:
+  /api/v1/auth/login:
+    post:
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.Login'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-dtos_LoginToken'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      summary: Login system with username and password
+      tags:
+      - AuthAPI
+  /api/v1/auth/logout:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Logout system
+      tags:
+      - AuthAPI
+  /api/v1/auth/menus:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_Menus'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Query current user menus based on the current user role
+      tags:
+      - AuthAPI
+  /api/v1/auth/password:
+    put:
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AuthUpdatePasswordReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Change current user password
+      tags:
+      - AuthAPI
+  /api/v1/auth/refresh-token:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-dtos_LoginToken'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Refresh current access token
+      tags:
+      - AuthAPI
+  /api/v1/auth/user:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user info
+      tags:
+      - AuthAPI
+    put:
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AuthUpdateUserReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Update current user info
+      tags:
+      - AuthAPI
+  /api/v1/captcha/id:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-dtos_Captcha'
+      summary: Get captcha ID
+      tags:
+      - CaptchaAPI
+  /api/v1/captcha/image:
+    get:
+      parameters:
+      - description: Captcha ID
+        in: query
+        name: id
+        type: string
+      - description: Reload captcha image (reload=1)
+        in: query
+        name: reload
+        type: boolean
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: Captcha image
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      summary: Response captcha image
+      tags:
+      - CaptchaAPI
+  /api/v1/loggers:
+    get:
+      parameters:
+      - description: end time
+        in: query
+        name: endTime
+        type: string
+      - description: log level
+        in: query
+        name: level
+        type: string
+      - description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        in: query
+        name: limit
+        type: integer
+      - description: log message
+        in: query
+        name: message
+        type: string
+      - description: pagination index. default(1)
+        in: query
+        name: page
+        type: integer
+      - description: start time
+        in: query
+        name: startTime
+        type: string
+      - description: log tag
+        in: query
+        name: tag
+        type: string
+      - description: total number of items
+        in: query
+        name: total
+        type: integer
+      - description: trace ID
+        in: query
+        name: traceID
+        type: string
+      - description: user name
+        in: query
+        name: username
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.ResultList-models_Logger'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Query logger list
+      tags:
+      - LoggerAPI
+  /api/v1/menus:
+    get:
+      parameters:
+      - description: Role ID
+        in: query
+        name: '-'
+        type: string
+      - description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        in: query
+        name: limit
+        type: integer
+      - description: Display name of menu
+        in: query
+        name: name
+        type: string
+      - description: pagination index. default(1)
+        in: query
+        name: page
+        type: integer
+      - description: Status of menu (disabled, enabled)
+        in: query
+        name: status
+        type: string
+      - description: total number of items
+        in: query
+        name: total
+        type: integer
+      - description: Type of menu (catalog, menu, button)
+        in: query
+        name: type
+        type: string
+      - description: Include resources
+        in: query
+        name: withResources
+        type: boolean
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.ResultList-models_Menu'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Query menu tree data
+      tags:
+      - MenuAPI
+    post:
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.MenuCreateReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_Menu'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Create menu record
+      tags:
+      - MenuAPI
+  /api/v1/menus/{id}:
+    delete:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete menu record by ID
+      tags:
+      - MenuAPI
+    get:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_Menu'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Get menu record by ID
+      tags:
+      - MenuAPI
+    put:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.MenuUpdateReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Update menu record by ID
+      tags:
+      - MenuAPI
+  /api/v1/roles:
+    get:
+      parameters:
+      - description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        in: query
+        name: limit
+        type: integer
+      - description: Display name of role
+        in: query
+        name: name
+        type: string
+      - description: pagination index. default(1)
+        in: query
+        name: page
+        type: integer
+      - description: Status of role (disabled, enabled
+        enum:
+        - disabled
+        - enabled
+        - ""
+        in: query
+        name: status
+        type: string
+      - description: total number of items
+        in: query
+        name: total
+        type: integer
+      - description: Include menu IDs
+        in: query
+        name: withMenus
+        type: boolean
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.ResultList-models_Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Query role list
+      tags:
+      - RoleAPI
+    post:
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RoleCreateReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_Role'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Create role record
+      tags:
+      - RoleAPI
+  /api/v1/roles/{id}:
+    delete:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete role record by ID
+      tags:
+      - RoleAPI
+    get:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_Role'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Get role record by ID
+      tags:
+      - RoleAPI
+    put:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RoleUpdateReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Update role record by ID
+      tags:
+      - RoleAPI
+  /api/v1/users:
+    get:
+      parameters:
+      - description: pagination size, less than 0 is considered as unlimited quantity.
+          default(20)
+        in: query
+        name: limit
+        type: integer
+      - description: Name of user
+        in: query
+        name: name
+        type: string
+      - description: pagination index. default(1)
+        in: query
+        name: page
+        type: integer
+      - description: Status of user (activated, freezed)
+        enum:
+        - activated
+        - freezed
+        in: query
+        name: status
+        type: string
+      - description: total number of items
+        in: query
+        name: total
+        type: integer
+      - description: Username for login
+        in: query
+        name: username
+        type: string
+      - description: Whether to include role IDs
+        in: query
+        name: withRoles
+        type: boolean
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.ResultList-models_User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Query user list
+      tags:
+      - UserAPI
+    post:
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserCreateReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Create user record
+      tags:
+      - UserAPI
+  /api/v1/users/{id}:
+    delete:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user record by ID
+      tags:
+      - UserAPI
+    get:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-models_User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user record by ID
+      tags:
+      - UserAPI
+    put:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserUpdateReq'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user record by ID
+      tags:
+      - UserAPI
+  /api/v1/users/{id}/reset-pwd:
+    patch:
+      parameters:
+      - description: unique id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.Result-any'
+      security:
+      - ApiKeyAuth: []
+      summary: Reset user password by ID
+      tags:
+      - UserAPI
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

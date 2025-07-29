@@ -1,0 +1,7 @@
+{
+  "file not found": "文件不存在",
+  "file upload failed": "文件上传失败",
+  "file deletion failed": "文件删除失败",
+  "file update failed": "文件更新失败",
+  "file download failed": "文件下载失败"
+}

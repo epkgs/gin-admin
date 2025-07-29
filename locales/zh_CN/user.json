@@ -1,0 +1,23 @@
+{
+  "user not found": "用户不存在",
+  "user is not logged in": "用户未登录",
+  "user {{.Name}} is disabled": "用户 {{.Name}} 已被禁用",
+  "user {{.Name}} already exists": "用户 {{.Name}} 已存在",
+  "password expired": "密码已过期",
+  "incorrect username or password": "用户名或密码错误",
+  "wrong user token": "用户令牌错误",
+  "generate visit token failed": "生成访问令牌失败",
+  "generate refresh token failed": "生成刷新令牌失败",
+  "parse token failed": "解析令牌失败",
+  "invalid token": "无效的令牌",
+  "password encrypt failed": "密码加密失败",
+  "password decrypt failed": "密码解密失败",
+  "username or password empty": "用户名或密码不能为空",
+  "password error": "密码错误",
+  "super user can not modify": "超级用户不能修改",
+  "role code already exists": "角色编码已存在",
+  "role not found": "角色不存在",
+  "incorrect user": "用户信息错误",
+  "old password incorrect": "旧密码错误",
+  "captcha id not found": "验证码ID不存在"
+}

@@ -1,0 +1,12 @@
+{
+  "database error": "数据库错误",
+  "database query error": "数据库查询错误",
+  "database create error": "数据库创建错误",
+  "database update error": "数据库更新错误",
+  "database delete error": "数据库删除错误",
+  "database connection error": "数据库连接错误",
+  "database transaction error": "数据库事务错误",
+  "query parameter cannot be empty": "查询参数不能为空",
+  "record does not exist": "记录不存在",
+  "nothing to update": "未更新任何数据"
+}
