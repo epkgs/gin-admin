@@ -18,5 +18,6 @@
   "failed to read config file: {{.File}}": "读取配置文件失败: {{.File}}",
   "failed to unmarshal config: {{.File}}": "解析配置文件失败: {{.File}}",
   "failed to get config file: {{.File}}": "访问配置文件 {{.File}} 失败",
-  "failed to walk dir: {{.Dir}}": "遍历目录 {{.Dir}} 失败"
+  "failed to walk dir: {{.Dir}}": "遍历目录 {{.Dir}} 失败",
+  "menu not found": "菜单不存在"
 }
