@@ -98,7 +98,7 @@ func (a *App) AddCleaner(ctx context.Context, cleaner func()) {
 	a.cleaners = append(a.cleaners, cleaner)
 }
 
-func (a *App) AutoMigrate(ctx context.Context) error {
+func (a *App) autoMigrate(_ context.Context) error {
 	return a.db.AutoMigrate(
 		new(models.Logger),
 		new(models.MenuRole),
@@ -111,7 +111,7 @@ func (a *App) AutoMigrate(ctx context.Context) error {
 
 func (a *App) Init(ctx context.Context) error {
 	if a.Config().DB.AutoMigrate {
-		if err := a.AutoMigrate(ctx); err != nil {
+		if err := a.autoMigrate(ctx); err != nil {
 			return err
 		}
 
