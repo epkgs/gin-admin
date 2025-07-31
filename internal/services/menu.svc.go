@@ -256,7 +256,7 @@ func (a *Menu) appendChildren(ctx context.Context, data models.Menus) (models.Me
 		}
 	}
 
-	if parentIDs := data.SplitParentIDs(); len(parentIDs) > 0 {
+	if parentIDs := data.ParentIDs(); len(parentIDs) > 0 {
 		parents, err := a.MenuRepo.Find(ctx, gormx.WithWhere("id IN (?)", parentIDs))
 		if err != nil {
 			return nil, errorx.WrapGormError(ctx, err)

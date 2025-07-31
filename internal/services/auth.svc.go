@@ -321,7 +321,7 @@ func (a *Auth) QueryMenus(ctx context.Context) (models.Menus, error) {
 	}
 
 	// fill parent menus
-	if parentIDs := menus.SplitParentIDs(); len(parentIDs) > 0 {
+	if parentIDs := menus.ParentIDs(); len(parentIDs) > 0 {
 		var missMenusIDs []string
 		menuIDMapper := menus.ToIDMapper()
 		for _, parentID := range parentIDs {

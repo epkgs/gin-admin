@@ -67,24 +67,25 @@ func (a Menus) ToIDMapper() map[string]*Menu {
 	return m
 }
 
-func (a Menus) SplitParentIDs() []string {
-	parentIDs := make([]string, 0, len(a))
-	idMapper := make(map[string]struct{})
+// collect all parent IDs of menu list
+func (a Menus) ParentIDs() []string {
+	parentIDs := []string{}
+	cacher := map[string]struct{}{}
 	for _, item := range a {
-		if _, ok := idMapper[item.ID]; ok {
+		if _, ok := cacher[item.ID]; ok {
 			continue
 		}
-		idMapper[item.ID] = struct{}{}
+		cacher[item.ID] = struct{}{}
 		if pp := item.ParentPath; pp != "" {
 			for _, pid := range strings.Split(pp, ".") {
 				if pid == "" {
 					continue
 				}
-				if _, ok := idMapper[pid]; ok {
+				if _, ok := cacher[pid]; ok {
 					continue
 				}
 				parentIDs = append(parentIDs, pid)
-				idMapper[pid] = struct{}{}
+				cacher[pid] = struct{}{}
 			}
 		}
 	}
