@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +32,7 @@ func AuthWithConfig(config AuthConfig) gin.HandlerFunc {
 		}
 
 		ctx := helper.WithUserID(c.Request.Context(), userID)
-		ctx = logging.WithUserID(ctx, userID)
+		ctx = logger.WithUserID(ctx, userID)
 		if userID == config.RootID {
 			ctx = helper.WithIsRootUser(ctx)
 		}

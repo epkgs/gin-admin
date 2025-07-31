@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"gin-admin/pkg/encoding/json"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 )
 
 type Config struct {
@@ -42,7 +42,7 @@ type Config struct {
 	Pprof      Pprof
 	Menu       Menu
 
-	Logger     logging.LoggerConfig
+	Logger     logger.Config
 	Middleware Middleware
 }
 

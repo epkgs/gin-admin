@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
@@ -41,7 +41,7 @@ func TraceWithConfig(config TraceConfig) gin.HandlerFunc {
 		}
 
 		ctx := helper.WithTraceID(c.Request.Context(), traceID)
-		ctx = logging.WithTraceID(ctx, traceID)
+		ctx = logger.WithTraceID(ctx, traceID)
 		c.Request = c.Request.WithContext(ctx)
 		c.Writer.Header().Set(config.ResponseTraceKey, traceID)
 		c.Next()

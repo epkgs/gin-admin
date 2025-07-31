@@ -20,7 +20,7 @@ import (
 	"gin-admin/pkg/encoding/json"
 	"gin-admin/pkg/encoding/yaml"
 	"gin-admin/pkg/gormx"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/randx"
 
 	"github.com/epkgs/object"
@@ -58,12 +58,12 @@ func (a *Menu) InitIfNeed(ctx context.Context) error {
 	}
 
 	if count > 0 {
-		logging.Info(ctx, "Menu database is not empty, skip init menu data.")
+		logger.Info(ctx, "Menu database is not empty, skip init menu data.")
 		return nil // 已有数据就跳过
 	}
 
 	if err := a.initFromFile(ctx, configs.C.Menu.File); err != nil {
-		logging.Error(ctx, "failed to init menu data", err, map[string]any{"file": configs.C.Menu.File})
+		logger.Error(ctx, "failed to init menu data", err, map[string]any{"file": configs.C.Menu.File})
 	}
 
 	return a.syncToCasbin(ctx)
@@ -78,7 +78,7 @@ func (a *Menu) initFromFile(ctx context.Context, menuFile string) error {
 	f, err := os.ReadFile(menuFile)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			logging.Warn(ctx, "Menu data file not found, skip init menu data from file", map[string]any{"file": menuFile})
+			logger.Warn(ctx, "Menu data file not found, skip init menu data from file", map[string]any{"file": menuFile})
 			return nil
 		}
 		return err

@@ -6,7 +6,7 @@ import (
 
 	"gin-admin/internal/errorx"
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -61,7 +61,7 @@ func RateLimiterWithConfig(config RateLimiterConfig) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			logging.Error(ctx, "Rate limiter middleware error", err)
+			logger.Error(ctx, "Rate limiter middleware error", err)
 			response.Error(c, errorx.ErrInternal.New(ctx))
 		} else if allowed {
 			c.Next()

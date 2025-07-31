@@ -1,4 +1,4 @@
-package logging
+package logger
 
 import (
 	"context"
@@ -7,17 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pelletier/go-toml"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type Config struct {
-	Logger LoggerConfig
-}
-
-type LoggerConfig struct {
 	Debug      bool
 	Level      string // debug/info/warn/error/dpanic/panic/fatal
 	CallerSkip int
@@ -42,21 +37,9 @@ type LoggerConfig struct {
 	}
 }
 
-type HookHandlerFunc func(ctx context.Context, cfg *LoggerConfig) (*Hook, error)
+type HookHandlerFunc func(ctx context.Context, cfg *Config) (*Hook, error)
 
-func LoadConfigFromToml(filename string) (*LoggerConfig, error) {
-	cfg := &Config{}
-	buf, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	if err := toml.Unmarshal(buf, cfg); err != nil {
-		return nil, err
-	}
-	return &cfg.Logger, nil
-}
-
-func InitWithConfig(ctx context.Context, cfg *LoggerConfig, hooks ...HookHandlerFunc) (func(), error) {
+func InitWithConfig(ctx context.Context, cfg *Config, hooks ...HookHandlerFunc) (func(), error) {
 	var zconfig zap.Config
 	if cfg.Debug {
 		cfg.Level = "debug"

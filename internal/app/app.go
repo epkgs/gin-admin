@@ -17,7 +17,7 @@ import (
 	"gin-admin/internal/types"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/middleware"
 	"gin-admin/pkg/response"
 	"gin-admin/pkg/uploader"
@@ -184,7 +184,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 	}
 
 	addr := configs.C.HTTP.Addr
-	logging.Info(ctx, fmt.Sprintf("HTTP server is listening on %s", addr))
+	logger.Info(ctx, fmt.Sprintf("HTTP server is listening on %s", addr))
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      e,
@@ -203,7 +203,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 		}
 
 		if err != nil && err != http.ErrServerClosed {
-			logging.Error(ctx, "Failed to listen http server", err)
+			logger.Error(ctx, "Failed to listen http server", err)
 		}
 	}()
 
@@ -213,7 +213,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 
 		srv.SetKeepAlivesEnabled(false)
 		if err := srv.Shutdown(ctx); err != nil {
-			logging.Error(ctx, "Failed to shutdown http server", err)
+			logger.Error(ctx, "Failed to shutdown http server", err)
 		}
 	})
 

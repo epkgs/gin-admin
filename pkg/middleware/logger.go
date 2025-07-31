@@ -8,7 +8,7 @@ import (
 
 	"gin-admin/pkg/geo"
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/user_agent"
@@ -105,8 +105,8 @@ func LoggerWithConfig(config LoggerConfig) gin.HandlerFunc {
 
 		{
 			ctx := c.Request.Context()
-			ctx = logging.WithTag(ctx, logging.Tag_Request)
-			logging.Info(
+			ctx = logger.WithTag(ctx, logger.Tag_Request)
+			logger.Info(
 				ctx,
 				fmt.Sprintf("[HTTP] %s-%s-%d (%dms)", c.Request.URL.Path, c.Request.Method, c.Writer.Status(), cost),
 				fields,

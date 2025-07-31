@@ -17,7 +17,7 @@ import (
 	"gin-admin/pkg/gormx"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/jwtx"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 
 	"github.com/epkgs/object"
 	"github.com/gin-gonic/gin"
@@ -117,7 +117,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	// 	return nil, errors.BadRequest("Incorrect captcha")
 	// }
 
-	ctx = logging.WithTag(ctx, logging.Tag_Login)
+	ctx = logger.WithTag(ctx, logger.Tag_Login)
 
 	// get user info
 	user, err := a.UserRepo.GetByUsername(ctx, req.Username, gormx.WithSelect("id", "password", "status"))
@@ -138,7 +138,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	}
 
 	userID := user.ID
-	ctx = logging.WithUserID(ctx, userID)
+	ctx = logger.WithUserID(ctx, userID)
 
 	// set user cache with role ids
 	roleIDs, err := a.UserSvc.GetRoleIDs(ctx, userID)
@@ -150,7 +150,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	err = a.Cacher.Set(ctx, defines.CacheNSForUser, userID, userCache.String(),
 		time.Duration(configs.C.Cache.Expiration.User)*time.Hour)
 	if err != nil {
-		logging.Error(ctx, "Failed to set cache", err)
+		logger.Error(ctx, "Failed to set cache", err)
 	}
 
 	// generate token
@@ -166,7 +166,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 		Expires:      token.GetExpires(),
 	}
 
-	logging.Info(ctx, "Login success",
+	logger.Info(ctx, "Login success",
 
 		map[string]any{
 			"username":     req.Username,
@@ -182,7 +182,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 
 func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.LoginToken, error) {
 
-	ctx = logging.WithTag(ctx, logging.Tag_Login)
+	ctx = logger.WithTag(ctx, logger.Tag_Login)
 
 	claims, err := a.Jwt.ParseRefreshToken(ctx, refreshToken)
 	if err != nil {
@@ -205,7 +205,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 		return nil, errorx.ErrUserDisabled.New(ctx, struct{ Name string }{user.NickName})
 	}
 
-	ctx = logging.WithUserID(ctx, userID)
+	ctx = logger.WithUserID(ctx, userID)
 
 	token, err := a.Jwt.GenerateToken(ctx, userID)
 	if err != nil {
@@ -219,7 +219,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 		Expires:      token.GetExpires(),
 	}
 
-	logging.Info(ctx, "Login success",
+	logger.Info(ctx, "Login success",
 		map[string]any{
 			"username":     user.Username,
 			"accessToken":  loginToken.AccessToken,
@@ -238,7 +238,7 @@ func (a *Auth) Logout(ctx context.Context) error {
 		return nil
 	}
 
-	ctx = logging.WithTag(ctx, logging.Tag_Logout)
+	ctx = logger.WithTag(ctx, logger.Tag_Logout)
 	if err := a.Jwt.DestroyToken(ctx, userToken); err != nil {
 		return err
 	}
@@ -246,9 +246,9 @@ func (a *Auth) Logout(ctx context.Context) error {
 	userID := helper.GetUserID(ctx)
 	err := a.Cacher.Delete(ctx, defines.CacheNSForUser, userID)
 	if err != nil {
-		logging.Error(ctx, "Failed to delete user cache", err)
+		logger.Error(ctx, "Failed to delete user cache", err)
 	}
-	logging.Info(ctx, "Logout success")
+	logger.Info(ctx, "Logout success")
 
 	return nil
 }

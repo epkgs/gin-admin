@@ -21,7 +21,7 @@ import (
 	"gin-admin/internal/types"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/gormx"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -124,7 +124,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 			},
 		})
 		if err != nil {
-			logging.Error(ctx, "Failed to query role menus", err)
+			logger.Error(ctx, "Failed to query role menus", err)
 			continue
 		}
 		atomic.AddInt32(&resCount, int32(len(list.Items)))
@@ -141,7 +141,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 		_ = os.Rename(policyFile, policyFile+".bak")
 		_ = os.MkdirAll(filepath.Dir(policyFile), 0755)
 		if err := os.WriteFile(policyFile, buf.Bytes(), 0666); err != nil {
-			logging.Error(ctx, "Failed to write policy file", err)
+			logger.Error(ctx, "Failed to write policy file", err)
 			return err
 		}
 		// set readonly
@@ -150,14 +150,14 @@ func (a *Casbinx) load(ctx context.Context) error {
 		modelFile := configs.C.Middleware.Casbin.ModelFile
 		e, err := casbin.NewEnforcer(modelFile, policyFile)
 		if err != nil {
-			logging.Error(ctx, "Failed to create casbin enforcer", err)
+			logger.Error(ctx, "Failed to create casbin enforcer", err)
 			return err
 		}
 		e.EnableLog(configs.C.IsDebug())
 		a.enforcer.Store(e)
 	}
 
-	logging.Info(ctx, "Casbin load policy",
+	logger.Info(ctx, "Casbin load policy",
 		map[string]any{
 			"cost":      time.Since(start),
 			"roles":     len(roles),
@@ -174,7 +174,7 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 	for range a.ticker.C {
 		val, ok, err := a.Cache.Get(ctx, defines.CacheNSForRole, defines.CacheKeyForSyncToCasbin)
 		if err != nil {
-			logging.Error(ctx, "Failed to get cache", err, map[string]any{"key": defines.CacheKeyForSyncToCasbin})
+			logger.Error(ctx, "Failed to get cache", err, map[string]any{"key": defines.CacheKeyForSyncToCasbin})
 			continue
 		} else if !ok {
 			continue
@@ -182,13 +182,13 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 
 		updated, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
-			logging.Error(ctx, "Failed to parse cache value", err, map[string]any{"val": val})
+			logger.Error(ctx, "Failed to parse cache value", err, map[string]any{"val": val})
 			continue
 		}
 
 		if lastUpdated < updated {
 			if err := a.load(ctx); err != nil {
-				logging.Error(ctx, "Failed to load casbin policy", err)
+				logger.Error(ctx, "Failed to load casbin policy", err)
 			} else {
 				lastUpdated = updated
 			}

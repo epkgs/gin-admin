@@ -12,14 +12,14 @@ import (
 
 	"gin-admin/internal/configs"
 	_ "gin-admin/internal/swagger"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 )
 
-// The Run function initializes and starts a service with configuration and logging, and handles
+// The Run function initializes and starts a service with configuration and logger, and handles
 // cleanup upon exit.
 func Run(ctx context.Context, configFile string) error {
 	defer func() {
-		if err := logging.Sync(ctx); err != nil {
+		if err := logger.Sync(ctx); err != nil {
 			fmt.Printf("failed to sync logger: %s \n", err.Error())
 		}
 	}()
@@ -28,13 +28,13 @@ func Run(ctx context.Context, configFile string) error {
 	configs.MustLoad(ctx, configFile)
 
 	// Initialize logger.
-	cleanLoggerFn, err := logging.InitWithConfig(ctx, &configs.C.Logger)
+	cleanLoggerFn, err := logger.InitWithConfig(ctx, &configs.C.Logger)
 	if err != nil {
 		return err
 	}
-	ctx = logging.WithTag(ctx, logging.Tag_Main)
+	ctx = logger.WithTag(ctx, logger.Tag_Main)
 
-	logging.Info(ctx, "starting service ...",
+	logger.Info(ctx, "starting service ...",
 		map[string]any{
 			"version": configs.C.Version,
 			"pid":     os.Getpid(),
@@ -46,11 +46,11 @@ func Run(ctx context.Context, configFile string) error {
 
 	// Start pprof server.
 	if addr := configs.C.Pprof.Addr; addr != "" {
-		logging.Info(ctx, "pprof server is listening on "+addr)
+		logger.Info(ctx, "pprof server is listening on "+addr)
 		go func() {
 			err := http.ListenAndServe(addr, nil)
 			if err != nil {
-				logging.Error(ctx, "failed to listen pprof server", err)
+				logger.Error(ctx, "failed to listen pprof server", err)
 			}
 		}()
 	}
@@ -71,7 +71,7 @@ func Run(ctx context.Context, configFile string) error {
 			}
 
 			if err := app.Release(ctx); err != nil {
-				logging.Error(ctx, "failed to release app context", err)
+				logger.Error(ctx, "failed to release app context", err)
 			}
 		}
 
@@ -97,7 +97,7 @@ func run(ctx context.Context, handler func(ctx context.Context) (func(), error))
 EXIT:
 	for {
 		sig := <-sc
-		logging.Info(ctx, "Received signal", map[string]any{"signal": sig.String()})
+		logger.Info(ctx, "Received signal", map[string]any{"signal": sig.String()})
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
@@ -110,7 +110,7 @@ EXIT:
 	}
 
 	cleanFn()
-	logging.Info(ctx, "Server exit, bye...")
+	logger.Info(ctx, "Server exit, bye...")
 	time.Sleep(time.Millisecond * 100)
 	os.Exit(state)
 	return nil

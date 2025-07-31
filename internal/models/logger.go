@@ -2,12 +2,12 @@ package models
 
 import (
 	"gin-admin/internal/configs"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 )
 
 // Logger management
 type Logger struct {
-	logging.Logger
+	logger.Logger
 
 	NickName string `json:"nickName" gorm:"<-:false;-:migration;"` // From User.NickName
 	Username string `json:"username" gorm:"<-:false;-:migration;"` // From User.Name

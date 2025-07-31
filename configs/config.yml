@@ -107,7 +107,7 @@ Logger:
   CallerSkip: 1                          # Number of caller stack frames to skip
 
   File:
-    Enable: false                        # Enable file logging
+    Enable: false                        # Enable file logger
     Path: "data/log/ginadmin.log"        # Log file path
     MaxBackups: 20                       # Maximum number of backup log files (default: 20)
     MaxSize: 64                          # Maximum size of each log file in MB (default: 64)

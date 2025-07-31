@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"gin-admin/internal/errorx"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -36,15 +36,15 @@ func RecoveryWithConfig(config RecoveryConfig) gin.HandlerFunc {
 				ctx := c.Request.Context()
 
 				if e, ok := err.(error); ok && errors.Is(e, context.Canceled) {
-					ctx = logging.WithTag(ctx, logging.Tag_Request)
-					logging.Info(
+					ctx = logger.WithTag(ctx, logger.Tag_Request)
+					logger.Info(
 						ctx,
 						fmt.Sprintf("%v", err),
 					)
 					return
 				}
 
-				ctx = logging.WithTag(ctx, logging.Tag_Recovery)
+				ctx = logger.WithTag(ctx, logger.Tag_Recovery)
 
 				values := map[string]any{
 					"stack": zap.StackSkip("stack", config.Skip),
@@ -63,7 +63,7 @@ func RecoveryWithConfig(config RecoveryConfig) gin.HandlerFunc {
 					values["headers"] = headers
 				}
 
-				logging.Error(
+				logger.Error(
 					ctx,
 					fmt.Sprintf("[Recovery] %s panic recovered", time.Now().Format("2006/01/02 - 15:04:05")),
 					fmt.Errorf("%v", err),

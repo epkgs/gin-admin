@@ -11,7 +11,7 @@ import (
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/logging"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/validatorx"
 
 	"github.com/gin-gonic/gin"
@@ -83,9 +83,9 @@ func Error(c *gin.Context, err error) {
 	}
 
 	if res.HttpStatus >= 500 {
-		ctx = logging.WithTag(ctx, logging.Tag_System)
-		ctx = logging.WithStack(ctx, fmt.Sprintf("%+v", err))
-		logging.Error(ctx, http.StatusText(res.HttpStatus), err)
+		ctx = logger.WithTag(ctx, logger.Tag_System)
+		ctx = logger.WithStack(ctx, fmt.Sprintf("%+v", err))
+		logger.Error(ctx, http.StatusText(res.HttpStatus), err)
 	}
 
 	response(c, res)
