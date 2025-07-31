@@ -9,7 +9,7 @@ require (
 	github.com/casbin/casbin/v2 v2.68.0
 	github.com/creasty/defaults v1.7.0
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/epkgs/i18n v0.0.0-20250724102941-278a443a712b
+	github.com/epkgs/i18n v1.0.0
 	github.com/epkgs/object v1.0.6
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/gin-contrib/cors v1.4.0

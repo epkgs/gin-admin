@@ -14,11 +14,11 @@ func httpError(code, httpStatus int) i18nerr.Wrapper[*HttpError] {
 	}
 }
 
-func Definef[Args any](i18n *i18n.I18n, code int, format string, httpStatus int) *i18nerr.Definition[*HttpError, Args] {
+func Definef[Args any](i18n *i18n.I18n, code int, format string, httpStatus int) *i18nerr.DefinitionF[*HttpError, Args] {
 	return i18nerr.Definef[Args](i18n, format, httpError(code, httpStatus))
 }
 
-func Define(i18n *i18n.I18n, code int, format string, httpStatus int) *i18nerr.DefinitionSimple[*HttpError] {
+func Define(i18n *i18n.I18n, code int, format string, httpStatus int) *i18nerr.Definition[*HttpError] {
 	return i18nerr.Define(i18n, format, httpError(code, httpStatus))
 }
 
