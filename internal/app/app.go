@@ -157,7 +157,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 		response.Error(c, errorx.ErrMethodNotAllowed.New(ctx))
 	})
 	e.NoRoute(func(c *gin.Context) {
-		response.Error(c, errorx.ErrRecordNotFound.New(ctx))
+		response.Error(c, errorx.ErrRouteNotFound.New(ctx))
 	})
 
 	// Register middlewares

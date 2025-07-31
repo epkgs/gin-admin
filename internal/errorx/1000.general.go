@@ -25,14 +25,12 @@ var (
 	ErrTimeout          = Define(gnI18n, 1006, "request timeout", http.StatusRequestTimeout)                                                            // 请求超时
 	ErrTooManyRequests  = Define(gnI18n, 1007, "too many requests", http.StatusTooManyRequests)                                                         // 请求过多
 	ErrAccessDenied     = Define(gnI18n, 1008, "access denied", http.StatusForbidden)                                                                   // 访问被拒绝
-	ErrUserAuthFailed   = Define(gnI18n, 1009, "user authentication failed", http.StatusUnauthorized)                                                   // 用户认证失败
-	ErrCasbinService    = Define(gnI18n, 1010, "casbin service error", http.StatusInternalServerError)                                                  // Casbin服务错误
-	ErrFileStorage      = Define(gnI18n, 1011, "file storage error", http.StatusInternalServerError)                                                    // 文件存储错误
-	ErrMethodNotAllowed = Define(gnI18n, 1012, "method not allowed", http.StatusMethodNotAllowed)                                                       // 请求函数不允许
-	ErrRequestTooLarge  = Definef[struct{ Byte int64 }](gnI18n, 1013, "request body too large, limit {{.Byte}} byte", http.StatusRequestEntityTooLarge) // 请求体过大，限制 {{.Byte}} 字节
-	ErrReadConfigFile   = Definef[struct{ File string }](gnI18n, 1014, "failed to read config file: {{.File}}", http.StatusInternalServerError)         // 读取配置文件失败: {{.File}}
-	ErrUnmarshalConfig  = Definef[struct{ File string }](gnI18n, 1015, "failed to unmarshal config: {{.File}}", http.StatusInternalServerError)         // 解析配置文件失败: {{.File}}
-	ErrGetConfigFile    = Definef[struct{ File string }](gnI18n, 1016, "failed to get config file: {{.File}}", http.StatusInternalServerError)          // 访问配置文件 {{.File}} 失败
-	ErrWalkDir          = Definef[struct{ Dir string }](gnI18n, 1017, "failed to walk dir: {{.Dir}}", http.StatusInternalServerError)                   // 遍历目录 {{.Dir}} 失败
-	ErrMenuNotFound     = Define(gnI18n, 1018, "menu not found", http.StatusNotFound)                                                                   // 菜单不存在
+	ErrRouteNotFound    = Define(gnI18n, 1009, "route not found", http.StatusNotFound)                                                                  // 请求路径不存在
+	ErrMethodNotAllowed = Define(gnI18n, 1010, "method not allowed", http.StatusMethodNotAllowed)                                                       // 请求函数不允许
+	ErrRequestTooLarge  = Definef[struct{ Byte int64 }](gnI18n, 1011, "request body too large, limit {{.Byte}} byte", http.StatusRequestEntityTooLarge) // 请求体过大，限制 {{.Byte}} 字节
+	ErrReadConfigFile   = Definef[struct{ File string }](gnI18n, 1012, "failed to read config file: {{.File}}", http.StatusInternalServerError)         // 读取配置文件失败: {{.File}}
+	ErrUnmarshalConfig  = Definef[struct{ File string }](gnI18n, 1013, "failed to unmarshal config: {{.File}}", http.StatusInternalServerError)         // 解析配置文件失败: {{.File}}
+	ErrGetConfigFile    = Definef[struct{ File string }](gnI18n, 1014, "failed to get config file: {{.File}}", http.StatusInternalServerError)          // 访问配置文件 {{.File}} 失败
+	ErrWalkDir          = Definef[struct{ Dir string }](gnI18n, 1015, "failed to walk dir: {{.Dir}}", http.StatusInternalServerError)                   // 遍历目录 {{.Dir}} 失败
+	ErrMenuNotFound     = Define(gnI18n, 1016, "menu not found", http.StatusNotFound)                                                                   // 菜单不存在
 )
