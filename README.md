@@ -79,5 +79,27 @@ go mod tidy
 - stop: 停止服务器
 - version: 显示版本信息
 
+### i18n 测试
+```bash
+# 启动服务器
+go run . start
+
+# 英文测试
+curl -X POST "http://localhost:8080/api/v1/auth/login" \
+     -H "Accept-Language: en-US" \
+     -H "Content-Type: application/json" \
+     -d '{"username": "test", "password": "wrong"}'
+
+# {"code":2005,"message":"incorrect username or password","data":null}
+
+# 中文测试
+curl -X POST "http://localhost:8080/api/v1/auth/login" \
+     -H "Accept-Language: zh_CN" \
+     -H "Content-Type: application/json" \
+     -d '{"username": "test", "password": "wrong"}'
+
+# {"code":2005,"message":"用户名或密码错误","data":null}
+```
+
 ## 许可证
 [MIT License](https://github.com/epkgs/gin-admin/blob/master/LICENSE)
