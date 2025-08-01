@@ -2,7 +2,7 @@
 AppName: "ginadmin"                    # Application name
 Version: "v1.0.0"                      # Application version
 AppEnv: "dev"                          # dev/debug/test/prod (default: "dev")
-PrintConfig: true                      # Print config on startup
+PrintConfig: false                      # Print config on startup
 DefaultLoginPwd: "6351623c8cef86fefabfa7da046fc619"  # MD5("abc-123") - Default login password
 Super:                                 # Super Administrator Account
   ID: "super"                          # Super admin ID (default: "super")
@@ -44,7 +44,7 @@ Cache:
 
 # Database Configuration
 DB:
-  Debug: true                        # Database debug mode
+  Debug: false                        # Database debug mode
   Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres (default: "sqlite3")
   # SQLite3 DSN
   DSN: "data/ginadmin.db"            # Database connection string (default: "data/app.db")
