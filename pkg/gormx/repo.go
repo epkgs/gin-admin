@@ -102,10 +102,6 @@ func (r *GenericRepo[T]) Get(ctx context.Context, id any, opts ...Option) (*T, e
 	// 根据条件查询
 	err := query.First(&entity).Error
 
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	}
-
 	return &entity, err
 }
 
@@ -123,11 +119,6 @@ func (r *GenericRepo[T]) First(ctx context.Context, opts ...Option) (*T, error) 
 
 	// 根据条件查询
 	err := query.First(&entity).Error
-
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	}
-
 	return &entity, err
 }
 
@@ -141,7 +132,7 @@ func (r *GenericRepo[T]) Update(ctx context.Context, entity *T, opts ...Option) 
 func (r *GenericRepo[T]) Delete(ctx context.Context, id any, opts ...Option) error {
 	var entity T
 	query := Apply(r.db.WithContext(ctx), opts...)
-	return query.Delete(&entity, id).Error
+	return query.Where("id = ?", id).Delete(&entity).Error
 }
 
 // DeleteBatch 删除实体
@@ -169,11 +160,6 @@ func (r *GenericRepo[T]) Find(ctx context.Context, opts ...Option) ([]*T, error)
 
 	// 执行查询
 	err := query.Find(&entities).Error
-
-	if err == gorm.ErrRecordNotFound {
-		return make([]*T, 0), nil
-	}
-
 	return entities, err
 }
 

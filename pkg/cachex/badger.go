@@ -69,26 +69,27 @@ func (a *badgerCache) Set(ctx context.Context, ns, key, value string, expiration
 	})
 }
 
-func (a *badgerCache) Get(ctx context.Context, ns, key string) (string, bool, error) {
+func (a *badgerCache) Get(ctx context.Context, ns, key string) (string, error) {
 	value := ""
-	ok := false
 	err := a.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(a.strToBytes(a.getKey(ns, key)))
 		if err != nil {
-			if err == badger.ErrKeyNotFound {
-				return nil
-			}
+			// if err == badger.ErrKeyNotFound {
+			// 	return nil
+			// }
 			return err
 		}
-		ok = true
 		val, err := item.ValueCopy(nil)
 		value = a.bytesToStr(val)
 		return err
 	})
 	if err != nil {
-		return "", false, err
+		if err == badger.ErrKeyNotFound {
+			return "", ErrNotFound
+		}
+		return "", err
 	}
-	return value, ok, nil
+	return value, nil
 }
 
 func (a *badgerCache) Exists(ctx context.Context, ns, key string) (bool, error) {
@@ -120,22 +121,20 @@ func (a *badgerCache) Delete(ctx context.Context, ns, key string) error {
 	})
 }
 
-func (a *badgerCache) GetAndDelete(ctx context.Context, ns, key string) (string, bool, error) {
-	value, ok, err := a.Get(ctx, ns, key)
+func (a *badgerCache) GetAndDelete(ctx context.Context, ns, key string) (string, error) {
+	value, err := a.Get(ctx, ns, key)
 	if err != nil {
-		return "", false, err
-	} else if !ok {
-		return "", false, nil
+		return "", err
 	}
 
 	err = a.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(a.strToBytes(a.getKey(ns, key)))
 	})
 	if err != nil {
-		return "", false, err
+		return "", err
 	}
 
-	return value, true, nil
+	return value, nil
 }
 
 func (a *badgerCache) Iterator(ctx context.Context, ns string, fn func(ctx context.Context, key, value string) bool) error {

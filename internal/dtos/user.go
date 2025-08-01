@@ -20,7 +20,7 @@ type UserCreateReq struct {
 	Email       string   `json:"email" binding:"omitempty,max=128,email"`           // Email of user
 	Description string   `json:"description" binding:"max=1024"`                    // Description of user
 	Status      string   `json:"status" binding:"required,oneof=activated freezed"` // Status of user (activated, freezed)
-	RoleIDs     []string `json:"roles" binding:"required"`                          // Roles of user
+	RoleIDs     []string `json:"roleIds" binding:"required"`                        // Roles of user
 }
 
 type UserUpdateReq struct {
@@ -33,5 +33,5 @@ type UserUpdateReq struct {
 	Email       *string   `json:"email" binding:"omitempty,email,max=128"`            // Email of user
 	Description *string   `json:"description" binding:"omitempty,max=1024"`           // Description of user
 	Status      *string   `json:"status" binding:"omitempty,oneof=activated freezed"` // Status of user (activated, freezed)
-	RoleIDs     *[]string `json:"roles" binding:"omitempty"`                          // Roles of user
+	RoleIDs     *[]string `json:"roleIds" binding:"omitempty"`                        // Roles of user
 }

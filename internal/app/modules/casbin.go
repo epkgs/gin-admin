@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"gin-admin/internal/configs"
-	"gin-admin/internal/defines"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -172,17 +170,13 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 	var lastUpdated int64
 	a.ticker = time.NewTicker(time.Duration(configs.C.Middleware.Casbin.AutoLoadInterval) * time.Second)
 	for range a.ticker.C {
-		val, ok, err := a.Cache.Get(ctx, defines.CacheNSForRole, defines.CacheKeyForSyncToCasbin)
+		updated, err := a.RoleSvc.GetUpdateTime(ctx)
 		if err != nil {
-			logger.Error(ctx, "Failed to get cache", err, map[string]any{"key": defines.CacheKeyForSyncToCasbin})
-			continue
-		} else if !ok {
-			continue
-		}
+			logger.Error(ctx, "Failed to get role update time", err)
 
-		updated, err := strconv.ParseInt(val, 10, 64)
-		if err != nil {
-			logger.Error(ctx, "Failed to parse cache value", err, map[string]any{"val": val})
+			if err := a.RoleSvc.RefreshUpdateTime(ctx); err != nil {
+				panic(err)
+			}
 			continue
 		}
 

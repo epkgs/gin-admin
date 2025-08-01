@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
-	"gin-admin/internal/defines"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -17,6 +17,11 @@ import (
 
 	"github.com/epkgs/object"
 	"gorm.io/gorm"
+)
+
+const (
+	gCacheKeyForCasbin = "sync:casbin"
+	gCacheNSForRole    = "role"
 )
 
 // Role management for SYS
@@ -154,7 +159,7 @@ func (a *Role) Update(ctx context.Context, id string, req *dtos.RoleUpdateReq) e
 			return err
 		}
 
-		return a.syncToCasbin(ctx)
+		return a.RefreshUpdateTime(ctx)
 	})
 
 	return errorx.WrapGormError(ctx, err)
@@ -173,12 +178,29 @@ func (a *Role) Delete(ctx context.Context, id string) error {
 		if err := a.RoleRepo.Delete(ctx, id, gormx.WithSelect("Menus", "Users")); err != nil {
 			return err
 		}
-		return a.syncToCasbin(ctx)
+		return a.RefreshUpdateTime(ctx)
 	})
 
 	return errorx.WrapGormError(ctx, err)
 }
 
-func (a *Role) syncToCasbin(ctx context.Context) error {
-	return a.Cacher.Set(ctx, defines.CacheNSForRole, defines.CacheKeyForSyncToCasbin, fmt.Sprintf("%d", time.Now().Unix()))
+func (a *Role) RefreshUpdateTime(ctx context.Context) error {
+	return a.Cacher.Set(ctx, gCacheNSForRole, gCacheKeyForCasbin, fmt.Sprintf("%d", time.Now().Unix()))
+}
+
+func (a *Role) GetUpdateTime(ctx context.Context) (int64, error) {
+	val, err := a.Cacher.Get(ctx, gCacheNSForRole, gCacheKeyForCasbin)
+	if err != nil {
+		if err == cachex.ErrNotFound {
+			return 0, errorx.ErrRecordNotFound.New(ctx).Wrap(err)
+		}
+		return 0, err
+	}
+
+	updated, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		return 0, errorx.ErrInternal.New(ctx).Wrap(err)
+	}
+
+	return updated, nil
 }

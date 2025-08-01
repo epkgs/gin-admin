@@ -33,7 +33,7 @@ func WrapGormError(ctx context.Context, err error) error {
 
 	switch err {
 	case gorm.ErrRecordNotFound:
-		return ErrRecordNotFound.New(ctx).WithStack()
+		return ErrRecordNotFound.New(ctx).Wrap(err)
 	case gorm.ErrInvalidTransaction:
 		return ErrDatabaseTransaction.New(ctx).Wrap(err)
 	case gorm.ErrNotImplemented:

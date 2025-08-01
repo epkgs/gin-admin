@@ -200,7 +200,9 @@ func (m *Middlewares) Init(ctx context.Context, e *gin.Engine) error {
 			return m.app.Casbin().GetEnforcer()
 		},
 		GetSubjects: func(c *gin.Context) []string {
-			return helper.GetUserCache(c.Request.Context()).RoleIDs
+			ctx := c.Request.Context()
+			roleIDs, _ := services.NewUser(m.app).GetRoleIDsCache(ctx, helper.GetUserID(ctx))
+			return roleIDs
 		},
 	}))
 

@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
+	"errors"
 	"sort"
 	"time"
 
 	"gin-admin/internal/configs"
-	"gin-admin/internal/defines"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -76,38 +76,33 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 		return userID, nil
 	}
 
-	userCacheVal, ok, err := a.Cacher.Get(ctx, defines.CacheNSForUser, userID)
+	roleIDs, err := a.UserSvc.GetRoleIDsCache(ctx, userID)
 	if err != nil {
-		return "", err
-	} else if ok {
-		userCache := helper.ParseUserCache(userCacheVal)
-		c.Request = c.Request.WithContext(helper.WithUserCache(ctx, userCache))
-		return userID, nil
-	}
+		if errors.Is(err, cachex.ErrNotFound) {
 
-	// Check user status, if not activated, force to logout
-	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status"))
-	if user == nil || user.Status != models.UserStatus_Activated {
-		return "", errorx.ErrInvalidToken.New(ctx)
-	}
-	if err != nil {
-		return "", errorx.WrapGormError(ctx, err)
-	}
+			// Check user status, if not activated, force to logout
+			user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status"))
+			if user == nil || user.Status != models.UserStatus_Activated {
+				return "", errorx.ErrInvalidToken.New(ctx)
+			}
+			if err != nil {
+				return "", errorx.WrapGormError(ctx, err)
+			}
 
-	roleIDs, err := a.UserSvc.GetRoleIDs(ctx, userID)
-	if err != nil {
-		return "", err
-	}
+			roleIDs, err = a.UserSvc.GetRoleIDs(ctx, userID)
+			if err != nil {
+				return "", err
+			}
 
-	userCache := helper.UserCache{
-		RoleIDs: roleIDs,
-	}
-	err = a.Cacher.Set(ctx, defines.CacheNSForUser, userID, userCache.String())
-	if err != nil {
+			err = a.UserSvc.SetRoleIDsCache(ctx, userID, roleIDs)
+			if err != nil {
+				return "", err
+			}
+			return userID, nil
+		}
 		return "", err
 	}
 
-	c.Request = c.Request.WithContext(helper.WithUserCache(ctx, userCache))
 	return userID, nil
 }
 
@@ -146,9 +141,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 		return nil, err
 	}
 
-	userCache := helper.UserCache{RoleIDs: roleIDs}
-	err = a.Cacher.Set(ctx, defines.CacheNSForUser, userID, userCache.String(),
-		time.Duration(configs.C.Cache.Expiration.User)*time.Hour)
+	err = a.UserSvc.SetRoleIDsCache(ctx, userID, roleIDs, time.Duration(configs.C.Cache.Expiration.User)*time.Hour)
 	if err != nil {
 		logger.Error(ctx, "Failed to set cache", err)
 	}
@@ -244,7 +237,7 @@ func (a *Auth) Logout(ctx context.Context) error {
 	}
 
 	userID := helper.GetUserID(ctx)
-	err := a.Cacher.Delete(ctx, defines.CacheNSForUser, userID)
+	err := a.UserSvc.DeleteRoleIDsCache(ctx, userID)
 	if err != nil {
 		logger.Error(ctx, "Failed to delete user cache", err)
 	}

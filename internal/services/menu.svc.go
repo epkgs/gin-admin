@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -10,7 +9,6 @@ import (
 	"time"
 
 	"gin-admin/internal/configs"
-	"gin-admin/internal/defines"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -28,7 +26,9 @@ import (
 	"gorm.io/gorm"
 )
 
-const treePathDelimiter = "."
+const (
+	gTreePathDelimiter = "."
+)
 
 // Menu management for SYS
 type Menu struct {
@@ -36,6 +36,7 @@ type Menu struct {
 	MenuRepo     *repositories.Menu
 	MenuRoleRepo *repositories.MenuRole
 	UserRoleRepo *repositories.UserRole
+	RoleSvc      *Role
 }
 
 func NewMenu(app types.AppContext) *Menu {
@@ -44,6 +45,7 @@ func NewMenu(app types.AppContext) *Menu {
 		MenuRepo:     repositories.NewMenu(app.DB()),
 		MenuRoleRepo: repositories.NewMenuRole(app.DB()),
 		UserRoleRepo: repositories.NewUserRole(app.DB()),
+		RoleSvc:      NewRole(app),
 	}
 }
 
@@ -66,7 +68,7 @@ func (a *Menu) InitIfNeed(ctx context.Context) error {
 		logger.Error(ctx, "failed to init menu data", err, map[string]any{"file": configs.C.Menu.File})
 	}
 
-	return a.syncToCasbin(ctx)
+	return a.RoleSvc.RefreshUpdateTime(ctx)
 }
 
 func (a *Menu) initFromFile(ctx context.Context, menuFile string) error {
@@ -150,7 +152,7 @@ func (a *Menu) upsert(ctx context.Context, items models.Menus, parent *models.Me
 			}
 			item.ParentID = parentID
 			if parent != nil {
-				item.ParentPath = parent.ParentPath + parentID + treePathDelimiter
+				item.ParentPath = parent.ParentPath + parentID + gTreePathDelimiter
 			}
 			menuItem = item
 			if err := a.MenuRepo.Create(ctx, item, gormx.WithOmit("Children")); err != nil {
@@ -247,7 +249,7 @@ func (a *Menu) appendChildren(ctx context.Context, data models.Menus) (models.Me
 	}
 
 	for _, item := range data {
-		children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", item.ParentPath+item.ID+treePathDelimiter+"%"))
+		children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", item.ParentPath+item.ID+gTreePathDelimiter+"%"))
 		if err != nil {
 			return nil, errorx.WrapGormError(ctx, err)
 		}
@@ -305,10 +307,12 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 			return nil, errorx.WrapGormError(ctx, err)
 		}
 
-		menu.ParentPath = parent.ParentPath + parent.ID + treePathDelimiter
+		menu.ParentPath = parent.ParentPath + parent.ID + gTreePathDelimiter
 	}
 
-	if err := object.Assign(menu, req); err != nil {
+	if err := object.Assign(menu, req, func(c *object.AssignConfig) {
+		c.IncludeIgnoreFields = true
+	}); err != nil {
 		return nil, err
 	}
 
@@ -339,12 +343,12 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 			if err != nil {
 				return errorx.WrapGormError(ctx, err)
 			}
-			menu.ParentPath = parent.ParentPath + parent.ID + treePathDelimiter
+			menu.ParentPath = parent.ParentPath + parent.ID + gTreePathDelimiter
 		} else {
 			menu.ParentPath = ""
 		}
 
-		res, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", oldParentPath+menu.ID+treePathDelimiter+"%"), gormx.WithSelect("id", "parent_path"))
+		res, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", oldParentPath+menu.ID+gTreePathDelimiter+"%"), gormx.WithSelect("id", "parent_path"))
 		if err != nil {
 			return errorx.WrapGormError(ctx, err)
 		}
@@ -357,15 +361,15 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 
 	err = a.MenuRepo.Transaction(ctx, func(tx *gorm.DB) error {
 		if req.Status != nil && oldStatus != *req.Status {
-			oldPath := oldParentPath + menu.ID + treePathDelimiter
+			oldPath := oldParentPath + menu.ID + gTreePathDelimiter
 			if err := a.MenuRepo.UpdateStatusByParentPath(ctx, oldPath, *req.Status); err != nil {
 				return err
 			}
 		}
 
 		for _, child := range childData {
-			oldPath := oldParentPath + menu.ID + treePathDelimiter
-			newPath := menu.ParentPath + menu.ID + treePathDelimiter
+			oldPath := oldParentPath + menu.ID + gTreePathDelimiter
+			newPath := menu.ParentPath + menu.ID + gTreePathDelimiter
 			err := a.MenuRepo.UpdateParentPath(ctx, child.ID, strings.Replace(child.ParentPath, oldPath, newPath, 1))
 			if err != nil {
 				return err
@@ -381,7 +385,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 				return err
 			}
 		}
-		return a.syncToCasbin(ctx)
+		return a.RoleSvc.RefreshUpdateTime(ctx)
 	})
 
 	return errorx.WrapGormError(ctx, err)
@@ -398,7 +402,7 @@ func (a *Menu) Delete(ctx context.Context, id string) error {
 		return errorx.WrapGormError(ctx, err)
 	}
 
-	children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", menu.ParentPath+menu.ID+treePathDelimiter+"%"), gormx.WithSelect("id"))
+	children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", menu.ParentPath+menu.ID+gTreePathDelimiter+"%"), gormx.WithSelect("id"))
 	if err != nil {
 		return errorx.WrapGormError(ctx, err)
 	}
@@ -414,7 +418,7 @@ func (a *Menu) Delete(ctx context.Context, id string) error {
 			}
 		}
 
-		return a.syncToCasbin(ctx)
+		return a.RoleSvc.RefreshUpdateTime(ctx)
 	})
 
 	return errorx.WrapGormError(ctx, err)
@@ -428,8 +432,4 @@ func (a *Menu) delete(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
-}
-
-func (a *Menu) syncToCasbin(ctx context.Context) error {
-	return a.Cacher.Set(ctx, defines.CacheNSForRole, defines.CacheKeyForSyncToCasbin, fmt.Sprintf("%d", time.Now().Unix()))
 }

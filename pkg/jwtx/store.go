@@ -27,7 +27,7 @@ func WithCacheNS(ns string) StoreOption {
 
 type Cacher interface {
 	Set(ctx context.Context, ns, key, value string, expiration ...time.Duration) error
-	Get(ctx context.Context, ns, key string) (string, bool, error)
+	Get(ctx context.Context, ns, key string) (string, error)
 	Exists(ctx context.Context, ns, key string) (bool, error)
 	Delete(ctx context.Context, ns, key string) error
 	Close(ctx context.Context) error

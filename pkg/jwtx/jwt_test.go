@@ -2,6 +2,7 @@ package jwtx
 
 import (
 	"context"
+	"gin-admin/pkg/cachex"
 	"testing"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	cache := NewMemoryCache(MemoryConfig{CleanupInterval: time.Second})
+	cache := cachex.NewMemoryCache(cachex.MemoryConfig{CleanupInterval: time.Second})
 
 	store := NewStoreWithCache(cache)
 	ctx := context.Background()

@@ -19,17 +19,15 @@ func TestBadgerCache(t *testing.T) {
 	err := cache.Set(ctx, "tt", "foo", "bar")
 	assert.Nil(err)
 
-	val, exists, err := cache.Get(ctx, "tt", "foo")
+	val, err := cache.Get(ctx, "tt", "foo")
 	assert.Nil(err)
-	assert.True(exists)
 	assert.Equal("bar", val)
 
 	err = cache.Delete(ctx, "tt", "foo")
 	assert.Nil(err)
 
-	val, exists, err = cache.Get(ctx, "tt", "foo")
-	assert.Nil(err)
-	assert.False(exists)
+	val, err = cache.Get(ctx, "tt", "foo")
+	assert.Equal(ErrNotFound, err)
 	assert.Equal("", val)
 
 	tmap := make(map[string]bool)

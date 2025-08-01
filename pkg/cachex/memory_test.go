@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRedisCache(t *testing.T) {
+func TestMemoryCache(t *testing.T) {
 	assert := assert.New(t)
 
-	cache := NewRedisCache(RedisConfig{
-		Addr: "localhost:6379",
-		DB:   1,
+	cache := NewMemoryCache(MemoryConfig{
+		CleanupInterval: time.Second * 30,
 	})
 
 	ctx := context.Background()
@@ -45,6 +45,7 @@ func TestRedisCache(t *testing.T) {
 	err = cache.Iterator(ctx, "tt", func(ctx context.Context, key, value string) bool {
 		assert.True(tmap[key])
 		assert.Equal("bar", value)
+		t.Log(key, value)
 		return true
 	})
 	assert.Nil(err)

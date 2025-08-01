@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"gin-admin/internal/configs"
-	"gin-admin/internal/defines"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -18,6 +19,10 @@ import (
 
 	"github.com/epkgs/object"
 	"gorm.io/gorm"
+)
+
+const (
+	gCacheNSForUserRoles = "user_roles"
 )
 
 // User management for SYS
@@ -205,7 +210,7 @@ func (a *User) Delete(ctx context.Context, id string) error {
 		if err := a.UserRoleRepo.DeleteByUserID(ctx, id); err != nil {
 			return err
 		}
-		return a.Cacher.Delete(ctx, defines.CacheNSForUser, id)
+		return a.DeleteRoleIDsCache(ctx, id)
 	})
 
 	return errorx.WrapGormError(ctx, err)
@@ -249,6 +254,35 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 	return models.UserRoles(userRoles).ToRoleIDs(), nil
 }
 
+func (a *User) SetRoleIDsCache(ctx context.Context, userID string, roleIDs []string, expiration ...time.Duration) error {
+	byt, err := json.Marshal(roleIDs)
+	if err != nil {
+		return errorx.ErrInternal.New(ctx).Wrap(err)
+	}
+	return a.Cacher.Set(ctx, gCacheNSForUserRoles, userID, string(byt), expiration...)
+}
+
+func (a *User) DeleteRoleIDsCache(ctx context.Context, userID string) error {
+	return a.Cacher.Delete(ctx, gCacheNSForUserRoles, userID)
+}
+
+func (a *User) GetRoleIDsCache(ctx context.Context, userID string) ([]string, error) {
+	val, err := a.Cacher.Get(ctx, gCacheNSForUserRoles, userID)
+	if err != nil {
+		if err == cachex.ErrNotFound {
+			return nil, errorx.ErrRecordNotFound.New(ctx).Wrap(err)
+		}
+		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+	}
+
+	var roleIDs []string
+	if err := json.Unmarshal([]byte(val), &roleIDs); err != nil {
+		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+	}
+
+	return roleIDs, nil
+}
+
 func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 
 	err := a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -289,6 +323,10 @@ func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 		return nil
 
 	})
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
 
 	return errorx.WrapGormError(ctx, err)
 }

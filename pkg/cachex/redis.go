@@ -81,15 +81,15 @@ func (a *redisCache) Set(ctx context.Context, ns, key, value string, expiration 
 	return cmd.Err()
 }
 
-func (a *redisCache) Get(ctx context.Context, ns, key string) (string, bool, error) {
+func (a *redisCache) Get(ctx context.Context, ns, key string) (string, error) {
 	cmd := a.cli.Get(ctx, a.getKey(ns, key))
 	if err := cmd.Err(); err != nil {
 		if err == redis.Nil {
-			return "", false, nil
+			return "", ErrNotFound
 		}
-		return "", false, err
+		return "", err
 	}
-	return cmd.Val(), true, nil
+	return cmd.Val(), nil
 }
 
 func (a *redisCache) Exists(ctx context.Context, ns, key string) (bool, error) {
@@ -115,19 +115,17 @@ func (a *redisCache) Delete(ctx context.Context, ns, key string) error {
 	return nil
 }
 
-func (a *redisCache) GetAndDelete(ctx context.Context, ns, key string) (string, bool, error) {
-	value, ok, err := a.Get(ctx, ns, key)
+func (a *redisCache) GetAndDelete(ctx context.Context, ns, key string) (string, error) {
+	value, err := a.Get(ctx, ns, key)
 	if err != nil {
-		return "", false, err
-	} else if !ok {
-		return "", false, nil
+		return "", err
 	}
 
 	cmd := a.cli.Del(ctx, a.getKey(ns, key))
 	if err := cmd.Err(); err != nil && err != redis.Nil {
-		return "", false, err
+		return "", err
 	}
-	return value, true, nil
+	return value, nil
 }
 
 func (a *redisCache) Iterator(ctx context.Context, ns string, fn func(ctx context.Context, key, value string) bool) error {
