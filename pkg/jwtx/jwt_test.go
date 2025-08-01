@@ -30,12 +30,9 @@ func TestAuth(t *testing.T) {
 	err = jwtAuth.DestroyToken(ctx, token.GetAccessToken())
 	assert.Nil(t, err)
 
-	claims, err = jwtAuth.ParseToken(ctx, token.GetAccessToken())
-	assert.Nil(t, err)
+	_, err = jwtAuth.ParseToken(ctx, token.GetAccessToken())
+	assert.NotNil(t, err)
 	assert.EqualError(t, err, ErrInvalidToken.Error())
-	id, err = claims.GetSubject()
-	assert.Nil(t, err)
-	assert.Empty(t, id)
 
 	err = jwtAuth.Release(ctx)
 	assert.Nil(t, err)
