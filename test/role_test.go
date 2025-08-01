@@ -2,6 +2,7 @@ package test
 
 import (
 	"net/http"
+	"os"
 	"testing"
 
 	"gin-admin/internal/dtos"
@@ -13,31 +14,36 @@ import (
 func TestRole(t *testing.T) {
 	e := ApiTester(t)
 
+	t.Cleanup(func() {
+		os.RemoveAll("data")
+	})
+
 	menuFormItem := dtos.MenuCreateReq{
-		Name: "role",
-		Type: "page",
-		Path: "/system/role",
-		Meta: models.MenuMeta{
-			Rank: 8,
-			Properties: map[string]any{
-				"icon":  "role",
-				"title": "Role management",
-			},
+		Name:  "role",
+		Type:  "menu",
+		Path:  "/system/role",
+		Rank:  8,
+		Title: "Role management",
+		Extra: map[string]any{
+			"icon": "role",
 		},
+
 		Status: models.MenuStatus_ENABLED,
 	}
 
-	var menu models.Menu
+	var createMenu dtos.Result[*models.Menu]
 	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
-		Expect().Status(http.StatusOK).JSON().Decode(dtos.NewResultData(&menu))
+		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
+
+	menu := createMenu.Data
 
 	assert := assert.New(t)
 	assert.NotEmpty(menu.ID)
 	assert.Equal(menuFormItem.Name, menu.Name)
-	assert.Equal(menuFormItem.Meta.Rank, menu.Meta.Rank)
+	assert.Equal(menuFormItem.Rank, menu.Rank)
 	assert.Equal(menuFormItem.Type, menu.Type)
 	assert.Equal(menuFormItem.Path, menu.Path)
-	assert.Equal(menuFormItem.Meta, menu.Meta)
+	assert.Equal(menuFormItem.Extra, menu.Extra)
 	assert.Equal(menuFormItem.Status, menu.Status)
 
 	roleFormItem := dtos.RoleCreateReq{
@@ -49,8 +55,9 @@ func TestRole(t *testing.T) {
 		Status:      models.RoleStatus_Enabled,
 	}
 
-	var role models.Role
-	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(dtos.NewResultData(&role))
+	var createRole dtos.Result[*models.Role]
+	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
+	role := createRole.Data
 	assert.NotEmpty(role.ID)
 	assert.Equal(roleFormItem.Code, role.Code)
 	assert.Equal(roleFormItem.Name, role.Name)
@@ -59,8 +66,9 @@ func TestRole(t *testing.T) {
 	assert.Equal(roleFormItem.Status, role.Status)
 	assert.Equal(len(roleFormItem.MenuIDs), len(role.Menus))
 
-	var roles models.Roles
-	e.GET(baseAPI + "/roles").Expect().Status(http.StatusOK).JSON().Decode(dtos.NewResultData(&roles))
+	var listRoles dtos.ResultList[*models.Role]
+	e.GET(baseAPI + "/roles").Expect().Status(http.StatusOK).JSON().Decode(&listRoles)
+	roles := listRoles.Data.Items
 	assert.GreaterOrEqual(len(roles), 1)
 
 	newName := "Administrator 1"
@@ -69,10 +77,10 @@ func TestRole(t *testing.T) {
 	role.Status = newStatus
 	e.PUT(baseAPI + "/roles/" + role.ID).WithJSON(role).Expect().Status(http.StatusOK)
 
-	var getRole models.Role
-	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK).JSON().Decode(dtos.NewResultData(&getRole))
-	assert.Equal(newName, getRole.Name)
-	assert.Equal(newStatus, getRole.Status)
+	var getRole dtos.Result[*models.Role]
+	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK).JSON().Decode(&getRole)
+	assert.Equal(newName, getRole.Data.Name)
+	assert.Equal(newStatus, getRole.Data.Status)
 
 	e.DELETE(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK)
 	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusNotFound)

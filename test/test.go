@@ -23,7 +23,7 @@ var (
 
 func init() {
 
-	configs.MustLoad(context.Background(), "config.yaml")
+	configs.MustLoad(context.Background(), "config.yml")
 
 	configs.C.DB.AutoMigrate = true
 
