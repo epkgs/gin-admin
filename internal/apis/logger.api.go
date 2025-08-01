@@ -21,7 +21,7 @@ func NewLogger(app types.AppContext) *Logger {
 		LoggerSVC: services.NewLogger(app),
 	}
 
-	app.Routers().GroupAPI("/api/v1/loggers", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
+	app.Routers().ApiGroup("/api/v1/loggers", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
 		g.GET("", handler.Query)
 		return nil
 	})

@@ -145,8 +145,8 @@ func (a *Menu) upsert(ctx context.Context, items models.Menus, parent *models.Me
 			if item.ID == "" {
 				item.ID = randx.NewXID()
 			}
-			if item.Meta.Rank == 0 {
-				item.Meta.Rank = total - i
+			if item.Rank == 0 {
+				item.Rank = total - i
 			}
 			item.ParentID = parentID
 			if parent != nil {

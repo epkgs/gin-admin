@@ -1,7 +1,5 @@
 package dtos
 
-import "gin-admin/internal/models"
-
 // Defining the query parameters for the `Menu` struct.
 type MenuListReq struct {
 	Pager
@@ -26,7 +24,7 @@ type MenuCreateReq struct {
 	ParentID  string `json:"parentId"`                                           // Parent ID (From Menu.ID)
 	Method    string `json:"method"`                                             // Http method of resource
 
-	Meta models.MenuMeta `json:"meta"` // Meta of menu (JSON)
+	Meta map[string]any `json:"meta"` // Meta of menu (JSON)
 }
 
 type MenuUpdateReq struct {
@@ -38,5 +36,5 @@ type MenuUpdateReq struct {
 	ParentID  *string `json:"parentId"`                                           // Parent ID (From Menu.ID)
 	Method    *string `json:"method"`                                             // Http method of resource
 
-	Meta *models.MenuMeta `json:"meta"` // Meta of menu (JSON)
+	Meta map[string]any `json:"meta"` // Meta of menu (JSON)
 }

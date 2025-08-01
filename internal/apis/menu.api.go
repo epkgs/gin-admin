@@ -21,7 +21,7 @@ func NewMenu(app types.AppContext) *Menu {
 		MenuSVC: services.NewMenu(app),
 	}
 
-	app.Routers().GroupAPI("/api/v1/menus", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
+	app.Routers().ApiGroup("/api/v1/menus", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
 		g.GET("", handler.Query)
 		g.GET(":id", handler.Get)
 		g.POST("", handler.Create)

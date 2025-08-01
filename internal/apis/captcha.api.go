@@ -23,7 +23,7 @@ func NewCaptcha(app types.AppContext) *Captcha {
 	app.Middlewares().Casbin().Exclude("/api/v1/captcha/")
 	app.Middlewares().Auth().Exclude("/api/v1/captcha/")
 
-	app.Routers().GroupAPI("/api/v1/captcha", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
+	app.Routers().ApiGroup("/api/v1/captcha", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
 		g.GET("id", handler.GetCaptcha)
 		g.GET("image", handler.Image)
 		return nil

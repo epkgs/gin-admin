@@ -25,7 +25,7 @@ func NewAuth(app types.AppContext) *Auth {
 	app.Middlewares().Auth().Exclude("/api/v1/auth/login", "/api/v1/auth/refresh-token")
 	app.Middlewares().Casbin().Exclude("/api/v1/auth")
 
-	app.Routers().GroupAPI("/api/v1/auth", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
+	app.Routers().ApiGroup("/api/v1/auth", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
 
 		g.POST("login", handler.Login)
 		g.POST("refresh-token", handler.RefreshToken)

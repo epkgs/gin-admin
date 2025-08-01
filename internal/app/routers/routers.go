@@ -23,7 +23,7 @@ func NewRouters(app types.AppContext) *Routers {
 	}
 }
 
-func (r *Routers) GroupAPI(prefix string, register types.RouteRegister) {
+func (r *Routers) ApiGroup(prefix string, register types.RouteRegister) {
 	r.middlewares.Auth().Include(prefix)
 	r.middlewares.Casbin().Include(prefix)
 	r.middlewares.CopyBody().Include(prefix)

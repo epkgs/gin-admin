@@ -21,7 +21,7 @@ func NewRole(app types.AppContext) *Role {
 		RoleSVC: services.NewRole(app),
 	}
 
-	app.Routers().GroupAPI("/api/v1/roles", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
+	app.Routers().ApiGroup("/api/v1/roles", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
 
 		g.GET("", handler.Query)
 		g.GET(":id", handler.Get)

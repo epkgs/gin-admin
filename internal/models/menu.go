@@ -19,26 +19,108 @@ const (
 
 // Menu management for SYS
 type Menu struct {
-	ID         string    `json:"id" gorm:"size:20;primarykey;"`                // Unique ID
-	Name       string    `json:"name" gorm:"size:128;index"`                   // Display name of menu
-	Type       string    `json:"type" gorm:"size:20;index"`                    // Type of menu (catalog, menu, button)
-	Method     string    `json:"method" gorm:"size:20;index;"`                 // Http method of resource
-	Path       string    `json:"path" gorm:"size:255;"`                        // Access path of menu
-	Component  string    `json:"component" gorm:"size:255;"`                   // Component path of view
-	Status     string    `json:"status" gorm:"size:20;index"`                  // Status of menu (enabled, disabled)
-	Redirect   string    `json:"redirect" gorm:"size:255;not null;default:''"` // Redirect path of menu
-	ParentID   string    `json:"parentId" gorm:"size:20;index;"`               // Parent ID (From Menu.ID)
-	ParentPath string    `json:"parentPath" gorm:"size:255;index;"`            // Parent path (split by .)
-	Children   *Menus    `json:"children" gorm:"-"`                            // Child menus
-	Meta       MenuMeta  `json:"meta" gorm:"embedded"`                         // Meta of menu
-	CreatedAt  time.Time `json:"createdAt" gorm:"index;"`                      // Create time
-	UpdatedAt  time.Time `json:"updatedAt" gorm:"index;"`                      // Update time
+	ID         string         `json:"id" gorm:"size:20;primarykey;"`                   // Unique ID
+	Name       string         `json:"name" gorm:"size:128;index"`                      // Display name of menu
+	Type       string         `json:"type" gorm:"size:20;index"`                       // Type of menu (catalog, menu, button)
+	Method     string         `json:"method" gorm:"size:20;index;"`                    // Http method of resource
+	Path       string         `json:"path" gorm:"size:255;"`                           // Access path of menu
+	Component  string         `json:"component" gorm:"size:255;"`                      // Component path of view
+	Status     string         `json:"status" gorm:"size:20;index"`                     // Status of menu (enabled, disabled)
+	Redirect   string         `json:"redirect" gorm:"size:255;not null;default:''"`    // Redirect path of menu
+	ParentID   string         `json:"parentId" gorm:"size:20;index;"`                  // Parent ID (From Menu.ID)
+	ParentPath string         `json:"parentPath" gorm:"size:255;index;"`               // Parent path (split by .)
+	Rank       int            `json:"rank" gorm:"column:rank;index;"`                  // Rank for sorting (Order by desc)
+	Title      string         `json:"title" gorm:"size:1024"`                          // Menu title
+	Extra      map[string]any `json:"-" gorm:"type:text;serializer:json;default:'{}'"` // Meta data
+	CreatedAt  time.Time      `json:"createdAt" gorm:"index;"`                         // Create time
+	UpdatedAt  time.Time      `json:"updatedAt" gorm:"index;"`                         // Update time
 
-	Roles Roles `json:"roles" gorm:"many2many:role_menus;"`
+	Children *Menus `json:"children" gorm:"-"` // Child menus
+	Roles    Roles  `json:"roles" gorm:"many2many:role_menus;"`
 }
 
 func (a Menu) TableName() string {
 	return configs.C.FormatTableName("menu")
+}
+
+// 自定义JSON反序列化
+func (a *Menu) UnmarshalJSON(data []byte) error {
+	// 使用别名类型避免递归调用
+	type Alias Menu
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	// 解析固定字段
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	fields := make(map[string]struct{})
+	fields["id"] = struct{}{}
+	fields["name"] = struct{}{}
+	fields["type"] = struct{}{}
+	fields["method"] = struct{}{}
+	fields["path"] = struct{}{}
+	fields["component"] = struct{}{}
+	fields["status"] = struct{}{}
+	fields["redirect"] = struct{}{}
+	fields["parentId"] = struct{}{}
+	fields["parentPath"] = struct{}{}
+	fields["rank"] = struct{}{}
+	fields["title"] = struct{}{}
+	fields["createdAt"] = struct{}{}
+	fields["updatedAt"] = struct{}{}
+	fields["children"] = struct{}{}
+	fields["roles"] = struct{}{}
+
+	// 解析整个JSON到map
+	var rawMap map[string]any
+	if err := json.Unmarshal(data, &rawMap); err != nil {
+		return err
+	}
+
+	// 初始化Extra map
+	a.Extra = make(map[string]any)
+
+	// 移除固定字段，保留动态字段
+	for key := range rawMap {
+		if _, exist := fields[key]; !exist {
+			a.Extra[key] = rawMap[key]
+		}
+	}
+
+	return nil
+}
+
+// 自定义JSON序列化
+func (a Menu) MarshalJSON() ([]byte, error) {
+
+	raw := make(map[string]any)
+	for key, value := range a.Extra {
+		raw[key] = value
+	}
+
+	raw["id"] = a.ID
+	raw["name"] = a.Name
+	raw["type"] = a.Type
+	raw["method"] = a.Method
+	raw["path"] = a.Path
+	raw["component"] = a.Component
+	raw["status"] = a.Status
+	raw["redirect"] = a.Redirect
+	raw["parentId"] = a.ParentID
+	raw["parentPath"] = a.ParentPath
+	raw["rank"] = a.Rank
+	raw["title"] = a.Title
+	raw["createdAt"] = a.CreatedAt
+	raw["updatedAt"] = a.UpdatedAt
+	raw["children"] = a.Children
+	raw["roles"] = a.Roles
+
+	return json.Marshal(raw)
 }
 
 // Defining the slice of `Menu` struct.
@@ -49,10 +131,10 @@ func (a Menus) Len() int {
 }
 
 func (a Menus) Less(i, j int) bool {
-	if a[i].Meta.Rank == a[j].Meta.Rank {
+	if a[i].Rank == a[j].Rank {
 		return a[i].CreatedAt.Unix() > a[j].CreatedAt.Unix()
 	}
-	return a[i].Meta.Rank > a[j].Meta.Rank
+	return a[i].Rank > a[j].Rank
 }
 
 func (a Menus) Swap(i, j int) {
@@ -121,49 +203,4 @@ func (m Menus) MarshalJSON() ([]byte, error) {
 	copy := M(m)
 
 	return json.Marshal(copy)
-}
-
-type MenuMeta struct {
-	Rank  int    `json:"order" gorm:"column:rank;index;"` // Rank for sorting (Order by desc)
-	Title string `json:"title" gorm:"size:1024"`          // Menu title
-
-	Properties map[string]any `json:"-" gorm:"type:text;serializer:json;default:'{}'"`
-}
-
-func (m *MenuMeta) UnmarshalJSON(data []byte) error {
-	var properties map[string]any
-	if err := json.Unmarshal(data, &properties); err != nil {
-		return err
-	}
-
-	if properties != nil {
-		if v, ok := properties["order"]; ok {
-			if vv, ok := v.(float64); ok {
-				m.Rank = int(vv)
-			}
-			delete(properties, "order")
-		}
-
-		if v, ok := properties["title"]; ok {
-			if vv, ok := v.(string); ok {
-				m.Title = vv
-			}
-			delete(properties, "title")
-		}
-	}
-	m.Properties = properties
-	return nil
-}
-
-func (m MenuMeta) MarshalJSON() ([]byte, error) {
-
-	props := m.Properties
-	if props == nil {
-		props = map[string]any{}
-	}
-
-	props["order"] = m.Rank
-	props["title"] = m.Title
-
-	return json.Marshal(props)
 }

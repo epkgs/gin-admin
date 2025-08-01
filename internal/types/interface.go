@@ -40,7 +40,7 @@ type Initializer interface {
 type RouteRegister func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error
 
 type Routers interface {
-	GroupAPI(prefix string, register RouteRegister)
+	ApiGroup(prefix string, register RouteRegister)
 	Init(ctx context.Context, e *gin.Engine) error
 }
 
