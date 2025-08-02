@@ -36,7 +36,7 @@ type App struct {
 	uploader *uploader.Uploader
 	casbin   types.Casbinx
 
-	middlewares *Middlewares
+	middlewares *modules.Middlewares
 
 	cleaners []func()
 }
@@ -56,7 +56,7 @@ func New(ctx context.Context, c *configs.Config) *App {
 	app.uploader = util.Must(modules.InitUploader(ctx, app))
 	app.casbin = util.Must(modules.InitCasbinx(ctx, app))
 
-	app.middlewares = NewMiddlewares(app)
+	app.middlewares = modules.NewMiddlewares(app)
 
 	return app
 }
