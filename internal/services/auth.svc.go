@@ -21,6 +21,7 @@ import (
 
 	"github.com/epkgs/object"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // Auth management for SYS
@@ -76,20 +77,24 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 		return userID, nil
 	}
 
-	roleIDs, err := a.UserSvc.GetRoleIDsCache(ctx, userID)
+	_, err = a.UserSvc.GetRoleIDsCache(ctx, userID)
 	if err != nil {
 		if errors.Is(err, cachex.ErrNotFound) {
 
 			// Check user status, if not activated, force to logout
 			user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status"))
-			if user == nil || user.Status != models.UserStatus_Activated {
-				return "", errorx.ErrInvalidToken.New(ctx)
-			}
 			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return "", errorx.ErrInvalidToken.New(ctx)
+				}
 				return "", errorx.WrapGormError(ctx, err)
 			}
 
-			roleIDs, err = a.UserSvc.GetRoleIDs(ctx, userID)
+			if user == nil || user.Status != models.UserStatus_Activated {
+				return "", errorx.ErrInvalidToken.New(ctx)
+			}
+
+			roleIDs, err := a.UserSvc.GetRoleIDs(ctx, userID)
 			if err != nil {
 				return "", err
 			}
@@ -117,10 +122,10 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	// get user info
 	user, err := a.UserRepo.GetByUsername(ctx, req.Username, gormx.WithSelect("id", "password", "status"))
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errorx.ErrUsernamePassword.New(ctx)
+		}
 		return nil, errorx.WrapGormError(ctx, err)
-	}
-	if user == nil {
-		return nil, errorx.ErrUsernamePassword.New(ctx)
 	}
 
 	if user.Status != models.UserStatus_Activated {
@@ -189,11 +194,12 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status", "username"))
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errorx.ErrUser.New(ctx)
+		}
 		return nil, errorx.WrapGormError(ctx, err)
 	}
-	if user == nil {
-		return nil, errorx.ErrUser.New(ctx)
-	}
+
 	if user.Status != models.UserStatus_Activated {
 		return nil, errorx.ErrUserDisabled.New(ctx, struct{ Name string }{user.NickName})
 	}
@@ -252,10 +258,10 @@ func (a *Auth) GetUserInfo(ctx context.Context) (*models.User, error) {
 	userID := helper.GetUserID(ctx)
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithPreload("Roles"), gormx.WithOmit("password"))
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errorx.ErrUserNotLogin.New(ctx)
+		}
 		return nil, errorx.WrapGormError(ctx, err)
-	}
-	if user == nil {
-		return nil, errorx.ErrUserNotLogin.New(ctx)
 	}
 
 	return user, nil
@@ -270,10 +276,10 @@ func (a *Auth) UpdatePassword(ctx context.Context, req *dtos.AuthUpdatePasswordR
 	userID := helper.GetUserID(ctx)
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("password"))
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errorx.ErrUserNotLogin.New(ctx)
+		}
 		return errorx.WrapGormError(ctx, err)
-	}
-	if user == nil {
-		return errorx.ErrUserNotLogin.New(ctx)
 	}
 
 	// check old password
@@ -324,11 +330,14 @@ func (a *Auth) QueryMenus(ctx context.Context) (models.Menus, error) {
 		}
 		if len(missMenusIDs) > 0 {
 			res, err := a.MenuRepo.Find(ctx, gormx.WithWhere("id in (?)", missMenusIDs))
-			if err != nil {
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, errorx.WrapGormError(ctx, err)
 			}
-			menus = append(menus, res...)
-			sort.Sort(menus)
+
+			if len(res) > 0 {
+				menus = append(menus, res...)
+				sort.Sort(menus)
+			}
 		}
 	}
 
@@ -344,10 +353,10 @@ func (a *Auth) UpdateUser(ctx context.Context, req *dtos.AuthUpdateUserReq) erro
 	userID := helper.GetUserID(ctx)
 	user, err := a.UserRepo.Get(ctx, userID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errorx.ErrUserNotLogin.New(ctx)
+		}
 		return errorx.WrapGormError(ctx, err)
-	}
-	if user == nil {
-		return errorx.ErrUserNotLogin.New(ctx)
 	}
 
 	var md object.Metadata

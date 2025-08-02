@@ -288,10 +288,7 @@ func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 	err := a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
 
 		user, err := a.UserRepo.Get(ctx, configs.C.Super.ID)
-		if err != nil {
-			return err
-		}
-		if user == nil {
+		if user == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 			// 如果没有 root 账户，则插入数据库
 			hashedPass, err := hash.GeneratePassword(configs.C.Super.Password)
 			if err != nil {
@@ -305,6 +302,9 @@ func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 				Status:   models.UserStatus_Activated,
 			}
 			return a.UserRepo.Create(ctx, user)
+		}
+		if err != nil {
+			return err
 		}
 
 		if user.Username != configs.C.Super.Username || hash.CompareHashAndPassword(user.Password, configs.C.Super.Password) != nil || user.NickName != configs.C.Super.NickName {

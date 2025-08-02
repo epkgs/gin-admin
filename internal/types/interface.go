@@ -21,7 +21,6 @@ type AppContext interface {
 	Casbin() Casbinx
 	Uploader() *uploader.Uploader
 
-	Routers() Routers
 	Middlewares() Middlewares
 
 	AddCleaner(ctx context.Context, cleaner func())
@@ -33,32 +32,14 @@ type Casbinx interface {
 	Release(ctx context.Context) error
 }
 
-type Initializer interface {
-	Init(ctx context.Context) error
-}
-
-type RouteRegister func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error
-
-type Routers interface {
-	ApiGroup(prefix string, register RouteRegister)
-	Init(ctx context.Context, e *gin.Engine) error
-}
-
-type Middleware interface {
-	Exclude(prefixes ...string)
-	GetExcluded() []string
-	Include(prefixes ...string)
-	GetIncluded() []string
-}
-
 type Middlewares interface {
-	Auth() Middleware
-	Casbin() Middleware
-	Trace() Middleware
-	Logger() Middleware
-	CopyBody() Middleware
-	RateLimiter() Middleware
-	Static() Middleware
-
-	Init(ctx context.Context, e *gin.Engine) error
+	I18n() gin.HandlerFunc
+	Cors() gin.HandlerFunc
+	Trace() gin.HandlerFunc
+	Logger() gin.HandlerFunc
+	CopyBody() gin.HandlerFunc
+	Auth() gin.HandlerFunc
+	RateLimiter() gin.HandlerFunc
+	Casbin() gin.HandlerFunc
+	Prometheus() gin.HandlerFunc
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"gin-admin/internal/configs"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/models"
 
@@ -17,6 +18,14 @@ func TestRole(t *testing.T) {
 	t.Cleanup(func() {
 		os.RemoveAll("data")
 	})
+
+	var login dtos.Result[*dtos.LoginToken]
+	e.POST(baseAPI + "/auth/login").WithJSON(dtos.Login{
+		Username: configs.C.Super.Username,
+		Password: configs.C.Super.Password,
+	}).Expect().Status(http.StatusOK).JSON().Decode(&login)
+
+	token := login.Data.AccessToken
 
 	menuFormItem := dtos.MenuCreateReq{
 		Name:  "role",
@@ -32,7 +41,7 @@ func TestRole(t *testing.T) {
 	}
 
 	var createMenu dtos.Result[*models.Menu]
-	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
+	e.POST(baseAPI+"/menus").WithHeader("Authorization", "Bearer "+token).WithJSON(menuFormItem).
 		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
 
 	menu := createMenu.Data
@@ -56,7 +65,7 @@ func TestRole(t *testing.T) {
 	}
 
 	var createRole dtos.Result[*models.Role]
-	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
+	e.POST(baseAPI+"/roles").WithHeader("Authorization", "Bearer "+token).WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
 	role := createRole.Data
 	assert.NotEmpty(role.ID)
 	assert.Equal(roleFormItem.Code, role.Code)
@@ -67,7 +76,7 @@ func TestRole(t *testing.T) {
 	assert.Equal(len(roleFormItem.MenuIDs), len(role.Menus))
 
 	var listRoles dtos.ResultList[*models.Role]
-	e.GET(baseAPI + "/roles").Expect().Status(http.StatusOK).JSON().Decode(&listRoles)
+	e.GET(baseAPI+"/roles").WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK).JSON().Decode(&listRoles)
 	roles := listRoles.Data.Items
 	assert.GreaterOrEqual(len(roles), 1)
 
@@ -75,16 +84,16 @@ func TestRole(t *testing.T) {
 	newStatus := models.RoleStatus_Disabled
 	role.Name = newName
 	role.Status = newStatus
-	e.PUT(baseAPI + "/roles/" + role.ID).WithJSON(role).Expect().Status(http.StatusOK)
+	e.PUT(baseAPI+"/roles/"+role.ID).WithHeader("Authorization", "Bearer "+token).WithJSON(role).Expect().Status(http.StatusOK)
 
 	var getRole dtos.Result[*models.Role]
-	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK).JSON().Decode(&getRole)
+	e.GET(baseAPI+"/roles/"+role.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK).JSON().Decode(&getRole)
 	assert.Equal(newName, getRole.Data.Name)
 	assert.Equal(newStatus, getRole.Data.Status)
 
-	e.DELETE(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK)
-	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusNotFound)
+	e.DELETE(baseAPI+"/roles/"+role.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK)
+	e.GET(baseAPI+"/roles/"+role.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusNotFound)
 
-	e.DELETE(baseAPI + "/menus/" + menu.ID).Expect().Status(http.StatusOK)
-	e.GET(baseAPI + "/menus/" + menu.ID).Expect().Status(http.StatusNotFound)
+	e.DELETE(baseAPI+"/menus/"+menu.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK)
+	e.GET(baseAPI+"/menus/"+menu.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusNotFound)
 }

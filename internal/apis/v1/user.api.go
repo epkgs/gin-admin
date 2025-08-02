@@ -1,8 +1,6 @@
-package apis
+package v1
 
 import (
-	"context"
-
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/services"
 	"gin-admin/internal/types"
@@ -13,26 +11,31 @@ import (
 
 // User management for SYS
 type User struct {
+	app     types.AppContext
 	UserSVC *services.User
 }
 
 func NewUser(app types.AppContext) *User {
-	handler := &User{
+	return &User{
+		app:     app,
 		UserSVC: services.NewUser(app),
 	}
+}
 
-	app.Routers().ApiGroup("/api/v1/users", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
-		g.GET("", handler.Query)
-		g.GET(":id", handler.Get)
-		g.POST("", handler.Create)
-		g.PUT(":id", handler.Update)
-		g.DELETE(":id", handler.Delete)
-		g.PATCH(":id/reset-pwd", handler.ResetPassword)
+func (a *User) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
 
-		return nil
-	})
+	g := group.Group("users")
+	g.Use(
+		a.app.Middlewares().Auth(),
+		a.app.Middlewares().Casbin(),
+	)
 
-	return handler
+	g.GET("", a.Query)
+	g.GET(":id", a.Get)
+	g.POST("", a.Create)
+	g.PUT(":id", a.Update)
+	g.DELETE(":id", a.Delete)
+	g.PATCH(":id/reset-pwd", a.ResetPassword)
 }
 
 // @Tags UserAPI

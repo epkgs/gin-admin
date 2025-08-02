@@ -79,4 +79,8 @@ type Middleware struct {
 		ModelFile        string `default:"rbac_model.conf"`
 		GenPolicyFile    string `default:"data/gen_rbac_policy.csv"`
 	}
+	Static struct {
+		ExcludedPathPrefixes []string // excluded path prefixes
+		Root                 string   // static file root
+	}
 }

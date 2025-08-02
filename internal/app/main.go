@@ -40,7 +40,6 @@ func Run(ctx context.Context, configFile string) error {
 			"pid":     os.Getpid(),
 			"config":  configs.C.ConfigFile,
 			"env":     configs.C.AppEnv,
-			"static":  configs.C.HTTP.StaticDir,
 		},
 	)
 

@@ -30,7 +30,6 @@ type Config struct {
 		IdleTimeout     int    `default:"10"` // seconds
 		CertFile        string
 		KeyFile         string
-		StaticDir       string // Directory for static files
 	}
 
 	Cache      Cache

@@ -9,18 +9,14 @@ import (
 )
 
 type CasbinConfig struct {
-	IncludedPathPrefixes []string
-	ExcludedPathPrefixes []string
-	Skipper              func(c *gin.Context) bool
-	GetEnforcer          func(c *gin.Context) *casbin.Enforcer
-	GetSubjects          func(c *gin.Context) []string
+	Skipper     func(c *gin.Context) bool
+	GetEnforcer func(c *gin.Context) *casbin.Enforcer
+	GetSubjects func(c *gin.Context) []string
 }
 
 func CasbinWithConfig(config CasbinConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !IncludedPathPrefixes(c, config.IncludedPathPrefixes...) ||
-			ExcludedPathPrefixes(c, config.ExcludedPathPrefixes...) ||
-			(config.Skipper != nil && config.Skipper(c)) {
+		if config.Skipper != nil && config.Skipper(c) {
 			c.Next()
 			return
 		}

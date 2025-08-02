@@ -1,8 +1,6 @@
-package apis
+package v1
 
 import (
-	"context"
-
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/services"
 	"gin-admin/internal/types"
@@ -13,20 +11,25 @@ import (
 
 // Logger management
 type Logger struct {
+	app       types.AppContext
 	LoggerSVC *services.Logger
 }
 
 func NewLogger(app types.AppContext) *Logger {
-	handler := &Logger{
+	return &Logger{
+		app:       app,
 		LoggerSVC: services.NewLogger(app),
 	}
+}
 
-	app.Routers().ApiGroup("/api/v1/loggers", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
-		g.GET("", handler.Query)
-		return nil
-	})
+func (a *Logger) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+	g := group.Group("loggers")
+	g.Use(
+		a.app.Middlewares().Auth(),
+		a.app.Middlewares().Casbin(),
+	)
 
-	return handler
+	g.GET("", a.Query)
 }
 
 // @Tags LoggerAPI

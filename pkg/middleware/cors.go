@@ -8,7 +8,6 @@ import (
 )
 
 type CORSConfig struct {
-	Enable          bool
 	AllowAllOrigins bool
 	// AllowOrigins is a list of origins a cross-domain request can be executed from.
 	// If the special "*" value is present in the list, all origins will be allowed.
@@ -45,9 +44,6 @@ var DefaultCORSConfig = CORSConfig{
 }
 
 func CORSWithConfig(cfg CORSConfig) gin.HandlerFunc {
-	if !cfg.Enable {
-		return Empty()
-	}
 
 	return cors.New(cors.Config{
 		AllowAllOrigins:        cfg.AllowAllOrigins,

@@ -19,7 +19,6 @@ HTTP:
   IdleTimeout: 10                      # Idle timeout in seconds (default: 10)
   CertFile: ""                         # SSL certificate file path
   KeyFile: ""                          # SSL private key file path
-  StaticDir: ""                        # Directory for static files 
 
 
 # Cache Configuration
@@ -211,3 +210,7 @@ Middleware:
     AutoLoadInterval: 3                # Auto load interval in seconds (default: 3)
     ModelFile: "rbac_model.conf"       # Casbin model file path (default: "rbac_model.conf")
     GenPolicyFile: "data/gen_rbac_policy.csv"  # Generated policy file path (default: "data/gen_rbac_policy.csv")
+
+  Static:
+    Root: ""                           #  Static file root path (default: "")
+    ExcludedPathPrefixes: []           #  Excluded path prefixes (default: [])

@@ -12,10 +12,8 @@ import (
 )
 
 type TraceConfig struct {
-	IncludedPathPrefixes []string
-	ExcludedPathPrefixes []string
-	RequestHeaderKey     string
-	ResponseTraceKey     string
+	RequestHeaderKey string
+	ResponseTraceKey string
 }
 
 var DefaultTraceConfig = TraceConfig{
@@ -29,11 +27,6 @@ func Trace() gin.HandlerFunc {
 
 func TraceWithConfig(config TraceConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !IncludedPathPrefixes(c, config.IncludedPathPrefixes...) ||
-			ExcludedPathPrefixes(c, config.ExcludedPathPrefixes...) {
-			c.Next()
-			return
-		}
 
 		traceID := c.GetHeader(config.RequestHeaderKey)
 		if traceID == "" {

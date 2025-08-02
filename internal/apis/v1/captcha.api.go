@@ -1,8 +1,6 @@
-package apis
+package v1
 
 import (
-	"context"
-
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/services"
 	"gin-admin/internal/types"
@@ -12,24 +10,22 @@ import (
 )
 
 type Captcha struct {
+	app        types.AppContext
 	CaptchaSVC *services.Captcha
 }
 
 func NewCaptcha(app types.AppContext) *Captcha {
-	handler := &Captcha{
+	return &Captcha{
+		app:        app,
 		CaptchaSVC: services.NewCaptcha(app),
 	}
+}
 
-	app.Middlewares().Casbin().Exclude("/api/v1/captcha/")
-	app.Middlewares().Auth().Exclude("/api/v1/captcha/")
+func (a *Captcha) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+	g := group.Group("captcha")
 
-	app.Routers().ApiGroup("/api/v1/captcha", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
-		g.GET("id", handler.GetCaptcha)
-		g.GET("image", handler.Image)
-		return nil
-	})
-
-	return handler
+	g.GET("id", a.GetCaptcha)
+	g.GET("image", a.Image)
 }
 
 // @Tags CaptchaAPI

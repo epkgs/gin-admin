@@ -9,7 +9,6 @@ import (
 
 	"gin-admin/internal/apis"
 	"gin-admin/internal/app/modules"
-	"gin-admin/internal/app/routers"
 	"gin-admin/internal/configs"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -37,7 +36,7 @@ type App struct {
 	uploader *uploader.Uploader
 	casbin   types.Casbinx
 
-	routers *routers.Routers
+	middlewares *Middlewares
 
 	cleaners []func()
 }
@@ -57,7 +56,7 @@ func New(ctx context.Context, c *configs.Config) *App {
 	app.uploader = util.Must(modules.InitUploader(ctx, app))
 	app.casbin = util.Must(modules.InitCasbinx(ctx, app))
 
-	app.routers = routers.NewRouters(app)
+	app.middlewares = NewMiddlewares(app)
 
 	return app
 }
@@ -86,12 +85,8 @@ func (a *App) Casbin() types.Casbinx {
 	return a.casbin
 }
 
-func (a *App) Routers() types.Routers {
-	return a.routers
-}
-
 func (a *App) Middlewares() types.Middlewares {
-	return a.routers.Middlewares()
+	return a.middlewares
 }
 
 func (a *App) AddCleaner(ctx context.Context, cleaner func()) {
@@ -130,13 +125,6 @@ func (a *App) Init(ctx context.Context) error {
 		panic(err)
 	}
 
-	apis.NewAuth(a)
-	apis.NewCaptcha(a)
-	apis.NewLogger(a)
-	apis.NewMenu(a)
-	apis.NewRole(a)
-	apis.NewUser(a)
-
 	return nil
 }
 
@@ -160,13 +148,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 		response.Error(c, errorx.ErrRouteNotFound.New(ctx))
 	})
 
-	// Register middlewares
-	if err := a.Middlewares().Init(ctx, e); err != nil {
-		return err
-	}
-
-	// Register routers
-	if err := a.routers.Init(ctx, e); err != nil {
+	if err := apis.RegisterRouters(a, e); err != nil {
 		return err
 	}
 
@@ -176,10 +158,10 @@ func (a *App) InitHttp(ctx context.Context) error {
 		e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	if dir := configs.C.HTTP.StaticDir; dir != "" {
+	if dir := configs.C.Middleware.Static.Root; dir != "" {
 		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:                 dir,
-			ExcludedPathPrefixes: a.Middlewares().Static().GetExcluded(),
+			ExcludedPathPrefixes: configs.C.Middleware.Static.ExcludedPathPrefixes,
 		}))
 	}
 

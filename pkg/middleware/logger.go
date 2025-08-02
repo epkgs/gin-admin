@@ -15,8 +15,6 @@ import (
 )
 
 type LoggerConfig struct {
-	IncludedPathPrefixes     []string
-	ExcludedPathPrefixes     []string
 	MaxOutputRequestBodyLen  int
 	MaxOutputResponseBodyLen int
 }
@@ -33,11 +31,6 @@ func Logger() gin.HandlerFunc {
 
 func LoggerWithConfig(config LoggerConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !IncludedPathPrefixes(c, config.IncludedPathPrefixes...) ||
-			ExcludedPathPrefixes(c, config.ExcludedPathPrefixes...) {
-			c.Next()
-			return
-		}
 
 		start := time.Now()
 		c.Next()

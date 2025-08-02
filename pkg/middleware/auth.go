@@ -9,18 +9,14 @@ import (
 )
 
 type AuthConfig struct {
-	IncludedPathPrefixes []string
-	ExcludedPathPrefixes []string
-	RootID               string
-	Skipper              func(c *gin.Context) bool
-	ParseUserID          func(c *gin.Context) (string, error)
+	RootID      string
+	Skipper     func(c *gin.Context) bool
+	ParseUserID func(c *gin.Context) (string, error)
 }
 
 func AuthWithConfig(config AuthConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !IncludedPathPrefixes(c, config.IncludedPathPrefixes...) ||
-			ExcludedPathPrefixes(c, config.ExcludedPathPrefixes...) ||
-			(config.Skipper != nil && config.Skipper(c)) {
+		if config.Skipper != nil && config.Skipper(c) {
 			c.Next()
 			return
 		}

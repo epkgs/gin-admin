@@ -14,9 +14,7 @@ import (
 )
 
 type CopyBodyConfig struct {
-	IncludedPathPrefixes []string
-	ExcludedPathPrefixes []string
-	MaxContentLen        int64
+	MaxContentLen int64
 }
 
 var DefaultCopyBodyConfig = CopyBodyConfig{
@@ -29,9 +27,7 @@ func CopyBody() gin.HandlerFunc {
 
 func CopyBodyWithConfig(config CopyBodyConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !IncludedPathPrefixes(c, config.IncludedPathPrefixes...) ||
-			ExcludedPathPrefixes(c, config.ExcludedPathPrefixes...) ||
-			c.Request.Body == nil {
+		if c.Request.Body == nil {
 			c.Next()
 			return
 		}

@@ -17,15 +17,13 @@ import (
 )
 
 type RateLimiterConfig struct {
-	Enable               bool
-	IncludedPathPrefixes []string
-	ExcludedPathPrefixes []string
-	Period               int
-	MaxRequestsPerIP     int
-	MaxRequestsPerUser   int
-	StoreType            string // memory/redis
-	MemoryStoreConfig    RateLimiterMemoryConfig
-	RedisStoreConfig     RateLimiterRedisConfig
+	Enable             bool
+	Period             int
+	MaxRequestsPerIP   int
+	MaxRequestsPerUser int
+	StoreType          string // memory/redis
+	MemoryStoreConfig  RateLimiterMemoryConfig
+	RedisStoreConfig   RateLimiterRedisConfig
 }
 
 func RateLimiterWithConfig(config RateLimiterConfig) gin.HandlerFunc {
@@ -42,11 +40,6 @@ func RateLimiterWithConfig(config RateLimiterConfig) gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		if !IncludedPathPrefixes(c, config.IncludedPathPrefixes...) ||
-			ExcludedPathPrefixes(c, config.ExcludedPathPrefixes...) {
-			c.Next()
-			return
-		}
 
 		var (
 			allowed bool

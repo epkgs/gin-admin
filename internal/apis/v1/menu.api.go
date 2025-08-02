@@ -1,8 +1,6 @@
-package apis
+package v1
 
 import (
-	"context"
-
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/services"
 	"gin-admin/internal/types"
@@ -11,47 +9,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Role management for SYS
-type Role struct {
-	RoleSVC *services.Role
+// Menu management for SYS
+type Menu struct {
+	app     types.AppContext
+	MenuSVC *services.Menu
 }
 
-func NewRole(app types.AppContext) *Role {
-	handler := &Role{
-		RoleSVC: services.NewRole(app),
+func NewMenu(app types.AppContext) *Menu {
+	return &Menu{
+		app:     app,
+		MenuSVC: services.NewMenu(app),
 	}
-
-	app.Routers().ApiGroup("/api/v1/roles", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
-
-		g.GET("", handler.Query)
-		g.GET(":id", handler.Get)
-		g.POST("", handler.Create)
-		g.PUT(":id", handler.Update)
-		g.DELETE(":id", handler.Delete)
-
-		return nil
-	})
-
-	return handler
 }
 
-// @Tags RoleAPI
+func (a *Menu) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+
+	g := group.Group("menus")
+	g.Use(
+		a.app.Middlewares().Auth(),
+		a.app.Middlewares().Casbin(),
+	)
+
+	g.GET("", a.Query)
+	g.GET(":id", a.Get)
+	g.POST("", a.Create)
+	g.PUT(":id", a.Update)
+	g.DELETE(":id", a.Delete)
+}
+
+// @Tags MenuAPI
 // @Security ApiKeyAuth
-// @Summary Query role list
-// @Param request query dtos.RoleListReq false "query params"
-// @Success 200 {object} dtos.ResultList[models.Role]
+// @Summary Query menu tree data
+// @Param request query dtos.MenuListReq false "query params"
+// @Success 200 {object} dtos.ResultList[models.Menu]
 // @Failure 401 {object} dtos.Result[any]
 // @Failure 500 {object} dtos.Result[any]
-// @Router /api/v1/roles [get]
-func (a *Role) Query(c *gin.Context) {
+// @Router /api/v1/menus [get]
+func (a *Menu) Query(c *gin.Context) {
 	ctx := c.Request.Context()
-	var params dtos.RoleListReq
+	var params dtos.MenuListReq
 	if err := c.ShouldBindQuery(&params); err != nil {
 		response.Error(c, err)
 		return
 	}
 
-	result, err := a.RoleSVC.List(ctx, params)
+	result, err := a.MenuSVC.List(ctx, params)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -59,17 +61,17 @@ func (a *Role) Query(c *gin.Context) {
 	response.List(c, result.Items, &result.Pager)
 }
 
-// @Tags RoleAPI
+// @Tags MenuAPI
 // @Security ApiKeyAuth
-// @Summary Get role record by ID
+// @Summary Get menu record by ID
 // @Param id path string true "unique id"
-// @Success 200 {object} dtos.Result[models.Role]
+// @Success 200 {object} dtos.Result[models.Menu]
 // @Failure 401 {object} dtos.Result[any]
 // @Failure 500 {object} dtos.Result[any]
-// @Router /api/v1/roles/{id} [get]
-func (a *Role) Get(c *gin.Context) {
+// @Router /api/v1/menus/{id} [get]
+func (a *Menu) Get(c *gin.Context) {
 	ctx := c.Request.Context()
-	item, err := a.RoleSVC.Get(ctx, c.Param("id"))
+	item, err := a.MenuSVC.Get(ctx, c.Param("id"))
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -77,24 +79,24 @@ func (a *Role) Get(c *gin.Context) {
 	response.OkData(c, item)
 }
 
-// @Tags RoleAPI
+// @Tags MenuAPI
 // @Security ApiKeyAuth
-// @Summary Create role record
-// @Param body body dtos.RoleCreateReq true "Request body"
-// @Success 200 {object} dtos.Result[models.Role]
+// @Summary Create menu record
+// @Param body body dtos.MenuCreateReq true "Request body"
+// @Success 200 {object} dtos.Result[models.Menu]
 // @Failure 400 {object} dtos.Result[any]
 // @Failure 401 {object} dtos.Result[any]
 // @Failure 500 {object} dtos.Result[any]
-// @Router /api/v1/roles [post]
-func (a *Role) Create(c *gin.Context) {
+// @Router /api/v1/menus [post]
+func (a *Menu) Create(c *gin.Context) {
 	ctx := c.Request.Context()
-	item := new(dtos.RoleCreateReq)
+	item := new(dtos.MenuCreateReq)
 	if err := c.ShouldBindJSON(item); err != nil {
 		response.Error(c, err)
 		return
 	}
 
-	result, err := a.RoleSVC.Create(ctx, *item)
+	result, err := a.MenuSVC.Create(ctx, item)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -102,25 +104,25 @@ func (a *Role) Create(c *gin.Context) {
 	response.OkData(c, result)
 }
 
-// @Tags RoleAPI
+// @Tags MenuAPI
 // @Security ApiKeyAuth
-// @Summary Update role record by ID
+// @Summary Update menu record by ID
 // @Param id path string true "unique id"
-// @Param body body dtos.RoleUpdateReq true "Request body"
+// @Param body body dtos.MenuUpdateReq true "Request body"
 // @Success 200 {object} dtos.Result[any]
 // @Failure 400 {object} dtos.Result[any]
 // @Failure 401 {object} dtos.Result[any]
 // @Failure 500 {object} dtos.Result[any]
-// @Router /api/v1/roles/{id} [put]
-func (a *Role) Update(c *gin.Context) {
+// @Router /api/v1/menus/{id} [put]
+func (a *Menu) Update(c *gin.Context) {
 	ctx := c.Request.Context()
-	item := new(dtos.RoleUpdateReq)
+	item := new(dtos.MenuUpdateReq)
 	if err := c.ShouldBindJSON(item); err != nil {
 		response.Error(c, err)
 		return
 	}
 
-	err := a.RoleSVC.Update(ctx, c.Param("id"), item)
+	err := a.MenuSVC.Update(ctx, c.Param("id"), item)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -128,17 +130,17 @@ func (a *Role) Update(c *gin.Context) {
 	response.OK(c)
 }
 
-// @Tags RoleAPI
+// @Tags MenuAPI
 // @Security ApiKeyAuth
-// @Summary Delete role record by ID
+// @Summary Delete menu record by ID
 // @Param id path string true "unique id"
 // @Success 200 {object} dtos.Result[any]
 // @Failure 401 {object} dtos.Result[any]
 // @Failure 500 {object} dtos.Result[any]
-// @Router /api/v1/roles/{id} [delete]
-func (a *Role) Delete(c *gin.Context) {
+// @Router /api/v1/menus/{id} [delete]
+func (a *Menu) Delete(c *gin.Context) {
 	ctx := c.Request.Context()
-	err := a.RoleSVC.Delete(ctx, c.Param("id"))
+	err := a.MenuSVC.Delete(ctx, c.Param("id"))
 	if err != nil {
 		response.Error(c, err)
 		return

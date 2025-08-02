@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"gin-admin/internal/apis"
 	"gin-admin/internal/app"
 	"gin-admin/internal/configs"
 
@@ -36,7 +37,7 @@ func init() {
 	}
 
 	engine = gin.New()
-	err := app.Routers().Init(ctx, engine)
+	err := apis.RegisterRouters(app, engine)
 	if err != nil {
 		panic(err)
 	}

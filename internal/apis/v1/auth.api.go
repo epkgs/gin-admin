@@ -1,8 +1,6 @@
-package apis
+package v1
 
 import (
-	"context"
-
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/services"
@@ -14,31 +12,28 @@ import (
 )
 
 type Auth struct {
+	app     types.AppContext
 	AuthSVC *services.Auth
 }
 
 func NewAuth(app types.AppContext) *Auth {
-	handler := &Auth{
+	return &Auth{
+		app:     app,
 		AuthSVC: services.NewAuth(app),
 	}
+}
 
-	app.Middlewares().Auth().Exclude("/api/v1/auth/login", "/api/v1/auth/refresh-token")
-	app.Middlewares().Casbin().Exclude("/api/v1/auth")
+func (a *Auth) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
 
-	app.Routers().ApiGroup("/api/v1/auth", func(ctx context.Context, g *gin.RouterGroup, e *gin.Engine) error {
+	g := group.Group("auth")
 
-		g.POST("login", handler.Login)
-		g.POST("refresh-token", handler.RefreshToken)
-		g.GET("user", handler.GetUserInfo)
-		g.GET("menus", handler.QueryMenus)
-		g.PUT("password", handler.UpdatePassword)
-		g.PUT("user", handler.UpdateUser)
-		g.POST("logout", handler.Logout)
-
-		return nil
-	})
-
-	return handler
+	g.POST("login", a.Login)
+	g.POST("refresh-token", a.RefreshToken)
+	g.GET("user", a.app.Middlewares().Auth(), a.GetUserInfo)
+	g.GET("menus", a.app.Middlewares().Auth(), a.QueryMenus)
+	g.PUT("password", a.app.Middlewares().Auth(), a.UpdatePassword)
+	g.PUT("user", a.app.Middlewares().Auth(), a.UpdateUser)
+	g.POST("logout", a.app.Middlewares().Auth(), a.Logout)
 }
 
 // @Tags AuthAPI
