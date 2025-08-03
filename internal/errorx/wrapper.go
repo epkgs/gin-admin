@@ -8,6 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
+type Definition = i18nerr.Definition[*HttpError]
+type DefinitionF[Args any] = i18nerr.DefinitionF[*HttpError, Args]
+
 func httpError(code, httpStatus int) i18nerr.Wrapper[*HttpError] {
 	return func(err *i18nerr.Error) *HttpError {
 		return NewHttpError(code, err.Error(), httpStatus)
@@ -33,20 +36,20 @@ func WrapGormError(ctx context.Context, err error) error {
 
 	switch err {
 	case gorm.ErrRecordNotFound:
-		return ErrRecordNotFound.New(ctx).Wrap(err)
+		return General.RecordNotFound.New(ctx).Wrap(err)
 	case gorm.ErrInvalidTransaction:
-		return ErrDatabaseTransaction.New(ctx).Wrap(err)
+		return DB.Transaction.New(ctx).Wrap(err)
 	case gorm.ErrNotImplemented:
-		return ErrDatabase.New(ctx).Wrap(err)
+		return General.Internal.New(ctx).Wrap(err)
 	case gorm.ErrMissingWhereClause:
-		return ErrBadRequest.New(ctx).Wrap(err)
+		return General.BadRequest.New(ctx).Wrap(err)
 	case gorm.ErrUnsupportedRelation:
-		return ErrBadRequest.New(ctx).Wrap(err)
+		return General.BadRequest.New(ctx).Wrap(err)
 	case gorm.ErrPrimaryKeyRequired:
-		return ErrInvalidParams.New(ctx, struct{ Params string }{Params: "id"}).Wrap(err)
+		return General.InvalidParams.New(ctx, struct{ Params string }{Params: "id"}).Wrap(err)
 	case gorm.ErrModelValueRequired, gorm.ErrModelAccessibleFieldsRequired, gorm.ErrSubQueryRequired, gorm.ErrInvalidData, gorm.ErrUnsupportedDriver, gorm.ErrRegistered, gorm.ErrInvalidField, gorm.ErrEmptySlice, gorm.ErrDryRunModeUnsupported, gorm.ErrInvalidDB, gorm.ErrInvalidValue, gorm.ErrInvalidValueOfLength, gorm.ErrPreloadNotAllowed, gorm.ErrDuplicatedKey, gorm.ErrForeignKeyViolated, gorm.ErrCheckConstraintViolated:
-		return ErrInternal.New(ctx).Wrap(err)
+		return General.Internal.New(ctx).Wrap(err)
 	}
 
-	return ErrInternal.New(ctx).Wrap(err)
+	return General.Internal.New(ctx).Wrap(err)
 }

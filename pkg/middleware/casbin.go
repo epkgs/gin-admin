@@ -25,7 +25,7 @@ func CasbinWithConfig(config CasbinConfig) gin.HandlerFunc {
 
 		enforcer := config.GetEnforcer(c)
 		if enforcer == nil {
-			response.Error(c, errorx.ErrAccessDenied.New(ctx))
+			response.Error(c, errorx.General.AccessDenied.New(ctx))
 			return
 		}
 
@@ -38,6 +38,6 @@ func CasbinWithConfig(config CasbinConfig) gin.HandlerFunc {
 				return
 			}
 		}
-		response.Error(c, errorx.ErrAccessDenied.New(ctx))
+		response.Error(c, errorx.General.AccessDenied.New(ctx))
 	}
 }

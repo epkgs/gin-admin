@@ -293,7 +293,7 @@ func (a *Menu) Get(ctx context.Context, id string) (*models.Menu, error) {
 // Create a new menu in the data access object.
 func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Menu, error) {
 	if configs.C.Menu.DenyOperate {
-		return nil, errorx.ErrBadRequest.New(ctx)
+		return nil, errorx.General.BadRequest.New(ctx)
 	}
 
 	menu := &models.Menu{
@@ -326,7 +326,7 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 // Update the specified menu in the data access object.
 func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) error {
 	if configs.C.Menu.DenyOperate {
-		return errorx.ErrBadRequest.New(ctx)
+		return errorx.General.BadRequest.New(ctx)
 	}
 
 	menu, err := a.MenuRepo.Get(ctx, id)
@@ -356,7 +356,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 	}
 
 	if err := object.Assign(menu, req); err != nil {
-		return errorx.ErrInternal.New(ctx).Wrap(err)
+		return errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	err = a.MenuRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -394,7 +394,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 // Delete the specified menu from the data access object.
 func (a *Menu) Delete(ctx context.Context, id string) error {
 	if configs.C.Menu.DenyOperate {
-		return errorx.ErrBadRequest.New(ctx)
+		return errorx.General.BadRequest.New(ctx)
 	}
 
 	menu, err := a.MenuRepo.Get(ctx, id)

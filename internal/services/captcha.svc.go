@@ -31,15 +31,15 @@ func (a *Captcha) GetCaptcha(ctx context.Context) (*dtos.Captcha, error) {
 // Response captcha image
 func (a *Captcha) ResponseCaptcha(ctx context.Context, w http.ResponseWriter, id string, reload bool) error {
 	if reload && !captcha.Reload(id) {
-		return errorx.ErrCaptchaIDNotFound.New(ctx)
+		return errorx.User.CaptchaIDNotFound.New(ctx)
 	}
 
 	err := captcha.WriteImage(w, id, configs.C.Captcha.Width, configs.C.Captcha.Height)
 	if err != nil {
 		if err == captcha.ErrNotFound {
-			return errorx.ErrCaptchaIDNotFound.New(ctx).Wrap(err)
+			return errorx.User.CaptchaIDNotFound.New(ctx).Wrap(err)
 		}
-		return errorx.ErrInternal.New(ctx).Wrap(err)
+		return errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")

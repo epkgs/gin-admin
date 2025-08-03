@@ -87,7 +87,7 @@ func (a *Auth) RefreshToken(c *gin.Context) {
 
 	refreshToken := helper.GetToken(c)
 	if refreshToken == "" {
-		response.Error(c, errorx.ErrInvalidToken.New(ctx))
+		response.Error(c, errorx.User.InvalidToken.New(ctx))
 		return
 	}
 

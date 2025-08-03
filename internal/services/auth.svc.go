@@ -57,7 +57,7 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 
 	token := helper.GetToken(c)
 	if token == "" {
-		return "", errorx.ErrInvalidToken.New(ctx)
+		return "", errorx.User.InvalidToken.New(ctx)
 	}
 
 	ctx = helper.WithUserToken(ctx, token)
@@ -65,9 +65,9 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 	claims, err := a.Jwt.ParseToken(ctx, token)
 	if err != nil {
 		if err == jwtx.ErrInvalidToken {
-			return "", errorx.ErrInvalidToken.New(ctx)
+			return "", errorx.User.InvalidToken.New(ctx)
 		}
-		return "", errorx.ErrInternal.New(ctx).Wrap(err)
+		return "", errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	userID, _ := claims.GetSubject()
@@ -85,13 +85,13 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 			user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status"))
 			if err != nil {
 				if errors.Is(err, gorm.ErrRecordNotFound) {
-					return "", errorx.ErrInvalidToken.New(ctx)
+					return "", errorx.User.InvalidToken.New(ctx)
 				}
 				return "", errorx.WrapGormError(ctx, err)
 			}
 
 			if user == nil || user.Status != models.UserStatus_Activated {
-				return "", errorx.ErrInvalidToken.New(ctx)
+				return "", errorx.User.InvalidToken.New(ctx)
 			}
 
 			roleIDs, err := a.UserSvc.GetRoleIDs(ctx, userID)
@@ -123,18 +123,18 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	user, err := a.UserRepo.GetByUsername(ctx, req.Username, gormx.WithSelect("id", "password", "status"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errorx.ErrUsernamePassword.New(ctx)
+			return nil, errorx.User.UsernamePassword.New(ctx)
 		}
 		return nil, errorx.WrapGormError(ctx, err)
 	}
 
 	if user.Status != models.UserStatus_Activated {
-		return nil, errorx.ErrUserDisabled.New(ctx, struct{ Name string }{req.Username})
+		return nil, errorx.User.Disabled.New(ctx, struct{ Name string }{req.Username})
 	}
 
 	// check password
 	if err := hash.CompareHashAndPassword(user.Password, req.Password); err != nil {
-		return nil, errorx.ErrUsernamePassword.New(ctx)
+		return nil, errorx.User.UsernamePassword.New(ctx)
 	}
 
 	userID := user.ID
@@ -154,7 +154,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	// generate token
 	token, err := a.Jwt.GenerateToken(ctx, userID)
 	if err != nil {
-		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	loginToken := &dtos.LoginToken{
@@ -185,7 +185,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 	claims, err := a.Jwt.ParseRefreshToken(ctx, refreshToken)
 	if err != nil {
 		if err == jwtx.ErrInvalidToken {
-			return nil, errorx.ErrInvalidToken.New(ctx).Wrap(err)
+			return nil, errorx.User.InvalidToken.New(ctx).Wrap(err)
 		}
 		return nil, err
 	}
@@ -195,13 +195,13 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status", "username"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errorx.ErrUser.New(ctx)
+			return nil, errorx.User.Incorrect.New(ctx)
 		}
 		return nil, errorx.WrapGormError(ctx, err)
 	}
 
 	if user.Status != models.UserStatus_Activated {
-		return nil, errorx.ErrUserDisabled.New(ctx, struct{ Name string }{user.NickName})
+		return nil, errorx.User.Disabled.New(ctx, struct{ Name string }{user.NickName})
 	}
 
 	ctx = logger.WithUserID(ctx, userID)
@@ -259,7 +259,7 @@ func (a *Auth) GetUserInfo(ctx context.Context) (*models.User, error) {
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithPreload("Roles"), gormx.WithOmit("password"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errorx.ErrUserNotLogin.New(ctx)
+			return nil, errorx.User.NotLogin.New(ctx)
 		}
 		return nil, errorx.WrapGormError(ctx, err)
 	}
@@ -270,27 +270,27 @@ func (a *Auth) GetUserInfo(ctx context.Context) (*models.User, error) {
 // Change login password
 func (a *Auth) UpdatePassword(ctx context.Context, req *dtos.AuthUpdatePasswordReq) error {
 	if helper.GetIsRootUser(ctx) {
-		return errorx.ErrModifySuperUser.New(ctx)
+		return errorx.User.ModifySuperUser.New(ctx)
 	}
 
 	userID := helper.GetUserID(ctx)
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("password"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errorx.ErrUserNotLogin.New(ctx)
+			return errorx.User.NotLogin.New(ctx)
 		}
 		return errorx.WrapGormError(ctx, err)
 	}
 
 	// check old password
 	if err := hash.CompareHashAndPassword(user.Password, req.OldPassword); err != nil {
-		return errorx.ErrOldPassword.New(ctx).Wrap(err)
+		return errorx.User.OldPassword.New(ctx).Wrap(err)
 	}
 
 	// update password
 	newPassword, err := hash.GeneratePassword(req.NewPassword)
 	if err != nil {
-		return errorx.ErrInternal.New(ctx).Wrap(err)
+		return errorx.General.Internal.New(ctx).Wrap(err)
 	}
 	return a.UserRepo.UpdatePassword(ctx, userID, newPassword)
 }
@@ -354,7 +354,7 @@ func (a *Auth) UpdateUser(ctx context.Context, req *dtos.AuthUpdateUserReq) erro
 	user, err := a.UserRepo.Get(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errorx.ErrUserNotLogin.New(ctx)
+			return errorx.User.NotLogin.New(ctx)
 		}
 		return errorx.WrapGormError(ctx, err)
 	}
@@ -365,11 +365,11 @@ func (a *Auth) UpdateUser(ctx context.Context, req *dtos.AuthUpdateUserReq) erro
 		c.Metadata = &md
 	})
 	if err != nil {
-		return errorx.ErrInternal.New(ctx).Wrap(err)
+		return errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	if len(md.Keys) == 0 {
-		return errorx.ErrNothingUpdate.New(ctx)
+		return errorx.DB.NothingUpdate.New(ctx)
 	}
 
 	return a.UserRepo.Update(ctx, user, gormx.WithSelect(md.Keys))

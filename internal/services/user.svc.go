@@ -88,14 +88,14 @@ func (a *User) Get(ctx context.Context, id string) (*models.User, error) {
 func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.User, error) {
 
 	if req.Username == configs.C.Super.Username {
-		return nil, errorx.ErrModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return nil, errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
 	}
 
 	existsUsername, err := a.UserRepo.ExistsUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	} else if existsUsername {
-		return nil, errorx.ErrUserExists.New(ctx, struct{ Name string }{Name: req.Username}) // 用户名已存在
+		return nil, errorx.User.Exists.New(ctx, struct{ Name string }{Name: req.Username}) // 用户名已存在
 	}
 
 	user := &models.User{
@@ -108,13 +108,13 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 	}
 
 	if err := object.Assign(user, req); err != nil {
-		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	if pass := req.Password; pass != "" {
 		hashPass, err := hash.GeneratePassword(pass)
 		if err != nil {
-			return nil, errorx.ErrPasswordEncrypt.New(ctx).Wrap(err)
+			return nil, errorx.User.PasswordEncrypt.New(ctx).Wrap(err)
 		}
 		user.Password = hashPass
 	}
@@ -136,7 +136,7 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) error {
 
 	if id == configs.C.Super.ID {
-		return errorx.ErrModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
 	}
 
 	user, err := a.UserRepo.Get(ctx, id)
@@ -149,7 +149,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 		if err != nil {
 			return errorx.WrapGormError(ctx, err)
 		} else if existsUsername {
-			return errorx.ErrUserExists.New(ctx, struct{ Name string }{Name: *req.Username}) // 用户名已存在
+			return errorx.User.Exists.New(ctx, struct{ Name string }{Name: *req.Username}) // 用户名已存在
 		}
 	}
 
@@ -157,7 +157,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 	if err := object.Assign(user, req, func(c *object.AssignConfig) {
 		c.Metadata = &md
 	}); err != nil {
-		return errorx.ErrInternal.New(ctx).Wrap(err)
+		return errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	selected := md.Keys
@@ -166,7 +166,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 		pass := *req.Password
 		hashPass, err := hash.GeneratePassword(pass)
 		if err != nil {
-			return errorx.ErrPasswordEncrypt.New(ctx).Wrap(err)
+			return errorx.User.PasswordEncrypt.New(ctx).Wrap(err)
 		}
 		user.Password = hashPass
 	}
@@ -193,14 +193,14 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 func (a *User) Delete(ctx context.Context, id string) error {
 
 	if id == configs.C.Super.ID {
-		return errorx.ErrModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
 	}
 
 	exists, err := a.UserRepo.Exists(ctx, gormx.WithWhere("id = ?", id))
 	if err != nil {
 		return errorx.WrapGormError(ctx, err)
 	} else if !exists {
-		return errorx.ErrUserNotFound.New(ctx)
+		return errorx.User.NotFound.New(ctx)
 	}
 
 	err = a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -218,19 +218,19 @@ func (a *User) Delete(ctx context.Context, id string) error {
 
 func (a *User) ResetPassword(ctx context.Context, id string) error {
 	if id == configs.C.Super.ID {
-		return errorx.ErrModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
 	}
 
 	exists, err := a.UserRepo.Exists(ctx, gormx.WithWhere("id=?", id))
 	if err != nil {
 		return errorx.WrapGormError(ctx, err)
 	} else if !exists {
-		return errorx.ErrUserNotFound.New(ctx)
+		return errorx.User.NotFound.New(ctx)
 	}
 
 	hashPass, err := hash.GeneratePassword(configs.C.DefaultLoginPwd)
 	if err != nil {
-		return errorx.ErrPasswordEncrypt.New(ctx).Wrap(err)
+		return errorx.User.PasswordEncrypt.New(ctx).Wrap(err)
 	}
 
 	err = a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -257,7 +257,7 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 func (a *User) SetRoleIDsCache(ctx context.Context, userID string, roleIDs []string, expiration ...time.Duration) error {
 	byt, err := json.Marshal(roleIDs)
 	if err != nil {
-		return errorx.ErrInternal.New(ctx).Wrap(err)
+		return errorx.General.Internal.New(ctx).Wrap(err)
 	}
 	return a.Cacher.Set(ctx, gCacheNSForUserRoles, userID, string(byt), expiration...)
 }
@@ -270,14 +270,14 @@ func (a *User) GetRoleIDsCache(ctx context.Context, userID string) ([]string, er
 	val, err := a.Cacher.Get(ctx, gCacheNSForUserRoles, userID)
 	if err != nil {
 		if err == cachex.ErrNotFound {
-			return nil, errorx.ErrRecordNotFound.New(ctx).Wrap(err)
+			return nil, errorx.General.RecordNotFound.New(ctx).Wrap(err)
 		}
-		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	var roleIDs []string
 	if err := json.Unmarshal([]byte(val), &roleIDs); err != nil {
-		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	return roleIDs, nil

@@ -51,7 +51,7 @@ func CopyBodyWithConfig(config CopyBodyConfig) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			response.Error(c, errorx.ErrRequestTooLarge.New(c.Request.Context(), struct{ Byte int64 }{config.MaxContentLen}))
+			response.Error(c, errorx.General.RequestTooLarge.New(c.Request.Context(), struct{ Byte int64 }{config.MaxContentLen}))
 			return
 		}
 

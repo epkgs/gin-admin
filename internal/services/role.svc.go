@@ -88,7 +88,7 @@ func (a *Role) Create(ctx context.Context, req dtos.RoleCreateReq) (*models.Role
 	if exists, err := a.RoleRepo.ExistsCode(ctx, req.Code); err != nil {
 		return nil, errorx.WrapGormError(ctx, err)
 	} else if exists {
-		return nil, errorx.ErrRoleCodeExists.New(ctx)
+		return nil, errorx.User.RoleCodeExists.New(ctx)
 	}
 
 	role := &models.Role{
@@ -99,7 +99,7 @@ func (a *Role) Create(ctx context.Context, req dtos.RoleCreateReq) (*models.Role
 	if err := object.Assign(role, req, func(c *object.AssignConfig) {
 		c.SkipKeys = []string{"Menus"}
 	}); err != nil {
-		return nil, errorx.ErrInternal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	if len(req.MenuIDs) > 0 {
@@ -129,7 +129,7 @@ func (a *Role) Update(ctx context.Context, id string, req *dtos.RoleUpdateReq) e
 		if exists, err := a.RoleRepo.ExistsCode(ctx, *req.Code); err != nil {
 			return errorx.WrapGormError(ctx, err)
 		} else if exists {
-			return errorx.ErrRoleCodeExists.New(ctx)
+			return errorx.User.RoleCodeExists.New(ctx)
 		}
 	}
 
@@ -171,7 +171,7 @@ func (a *Role) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return errorx.WrapGormError(ctx, err)
 	} else if !exists {
-		return errorx.ErrRoleNotFount.New(ctx)
+		return errorx.User.RoleNotFount.New(ctx)
 	}
 
 	err = a.RoleRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -192,14 +192,14 @@ func (a *Role) GetUpdateTime(ctx context.Context) (int64, error) {
 	val, err := a.Cacher.Get(ctx, gCacheNSForRole, gCacheKeyForCasbin)
 	if err != nil {
 		if err == cachex.ErrNotFound {
-			return 0, errorx.ErrRecordNotFound.New(ctx).Wrap(err)
+			return 0, errorx.General.RecordNotFound.New(ctx).Wrap(err)
 		}
 		return 0, err
 	}
 
 	updated, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		return 0, errorx.ErrInternal.New(ctx).Wrap(err)
+		return 0, errorx.General.Internal.New(ctx).Wrap(err)
 	}
 
 	return updated, nil
