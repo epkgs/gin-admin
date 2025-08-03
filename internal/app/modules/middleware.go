@@ -14,6 +14,8 @@ import (
 )
 
 type Middlewares struct {
+	app types.AppContext
+
 	i18n        gin.HandlerFunc
 	cors        gin.HandlerFunc
 	trace       gin.HandlerFunc
@@ -26,118 +28,159 @@ type Middlewares struct {
 }
 
 func NewMiddlewares(app types.AppContext) *Middlewares {
-	m := &Middlewares{}
-
-	cfg := app.Config()
-
-	m.i18n = i18n.GinMiddleware("zh")
-
-	if cfg.Middleware.CORS.Enable {
-		m.cors = middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowAllOrigins:        cfg.Middleware.CORS.AllowAllOrigins,
-			AllowOrigins:           cfg.Middleware.CORS.AllowOrigins,
-			AllowMethods:           cfg.Middleware.CORS.AllowMethods,
-			AllowHeaders:           cfg.Middleware.CORS.AllowHeaders,
-			AllowCredentials:       cfg.Middleware.CORS.AllowCredentials,
-			ExposeHeaders:          cfg.Middleware.CORS.ExposeHeaders,
-			MaxAge:                 cfg.Middleware.CORS.MaxAge,
-			AllowWildcard:          cfg.Middleware.CORS.AllowWildcard,
-			AllowBrowserExtensions: cfg.Middleware.CORS.AllowBrowserExtensions,
-			AllowWebSockets:        cfg.Middleware.CORS.AllowWebSockets,
-			AllowFiles:             cfg.Middleware.CORS.AllowFiles,
-		})
-	} else {
-		m.cors = middleware.Empty()
+	return &Middlewares{
+		app: app,
 	}
-
-	m.trace = middleware.TraceWithConfig(middleware.TraceConfig{
-		RequestHeaderKey: cfg.Middleware.Trace.RequestHeaderKey,
-		ResponseTraceKey: cfg.Middleware.Trace.ResponseTraceKey,
-	})
-
-	m.logger = middleware.LoggerWithConfig(middleware.LoggerConfig{
-		MaxOutputRequestBodyLen:  cfg.Middleware.Logger.MaxOutputRequestBodyLen,
-		MaxOutputResponseBodyLen: cfg.Middleware.Logger.MaxOutputResponseBodyLen,
-	})
-
-	m.copyBody = middleware.CopyBodyWithConfig(middleware.CopyBodyConfig{
-		MaxContentLen: cfg.Middleware.CopyBody.MaxContentLen,
-	})
-
-	m.auth = middleware.AuthWithConfig(middleware.AuthConfig{
-		ParseUserID: services.NewAuth(app).ParseUserID,
-		RootID:      cfg.Super.ID,
-	})
-
-	m.rateLimiter = middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
-		Enable:             cfg.Middleware.RateLimiter.Enable,
-		Period:             cfg.Middleware.RateLimiter.Period,
-		MaxRequestsPerIP:   cfg.Middleware.RateLimiter.MaxRequestsPerIP,
-		MaxRequestsPerUser: cfg.Middleware.RateLimiter.MaxRequestsPerUser,
-		StoreType:          cfg.Middleware.RateLimiter.Store.Type,
-		MemoryStoreConfig: middleware.RateLimiterMemoryConfig{
-			Expiration:      time.Second * time.Duration(cfg.Middleware.RateLimiter.Store.Memory.Expiration),
-			CleanupInterval: time.Second * time.Duration(cfg.Middleware.RateLimiter.Store.Memory.CleanupInterval),
-		},
-		RedisStoreConfig: middleware.RateLimiterRedisConfig{
-			Addr:     cfg.Middleware.RateLimiter.Store.Redis.Addr,
-			Password: cfg.Middleware.RateLimiter.Store.Redis.Password,
-			DB:       cfg.Middleware.RateLimiter.Store.Redis.DB,
-			Username: cfg.Middleware.RateLimiter.Store.Redis.Username,
-		},
-	})
-
-	m.casbin = middleware.CasbinWithConfig(middleware.CasbinConfig{
-		Skipper: func(c *gin.Context) bool {
-			if cfg.Middleware.Casbin.Disable ||
-				helper.GetIsRootUser(c.Request.Context()) {
-				return true
-			}
-			return false
-		},
-		GetEnforcer: func(c *gin.Context) *casbin.Enforcer {
-			return app.Casbin().GetEnforcer()
-		},
-		GetSubjects: func(c *gin.Context) []string {
-			ctx := c.Request.Context()
-			roleIDs, _ := services.NewUser(app).GetRoleIDsCache(ctx, helper.GetUserID(ctx))
-			return roleIDs
-		},
-	})
-
-	if cfg.Prometheus.Enable {
-		m.prometheus = promx.GinMiddleware(&promx.Config{
-			Enable:         cfg.Prometheus.Enable,
-			App:            cfg.AppName,
-			ListenPort:     cfg.Prometheus.Port,
-			BasicUserName:  cfg.Prometheus.BasicUsername,
-			BasicPassword:  cfg.Prometheus.BasicPassword,
-			LogApi:         cfg.Prometheus.LogApis,
-			LogMethod:      cfg.Prometheus.LogMethods,
-			Objectives:     map[float64]float64{0.9: 0.01, 0.95: 0.005, 0.99: 0.001},
-			DefaultCollect: cfg.Prometheus.DefaultCollect,
-		}, helper.GetRequestBody)
-	} else {
-		m.prometheus = middleware.Empty()
-	}
-
-	return m
 }
 
-func (m *Middlewares) I18n() gin.HandlerFunc { return m.i18n }
+func (m *Middlewares) I18n() gin.HandlerFunc {
+	if m.i18n == nil {
+		m.i18n = i18n.GinMiddleware("zh")
+	}
+	return m.i18n
+}
 
-func (m *Middlewares) Cors() gin.HandlerFunc { return m.cors }
+func (m *Middlewares) Cors() gin.HandlerFunc {
+	if m.cors == nil {
+		cfg := m.app.Config()
 
-func (m *Middlewares) Trace() gin.HandlerFunc { return m.trace }
+		if cfg.Middleware.CORS.Enable {
+			m.cors = middleware.CORSWithConfig(middleware.CORSConfig{
+				AllowAllOrigins:        cfg.Middleware.CORS.AllowAllOrigins,
+				AllowOrigins:           cfg.Middleware.CORS.AllowOrigins,
+				AllowMethods:           cfg.Middleware.CORS.AllowMethods,
+				AllowHeaders:           cfg.Middleware.CORS.AllowHeaders,
+				AllowCredentials:       cfg.Middleware.CORS.AllowCredentials,
+				ExposeHeaders:          cfg.Middleware.CORS.ExposeHeaders,
+				MaxAge:                 cfg.Middleware.CORS.MaxAge,
+				AllowWildcard:          cfg.Middleware.CORS.AllowWildcard,
+				AllowBrowserExtensions: cfg.Middleware.CORS.AllowBrowserExtensions,
+				AllowWebSockets:        cfg.Middleware.CORS.AllowWebSockets,
+				AllowFiles:             cfg.Middleware.CORS.AllowFiles,
+			})
+		} else {
+			m.cors = middleware.Empty()
+		}
+	}
+	return m.cors
+}
 
-func (m *Middlewares) Logger() gin.HandlerFunc { return m.logger }
+func (m *Middlewares) Trace() gin.HandlerFunc {
+	if m.trace == nil {
+		cfg := m.app.Config()
 
-func (m *Middlewares) CopyBody() gin.HandlerFunc { return m.copyBody }
+		m.trace = middleware.TraceWithConfig(middleware.TraceConfig{
+			RequestHeaderKey: cfg.Middleware.Trace.RequestHeaderKey,
+			ResponseTraceKey: cfg.Middleware.Trace.ResponseTraceKey,
+		})
+	}
+	return m.trace
+}
 
-func (m *Middlewares) Auth() gin.HandlerFunc { return m.auth }
+func (m *Middlewares) Logger() gin.HandlerFunc {
+	if m.logger == nil {
+		cfg := m.app.Config()
 
-func (m *Middlewares) RateLimiter() gin.HandlerFunc { return m.rateLimiter }
+		m.logger = middleware.LoggerWithConfig(middleware.LoggerConfig{
+			MaxOutputRequestBodyLen:  cfg.Middleware.Logger.MaxOutputRequestBodyLen,
+			MaxOutputResponseBodyLen: cfg.Middleware.Logger.MaxOutputResponseBodyLen,
+		})
+	}
+	return m.logger
+}
 
-func (m *Middlewares) Casbin() gin.HandlerFunc { return m.casbin }
+func (m *Middlewares) CopyBody() gin.HandlerFunc {
+	if m.copyBody == nil {
+		cfg := m.app.Config()
 
-func (m *Middlewares) Prometheus() gin.HandlerFunc { return m.prometheus }
+		m.copyBody = middleware.CopyBodyWithConfig(middleware.CopyBodyConfig{
+			MaxContentLen: cfg.Middleware.CopyBody.MaxContentLen,
+		})
+	}
+	return m.copyBody
+}
+
+func (m *Middlewares) Auth() gin.HandlerFunc {
+	if m.auth == nil {
+		cfg := m.app.Config()
+
+		m.auth = middleware.AuthWithConfig(middleware.AuthConfig{
+			ParseUserID: services.NewAuth(m.app).ParseUserID,
+			RootID:      cfg.Super.ID,
+		})
+	}
+	return m.auth
+}
+
+func (m *Middlewares) RateLimiter() gin.HandlerFunc {
+	if m.rateLimiter == nil {
+		cfg := m.app.Config()
+
+		m.rateLimiter = middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
+			Enable:             cfg.Middleware.RateLimiter.Enable,
+			Period:             cfg.Middleware.RateLimiter.Period,
+			MaxRequestsPerIP:   cfg.Middleware.RateLimiter.MaxRequestsPerIP,
+			MaxRequestsPerUser: cfg.Middleware.RateLimiter.MaxRequestsPerUser,
+			StoreType:          cfg.Middleware.RateLimiter.Store.Type,
+			MemoryStoreConfig: middleware.RateLimiterMemoryConfig{
+				Expiration:      time.Second * time.Duration(cfg.Middleware.RateLimiter.Store.Memory.Expiration),
+				CleanupInterval: time.Second * time.Duration(cfg.Middleware.RateLimiter.Store.Memory.CleanupInterval),
+			},
+			RedisStoreConfig: middleware.RateLimiterRedisConfig{
+				Addr:     cfg.Middleware.RateLimiter.Store.Redis.Addr,
+				Password: cfg.Middleware.RateLimiter.Store.Redis.Password,
+				DB:       cfg.Middleware.RateLimiter.Store.Redis.DB,
+				Username: cfg.Middleware.RateLimiter.Store.Redis.Username,
+			},
+		})
+	}
+	return m.rateLimiter
+}
+
+func (m *Middlewares) Casbin() gin.HandlerFunc {
+	if m.casbin == nil {
+		cfg := m.app.Config()
+
+		m.casbin = middleware.CasbinWithConfig(middleware.CasbinConfig{
+			Skipper: func(c *gin.Context) bool {
+				if cfg.Middleware.Casbin.Disable ||
+					helper.GetIsRootUser(c.Request.Context()) {
+					return true
+				}
+				return false
+			},
+			GetEnforcer: func(c *gin.Context) *casbin.Enforcer {
+				return m.app.Casbin().GetEnforcer()
+			},
+			GetSubjects: func(c *gin.Context) []string {
+				ctx := c.Request.Context()
+				roleIDs, _ := services.NewUser(m.app).GetRoleIDsCache(ctx, helper.GetUserID(ctx))
+				return roleIDs
+			},
+		})
+	}
+	return m.casbin
+}
+
+func (m *Middlewares) Prometheus() gin.HandlerFunc {
+	if m.prometheus == nil {
+		cfg := m.app.Config()
+
+		if cfg.Prometheus.Enable {
+			m.prometheus = promx.GinMiddleware(&promx.Config{
+				Enable:         cfg.Prometheus.Enable,
+				App:            cfg.AppName,
+				ListenPort:     cfg.Prometheus.Port,
+				BasicUserName:  cfg.Prometheus.BasicUsername,
+				BasicPassword:  cfg.Prometheus.BasicPassword,
+				LogApi:         cfg.Prometheus.LogApis,
+				LogMethod:      cfg.Prometheus.LogMethods,
+				Objectives:     map[float64]float64{0.9: 0.01, 0.95: 0.005, 0.99: 0.001},
+				DefaultCollect: cfg.Prometheus.DefaultCollect,
+			}, helper.GetRequestBody)
+		} else {
+			m.prometheus = middleware.Empty()
+		}
+	}
+	return m.prometheus
+}
