@@ -88,7 +88,7 @@ Prometheus:
   DefaultCollect: true
 
 Swagger:
-  Disable: false                     # Disable swagger UI (default: false)  
+  Enable: false                      # Enable swagger UI (default: false)  
   StaticFile: "configs/openapi.json" # Static file for openapi.json (default: "configs/openapi.json")
 
 

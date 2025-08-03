@@ -153,9 +153,10 @@ func (a *App) InitHttp(ctx context.Context) error {
 	}
 
 	// Register swagger
-	if !configs.C.Swagger.Disable {
-		e.StaticFile("/openapi.json", configs.C.Swagger.StaticFile)
-		e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if configs.C.Swagger.Enable {
+		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.Casbin())
+		g.StaticFile("/openapi.json", configs.C.Swagger.StaticFile)
+		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
 	if dir := configs.C.Middleware.Static.Root; dir != "" {
