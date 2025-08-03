@@ -26,8 +26,6 @@ func init() {
 
 	configs.MustLoad(context.Background(), "config.yml")
 
-	configs.C.DB.AutoMigrate = true
-
 	_ = os.RemoveAll(configs.C.DB.DSN)
 	ctx := context.Background()
 	app := app.New(ctx, configs.C)

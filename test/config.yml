@@ -162,7 +162,7 @@ Middleware:
     MaxContentLen: 134217728           # Maximum content length (default 32MB = 33554432, here 128MB)
 
   Auth:
-    Disable: false                     # Disable auth middleware
+    Disable: true                      # Disable auth middleware
     SigningMethod: "HS512"             # JWT signing method: HS256/HS384/HS512 (default: "HS512")
     SigningKey: "XnEsT0S@"             # JWT secret key (default: "XnEsT0S@")
     OldSigningKey: ""                  # Old secret key (for migration)
@@ -205,7 +205,7 @@ Middleware:
         DB: 10                         # Redis database number
 
   Casbin:
-    Disable: false                     # Disable Casbin middleware
+    Disable: true                      # Disable Casbin middleware
     LoadThread: 2                      # Number of loading threads (default: 2)
     AutoLoadInterval: 3                # Auto load interval in seconds (default: 3)
     ModelFile: "rbac_model.conf"       # Casbin model file path (default: "rbac_model.conf")

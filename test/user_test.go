@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/internal/configs"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/models"
 	"gin-admin/pkg/crypto/hash"
@@ -19,14 +18,6 @@ func TestUser(t *testing.T) {
 	t.Cleanup(func() {
 		os.RemoveAll("data")
 	})
-
-	var login dtos.Result[*dtos.LoginToken]
-	e.POST(baseAPI + "/auth/login").WithJSON(dtos.Login{
-		Username: configs.C.Super.Username,
-		Password: configs.C.Super.Password,
-	}).Expect().Status(http.StatusOK).JSON().Decode(&login)
-
-	token := login.Data.AccessToken
 
 	menuFormItem := dtos.MenuCreateReq{
 		Name:  "user",
@@ -42,7 +33,7 @@ func TestUser(t *testing.T) {
 	}
 
 	var createMenu dtos.Result[*models.Menu]
-	e.POST(baseAPI+"/menus").WithHeader("Authorization", "Bearer "+token).WithJSON(menuFormItem).
+	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
 		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
 
 	assert := assert.New(t)
@@ -66,7 +57,7 @@ func TestUser(t *testing.T) {
 	}
 
 	var createRole dtos.Result[*models.Role]
-	e.POST(baseAPI+"/roles").WithHeader("Authorization", "Bearer "+token).WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
+	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
 
 	role := createRole.Data
 	assert.NotEmpty(role.ID)
@@ -89,7 +80,7 @@ func TestUser(t *testing.T) {
 	}
 
 	var createUser dtos.Result[*models.User]
-	e.POST(baseAPI+"/users").WithHeader("Authorization", "Bearer "+token).WithJSON(userFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createUser)
+	e.POST(baseAPI + "/users").WithJSON(userFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createUser)
 	user := createUser.Data
 	assert.NotEmpty(user.ID)
 	assert.Equal(userFormItem.Username, user.Username)
@@ -101,7 +92,7 @@ func TestUser(t *testing.T) {
 	assert.Equal(len(userFormItem.RoleIDs), len(user.Roles))
 
 	var listUsers dtos.ResultList[*models.User]
-	e.GET(baseAPI+"/users").WithHeader("Authorization", "Bearer "+token).WithQuery("username", userFormItem.Username).Expect().Status(http.StatusOK).JSON().Decode(&listUsers)
+	e.GET(baseAPI+"/users").WithQuery("username", userFormItem.Username).Expect().Status(http.StatusOK).JSON().Decode(&listUsers)
 	users := listUsers.Data.Items
 	assert.GreaterOrEqual(len(users), 1)
 
@@ -109,19 +100,19 @@ func TestUser(t *testing.T) {
 	newStatus := models.UserStatus_Freezed
 	user.NickName = newName
 	user.Status = newStatus
-	e.PUT(baseAPI+"/users/"+user.ID).WithHeader("Authorization", "Bearer "+token).WithJSON(user).Expect().Status(http.StatusOK)
+	e.PUT(baseAPI + "/users/" + user.ID).WithJSON(user).Expect().Status(http.StatusOK)
 
 	var getUser dtos.Result[*models.User]
-	e.GET(baseAPI+"/users/"+user.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK).JSON().Decode(&getUser)
+	e.GET(baseAPI + "/users/" + user.ID).Expect().Status(http.StatusOK).JSON().Decode(&getUser)
 	assert.Equal(newName, getUser.Data.NickName)
 	assert.Equal(newStatus, getUser.Data.Status)
 
-	e.DELETE(baseAPI+"/users/"+user.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK)
-	e.GET(baseAPI+"/users/"+user.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusNotFound)
+	e.DELETE(baseAPI + "/users/" + user.ID).Expect().Status(http.StatusOK)
+	e.GET(baseAPI + "/users/" + user.ID).Expect().Status(http.StatusNotFound)
 
-	e.DELETE(baseAPI+"/roles/"+role.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK)
-	e.GET(baseAPI+"/roles/"+role.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusNotFound)
+	e.DELETE(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK)
+	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusNotFound)
 
-	e.DELETE(baseAPI+"/menus/"+menu.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusOK)
-	e.GET(baseAPI+"/menus/"+menu.ID).WithHeader("Authorization", "Bearer "+token).Expect().Status(http.StatusNotFound)
+	e.DELETE(baseAPI + "/menus/" + menu.ID).Expect().Status(http.StatusOK)
+	e.GET(baseAPI + "/menus/" + menu.ID).Expect().Status(http.StatusNotFound)
 }
