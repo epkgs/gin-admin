@@ -201,5 +201,5 @@ func (r *GenericRepo[T]) WithTx(tx *gorm.DB) Repository[T] {
 }
 
 func (r *GenericRepo[T]) DB() *gorm.DB {
-	return r.db
+	return r.db.Model(new(T))
 }

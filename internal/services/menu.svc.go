@@ -189,12 +189,12 @@ func (a *Menu) List(ctx context.Context, req dtos.MenuListReq) (*dtos.List[*mode
 			db = db.Where("parent_path LIKE ?", v+"%")
 		}
 		if v := req.UserID; len(v) > 0 {
-			userRoleQuery := a.UserRoleRepo.DB().Model(new(models.UserRole)).Where("user_id = ?", v).Select("role_id")
-			menuRoleQuery := a.MenuRoleRepo.DB().Model(new(models.MenuRole)).Where("role_id IN (?)", userRoleQuery).Select("menu_id")
+			userRoleQuery := a.UserRoleRepo.DB().Where("user_id = ?", v).Select("role_id")
+			menuRoleQuery := a.MenuRoleRepo.DB().Where("role_id IN (?)", userRoleQuery).Select("menu_id")
 			db = db.Where("id IN (?)", menuRoleQuery)
 		}
 		if v := req.RoleID; len(v) > 0 {
-			menuRoleQuery := a.MenuRoleRepo.DB().Model(new(models.MenuRole)).Where("role_id = ?", v).Select("menu_id")
+			menuRoleQuery := a.MenuRoleRepo.DB().Where("role_id = ?", v).Select("menu_id")
 			db = db.Where("id IN (?)", menuRoleQuery)
 		}
 		if v := req.Type; len(v) > 0 {
