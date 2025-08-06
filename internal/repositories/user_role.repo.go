@@ -11,15 +11,15 @@ import (
 
 // User roles
 type UserRole struct {
-	gormx.Repository[models.UserRole]
+	base[models.UserRole]
 }
 
 func NewUserRole(db *gorm.DB) *UserRole {
 	return &UserRole{
-		Repository: gormx.NewGenericRepo[models.UserRole](db),
+		base: gormx.NewGenericRepo[models.UserRole](db),
 	}
 }
 
 func (a *UserRole) DeleteByUserID(ctx context.Context, userID ...string) error {
-	return a.Repository.DeleteBatch(ctx, gormx.WithWhere("user_id IN (?)", userID))
+	return a.base.DeleteBatch(ctx, gormx.WithWhere("user_id IN (?)", userID))
 }

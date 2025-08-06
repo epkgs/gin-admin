@@ -9,11 +9,11 @@ import (
 
 // Logger management
 type Logger struct {
-	gormx.Repository[models.Logger]
+	base[models.Logger]
 }
 
 func NewLogger(db *gorm.DB) *Logger {
 	return &Logger{
-		Repository: gormx.NewGenericRepo[models.Logger](db),
+		base: gormx.NewGenericRepo[models.Logger](db),
 	}
 }

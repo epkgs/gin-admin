@@ -11,12 +11,12 @@ import (
 
 // User management for SYS
 type User struct {
-	gormx.Repository[models.User]
+	base[models.User]
 }
 
 func NewUser(db *gorm.DB) *User {
 	return &User{
-		Repository: gormx.NewGenericRepo[models.User](db),
+		base: gormx.NewGenericRepo[models.User](db),
 	}
 }
 
@@ -29,14 +29,9 @@ func (a *User) GetByUsername(ctx context.Context, username string, opts ...gormx
 }
 
 func (a *User) ExistsUsername(ctx context.Context, username string) (bool, error) {
-	count, err := a.Repository.Count(ctx, func(db *gorm.DB) *gorm.DB {
+	return a.base.Exists(ctx, func(db *gorm.DB) *gorm.DB {
 		return db.Where("username=?", username)
 	})
-	if err != nil {
-		return false, err
-	}
-
-	return count > 0, nil
 }
 
 func (a *User) UpdatePassword(ctx context.Context, id string, password string) error {
