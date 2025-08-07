@@ -39,8 +39,3 @@ type DB struct {
 		Tables   []string
 	}
 }
-
-type Upload struct {
-	Path       string `default:"uploads"`
-	UseDateDir bool   `default:"true"`
-}

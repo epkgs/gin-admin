@@ -34,7 +34,6 @@ type Config struct {
 
 	Cache      Cache
 	DB         DB
-	Upload     Upload
 	Captcha    Captcha
 	Prometheus Prometheus
 	Swagger    Swagger

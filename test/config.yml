@@ -59,12 +59,6 @@ DB:
   AutoMigrate: true                  # Auto migrate database tables
   PrepareStmt: false                 # Prepare SQL statements
 
-# Upload Configuration
-Upload:
-  Path: "uploads"                    # Upload directory path (default: "uploads")
-  UseDateDir: true                   # Use date directory (default: true)
-
-
 # Util Configuration
 Captcha:
   Length: 4                          # Captcha length (default: 4)

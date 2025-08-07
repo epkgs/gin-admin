@@ -19,7 +19,6 @@ import (
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/middleware"
 	"gin-admin/pkg/response"
-	"gin-admin/pkg/uploader"
 	"gin-admin/pkg/utils/util"
 
 	"github.com/gin-gonic/gin"
@@ -29,12 +28,11 @@ import (
 )
 
 type App struct {
-	config   *configs.Config
-	db       *gorm.DB
-	cacher   cachex.Cacher
-	jwt      jwtx.Auther
-	uploader *uploader.Uploader
-	casbin   types.Casbinx
+	config *configs.Config
+	db     *gorm.DB
+	cacher cachex.Cacher
+	jwt    jwtx.Auther
+	casbin types.Casbinx
 
 	middlewares *modules.Middlewares
 
@@ -53,7 +51,6 @@ func New(ctx context.Context, c *configs.Config) *App {
 	app.cacher = util.Must(modules.InitCacher(ctx, app))
 	app.db = util.Must(modules.InitDB(ctx, app))
 	app.jwt = util.Must(modules.InitJWT(ctx, app))
-	app.uploader = util.Must(modules.InitUploader(ctx, app))
 	app.casbin = util.Must(modules.InitCasbinx(ctx, app))
 
 	app.middlewares = modules.NewMiddlewares(app)
@@ -75,10 +72,6 @@ func (a *App) Cacher() cachex.Cacher {
 
 func (a *App) Jwt() jwtx.Auther {
 	return a.jwt
-}
-
-func (a *App) Uploader() *uploader.Uploader {
-	return a.uploader
 }
 
 func (a *App) Casbin() types.Casbinx {

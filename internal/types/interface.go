@@ -6,7 +6,6 @@ import (
 	"gin-admin/internal/configs"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
-	"gin-admin/pkg/uploader"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,6 @@ type AppContext interface {
 	Cacher() cachex.Cacher
 	Jwt() jwtx.Auther
 	Casbin() Casbinx
-	Uploader() *uploader.Uploader
 
 	Middlewares() Middlewares
 
