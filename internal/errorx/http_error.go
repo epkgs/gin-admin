@@ -153,16 +153,3 @@ func HttpStatus(err error) int {
 
 	return HttpStatusDefault
 }
-
-func TraceID(err error) string {
-	if err == nil {
-		return ""
-	}
-
-	var traceIDer interface{ TraceID() string }
-	if ok := errors.As(err, &traceIDer); ok {
-		return traceIDer.TraceID()
-	}
-
-	return ""
-}
