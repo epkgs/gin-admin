@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
+	"log"
 	"mime"
 	"os"
 	"path/filepath"
@@ -15,10 +17,9 @@ import (
 )
 
 type LocalClientConfig struct {
-	Domain     string
-	RootPath   string
-	BucketName string
-	Prefix     string
+	Domain   string // domain, default: "/"
+	RootPath string // upload root path, default: "uploads"
+	Prefix   string // object name prefix, default: ""
 }
 
 var _ IClient = (*LocalClient)(nil)
@@ -26,7 +27,8 @@ var _ IClient = (*LocalClient)(nil)
 // LocalObjectModel 用于存储本地对象的元数据
 type LocalObjectModel struct {
 	ID           uint              `gorm:"primaryKey;autoIncrement"`
-	Key          string            `gorm:"uniqueIndex;size:512"`
+	BucketName   string            `gorm:"size:255;uniqueIndex:idx_bucket_object"`
+	ObjectName   string            `gorm:"size:512;uniqueIndex:idx_bucket_object"`
 	ETag         string            `gorm:"size:64"`
 	Size         int64             `gorm:"index"`
 	ContentType  string            `gorm:"size:128"`
@@ -45,7 +47,18 @@ type LocalClient struct {
 	db     *gorm.DB
 }
 
-func NewLocalClient(config LocalClientConfig, db *gorm.DB) (*LocalClient, error) {
+func NewLocalClient(db *gorm.DB, configs ...func(*LocalClientConfig)) (*LocalClient, error) {
+
+	config := LocalClientConfig{
+		Domain:   "/",
+		RootPath: "uploads",
+		Prefix:   "",
+	}
+
+	for _, c := range configs {
+		c(&config)
+	}
+
 	// 确保根目录存在
 	if err := os.MkdirAll(config.RootPath, 0755); err != nil {
 		return nil, err
@@ -66,10 +79,6 @@ func NewLocalClient(config LocalClientConfig, db *gorm.DB) (*LocalClient, error)
 }
 
 func (c *LocalClient) PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...func(*PutObjectOptions)) (*PutObjectResult, error) {
-	if bucketName == "" {
-		bucketName = c.config.BucketName
-	}
-
 	opt := PutObjectOptions{
 		ContentType:  "",
 		UserMetadata: map[string]string{},
@@ -90,11 +99,16 @@ func (c *LocalClient) PutObject(ctx context.Context, bucketName, objectName stri
 	}
 
 	// 创建目标文件
-	file, err := os.Create(fullPath)
+	file, fullPath, i, err := c.createFileWithNumbering(fullPath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
+
+	if i > 0 {
+		ext := filepath.Ext(objectName)
+		objectName = fmt.Sprintf("%s_%d%s", objectName[:len(objectName)-len(ext)], i, ext)
+	}
 
 	var (
 		etag    string
@@ -141,7 +155,8 @@ func (c *LocalClient) PutObject(ctx context.Context, bucketName, objectName stri
 	// 如果有数据库连接，保存元数据
 	if c.db != nil {
 		model := &LocalObjectModel{
-			Key:          objectName,
+			BucketName:   bucketName,
+			ObjectName:   objectName,
 			ETag:         etag,
 			Size:         info.Size(),
 			ContentType:  contentType,
@@ -170,17 +185,14 @@ func (c *LocalClient) PutObject(ctx context.Context, bucketName, objectName stri
 	}
 
 	return &PutObjectResult{
-		URL:  c.config.Domain + "/" + filepath.ToSlash(objectName),
-		Key:  objectName,
+		URL:  c.config.Domain + "/" + bucketName + "/" + filepath.ToSlash(objectName),
+		Key:  bucketName + "/" + objectName,
 		ETag: etag,
 		Size: written,
 	}, nil
 }
 
 func (c *LocalClient) GetObject(ctx context.Context, bucketName, objectName string) (io.ReadCloser, error) {
-	if bucketName == "" {
-		bucketName = c.config.BucketName
-	}
 
 	objectName = formatObjectName(c.config.Prefix, objectName)
 
@@ -199,10 +211,12 @@ func (c *LocalClient) GetObject(ctx context.Context, bucketName, objectName stri
 	return file, nil
 }
 
+func (c *LocalClient) GetObjectByURL(ctx context.Context, urlStr string) (io.ReadCloser, error) {
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.GetObject(ctx, bucketName, objectName)
+}
+
 func (c *LocalClient) RemoveObject(ctx context.Context, bucketName, objectName string) error {
-	if bucketName == "" {
-		bucketName = c.config.BucketName
-	}
 
 	objectName = formatObjectName(c.config.Prefix, objectName)
 
@@ -219,7 +233,7 @@ func (c *LocalClient) RemoveObject(ctx context.Context, bucketName, objectName s
 	if c.db != nil {
 		err = c.db.WithContext(ctx).Where("key = ?", objectName).Delete(&LocalObjectModel{}).Error
 		if err != nil {
-			return err
+			log.Println(err)
 		}
 	}
 
@@ -227,21 +241,11 @@ func (c *LocalClient) RemoveObject(ctx context.Context, bucketName, objectName s
 }
 
 func (c *LocalClient) RemoveObjectByURL(ctx context.Context, urlStr string) error {
-	prefix := c.config.Domain
-	if !strings.HasPrefix(urlStr, prefix) {
-		return nil
-	}
-
-	objectName := strings.TrimPrefix(urlStr, prefix)
-	objectName = strings.TrimPrefix(objectName, "/") // 移除开头的斜杠
-
-	return c.RemoveObject(ctx, "", objectName)
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.RemoveObject(ctx, bucketName, objectName)
 }
 
 func (c *LocalClient) StatObject(ctx context.Context, bucketName, objectName string) (*ObjectStat, error) {
-	if bucketName == "" {
-		bucketName = c.config.BucketName
-	}
 
 	objectName = formatObjectName(c.config.Prefix, objectName)
 
@@ -251,7 +255,7 @@ func (c *LocalClient) StatObject(ctx context.Context, bucketName, objectName str
 		result := c.db.WithContext(ctx).Where("key = ?", objectName).First(&model)
 		if result.Error == nil {
 			return &ObjectStat{
-				Key:          model.Key,
+				Key:          model.BucketName + "/" + model.ObjectName,
 				ETag:         model.ETag,
 				Size:         model.Size,
 				ContentType:  model.ContentType,
@@ -282,7 +286,7 @@ func (c *LocalClient) StatObject(ctx context.Context, bucketName, objectName str
 	}
 
 	return &ObjectStat{
-		Key:          objectName,
+		Key:          bucketName + "/" + objectName,
 		Size:         info.Size(),
 		ETag:         "", // 本地文件系统本身不支持ETag，但如果有数据库会从数据库获取
 		LastModified: info.ModTime(),
@@ -292,14 +296,79 @@ func (c *LocalClient) StatObject(ctx context.Context, bucketName, objectName str
 }
 
 func (c *LocalClient) StatObjectByURL(ctx context.Context, urlStr string) (*ObjectStat, error) {
-	prefix := c.config.Domain
-	if !strings.HasPrefix(urlStr, prefix) {
-		return nil, nil
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.StatObject(ctx, bucketName, objectName)
+}
+
+// createFileWithNumbering 创建文件，如果文件已存在则添加序号
+func (c *LocalClient) createFileWithNumbering(fullPath string) (*os.File, string, int, error) {
+	// 先尝试直接创建文件
+	file, err := os.Create(fullPath)
+	if err == nil {
+		return file, fullPath, 0, nil
 	}
 
-	objectName := strings.TrimPrefix(urlStr, prefix)
-	// 移除开头的斜杠
-	objectName = strings.TrimPrefix(objectName, "/")
+	// 如果创建失败，检查是否因为文件已存在
+	if !os.IsExist(err) {
+		return nil, "", 0, err
+	}
 
-	return c.StatObject(ctx, "", objectName)
+	// 文件已存在，需要添加序号
+	dir := filepath.Dir(fullPath)
+	baseName := filepath.Base(fullPath)
+	ext := filepath.Ext(baseName)
+	nameWithoutExt := strings.TrimSuffix(baseName, ext)
+
+	// 尝试添加序号，从1开始
+	for i := 1; i < 1000; i++ { // 限制尝试次数防止无限循环
+		newName := fmt.Sprintf("%s_%d%s", nameWithoutExt, i, ext)
+		newPath := filepath.Join(dir, newName)
+
+		file, err := os.Create(newPath)
+		if err == nil {
+			return file, newPath, i, nil
+		}
+
+		if !os.IsExist(err) {
+			return nil, "", 0, err
+		}
+		// 如果仍然存在，继续尝试下一个序号
+	}
+
+	return nil, "", 0, fmt.Errorf("failed to create file, too many attempts")
+}
+
+func (c *LocalClient) splitBucketAndObject(urlStr string) (bucketName, objectName string) {
+
+	prefix := c.config.Domain
+	if !strings.HasPrefix(urlStr, prefix) {
+		return "", ""
+	}
+
+	key := strings.TrimPrefix(urlStr, prefix)
+	// 移除开头的斜杠
+	key = strings.TrimPrefix(key, "/")
+
+	if key == "" {
+		return "", ""
+	}
+
+	// 如果没有 '/'，则 bucketName 为空，整个字符串是 objectName
+	if !strings.Contains(key, "/") {
+		return "", key
+	}
+
+	// 找到第一个 '/' 的位置
+	firstSlashIndex := strings.Index(key, "/")
+	// 第一个 '/' 之后没有字符
+	if firstSlashIndex+1 >= len(key) {
+		return "", key
+	}
+
+	// 第一个 '/' 之前的部分是 bucketName
+	bucketName = key[:firstSlashIndex]
+	// 第一个 '/' 之后的部分是 objectName
+	objectName = key[firstSlashIndex+1:]
+
+	return bucketName, objectName
 }

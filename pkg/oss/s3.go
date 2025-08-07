@@ -44,14 +44,17 @@ func NewS3Client(config S3ClientConfig) (*S3Client, error) {
 	}, nil
 }
 
-func (c *S3Client) PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...PutObjectOptions) (*PutObjectResult, error) {
+func (c *S3Client) PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...func(opt *PutObjectOptions)) (*PutObjectResult, error) {
 	if bucketName == "" {
 		bucketName = c.config.BucketName
 	}
 
-	var opt PutObjectOptions
-	if len(options) > 0 {
-		opt = options[0]
+	opt := PutObjectOptions{
+		ContentType:  "",
+		UserMetadata: map[string]string{},
+	}
+	for _, f := range options {
+		f(&opt)
 	}
 
 	objectName = formatObjectName(c.config.Prefix, objectName)
@@ -118,15 +121,15 @@ func (c *S3Client) RemoveObject(ctx context.Context, bucketName, objectName stri
 	return err
 }
 
-func (c *S3Client) RemoveObjectByURL(ctx context.Context, urlStr string) error {
-	prefix := c.config.Domain + "/"
-	if !strings.HasPrefix(urlStr, prefix) {
-		return nil
-	}
+func (c *S3Client) GetObjectByURL(ctx context.Context, urlStr string) (io.ReadCloser, error) {
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.GetObject(ctx, bucketName, objectName)
+}
 
-	objectName := strings.TrimPrefix(urlStr, prefix)
+func (c *S3Client) RemoveObjectByURL(ctx context.Context, urlStr string) error {
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
 	input := &s3.DeleteObjectInput{
-		Bucket: aws.String(c.config.BucketName),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectName),
 	}
 
@@ -135,13 +138,8 @@ func (c *S3Client) RemoveObjectByURL(ctx context.Context, urlStr string) error {
 }
 
 func (c *S3Client) StatObjectByURL(ctx context.Context, urlStr string) (*ObjectStat, error) {
-	prefix := c.config.Domain + "/"
-	if !strings.HasPrefix(urlStr, prefix) {
-		return nil, nil
-	}
-
-	objectName := strings.TrimPrefix(urlStr, prefix)
-	return c.StatObject(ctx, c.config.BucketName, objectName)
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.StatObject(ctx, bucketName, objectName)
 }
 
 func (c *S3Client) StatObject(ctx context.Context, bucketName, objectName string) (*ObjectStat, error) {
@@ -176,4 +174,14 @@ func (c *S3Client) StatObject(ctx context.Context, bucketName, objectName string
 		ContentType:  *output.ContentType,
 		UserMetadata: metadata,
 	}, nil
+}
+
+func (c *S3Client) splitBucketAndObject(urlStr string) (bucketName, objectName string) {
+	prefix := c.config.Domain + "/"
+	if !strings.HasPrefix(urlStr, prefix) {
+		return "", ""
+	}
+
+	objectName = strings.TrimPrefix(urlStr, prefix)
+	return c.config.BucketName, objectName
 }

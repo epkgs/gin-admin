@@ -48,14 +48,17 @@ func NewMinioClient(config MinioClientConfig) (*MinioClient, error) {
 	}, nil
 }
 
-func (c *MinioClient) PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...PutObjectOptions) (*PutObjectResult, error) {
+func (c *MinioClient) PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...func(*PutObjectOptions)) (*PutObjectResult, error) {
 	if bucketName == "" {
 		bucketName = c.config.BucketName
 	}
 
-	var opt PutObjectOptions
-	if len(options) > 0 {
-		opt = options[0]
+	opt := PutObjectOptions{
+		ContentType:  "",
+		UserMetadata: map[string]string{},
+	}
+	for _, f := range options {
+		f(&opt)
 	}
 
 	objectName = formatObjectName(c.config.Prefix, objectName)
@@ -93,24 +96,19 @@ func (c *MinioClient) RemoveObject(ctx context.Context, bucketName, objectName s
 	return c.client.RemoveObject(ctx, bucketName, objectName, minio.RemoveObjectOptions{})
 }
 
-func (c *MinioClient) RemoveObjectByURL(ctx context.Context, urlStr string) error {
-	prefix := c.config.Domain + "/"
-	if !strings.HasPrefix(urlStr, prefix) {
-		return nil
-	}
+func (c *MinioClient) GetObjectByURL(ctx context.Context, urlStr string) (io.ReadCloser, error) {
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.GetObject(ctx, bucketName, objectName)
+}
 
-	objectName := strings.TrimPrefix(urlStr, prefix)
-	return c.RemoveObject(ctx, "", objectName)
+func (c *MinioClient) RemoveObjectByURL(ctx context.Context, urlStr string) error {
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.RemoveObject(ctx, bucketName, objectName)
 }
 
 func (c *MinioClient) StatObjectByURL(ctx context.Context, urlStr string) (*ObjectStat, error) {
-	prefix := c.config.Domain + "/"
-	if !strings.HasPrefix(urlStr, prefix) {
-		return nil, nil
-	}
-
-	objectName := strings.TrimPrefix(urlStr, prefix)
-	return c.StatObject(ctx, "", objectName)
+	bucketName, objectName := c.splitBucketAndObject(urlStr)
+	return c.StatObject(ctx, bucketName, objectName)
 }
 
 func (c *MinioClient) StatObject(ctx context.Context, bucketName, objectName string) (*ObjectStat, error) {
@@ -131,4 +129,14 @@ func (c *MinioClient) StatObject(ctx context.Context, bucketName, objectName str
 		ContentType:  info.ContentType,
 		UserMetadata: info.UserMetadata,
 	}, nil
+}
+
+func (c *MinioClient) splitBucketAndObject(urlStr string) (bucketName, objectName string) {
+	prefix := c.config.Domain + "/"
+	if !strings.HasPrefix(urlStr, prefix) {
+		return "", ""
+	}
+
+	objectName = strings.TrimPrefix(urlStr, prefix)
+	return c.config.BucketName, objectName
 }

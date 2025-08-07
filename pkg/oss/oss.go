@@ -24,8 +24,9 @@ func SetGlobal(h func() IClient) {
 
 // IClient is an interface for oss client
 type IClient interface {
-	PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...PutObjectOptions) (*PutObjectResult, error)
+	PutObject(ctx context.Context, bucketName, objectName string, reader io.ReadSeeker, objectSize int64, options ...func(opt *PutObjectOptions)) (*PutObjectResult, error)
 	GetObject(ctx context.Context, bucketName, objectName string) (io.ReadCloser, error)
+	GetObjectByURL(ctx context.Context, urlStr string) (io.ReadCloser, error)
 	RemoveObject(ctx context.Context, bucketName, objectName string) error
 	RemoveObjectByURL(ctx context.Context, urlStr string) error
 	StatObject(ctx context.Context, bucketName, objectName string) (*ObjectStat, error)
