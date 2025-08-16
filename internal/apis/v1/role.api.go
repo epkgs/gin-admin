@@ -27,7 +27,7 @@ func (a *Role) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
 	g := group.Group("roles")
 	g.Use(
 		a.app.Middlewares().Auth(),
-		a.app.Middlewares().Casbin(),
+		a.app.Middlewares().RBAC(),
 	)
 
 	g.GET("", a.Query)

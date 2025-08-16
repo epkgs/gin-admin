@@ -147,7 +147,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 
 	// Register swagger
 	if configs.C.Swagger.Enable {
-		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.Casbin())
+		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.RBAC())
 		g.StaticFile("/openapi.json", configs.C.Swagger.StaticFile)
 		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}

@@ -137,7 +137,7 @@ func (m *Middlewares) RateLimiter() gin.HandlerFunc {
 	return m.rateLimiter
 }
 
-func (m *Middlewares) Casbin() gin.HandlerFunc {
+func (m *Middlewares) RBAC() gin.HandlerFunc {
 	if m.casbin == nil {
 		cfg := m.app.Config()
 

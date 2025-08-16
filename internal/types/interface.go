@@ -38,6 +38,6 @@ type Middlewares interface {
 	CopyBody() gin.HandlerFunc
 	Auth() gin.HandlerFunc
 	RateLimiter() gin.HandlerFunc
-	Casbin() gin.HandlerFunc
+	RBAC() gin.HandlerFunc
 	Prometheus() gin.HandlerFunc
 }
