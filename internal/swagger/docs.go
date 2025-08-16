@@ -1461,13 +1461,10 @@ const docTemplate = `{
                     "description": "Component path of view",
                     "type": "string"
                 },
-                "meta": {
-                    "description": "Meta of menu (JSON)",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.MenuMeta"
-                        }
-                    ]
+                "extra": {
+                    "description": "Extras",
+                    "type": "object",
+                    "additionalProperties": {}
                 },
                 "method": {
                     "description": "Http method of resource",
@@ -1486,6 +1483,14 @@ const docTemplate = `{
                     "description": "Access path of menu",
                     "type": "string"
                 },
+                "rank": {
+                    "description": "Rank for sorting (Order by desc)",
+                    "type": "integer"
+                },
+                "redirect": {
+                    "description": "Redirect path of menu",
+                    "type": "string"
+                },
                 "status": {
                     "description": "Status of menu (enabled, disabled)",
                     "type": "string",
@@ -1493,6 +1498,10 @@ const docTemplate = `{
                         "disabled",
                         "enabled"
                     ]
+                },
+                "title": {
+                    "description": "Menu title",
+                    "type": "string"
                 },
                 "type": {
                     "description": "Type of menu (catalog menu, button)",
@@ -1512,13 +1521,10 @@ const docTemplate = `{
                     "description": "Component path of view",
                     "type": "string"
                 },
-                "meta": {
+                "extra": {
                     "description": "Meta of menu (JSON)",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.MenuMeta"
-                        }
-                    ]
+                    "type": "object",
+                    "additionalProperties": {}
                 },
                 "method": {
                     "description": "Http method of resource",
@@ -1537,6 +1543,10 @@ const docTemplate = `{
                     "description": "Access path of menu",
                     "type": "string"
                 },
+                "rank": {
+                    "description": "Rank for sorting (Order by desc)",
+                    "type": "integer"
+                },
                 "status": {
                     "description": "Status of menu (enabled, disabled)",
                     "type": "string",
@@ -1544,6 +1554,10 @@ const docTemplate = `{
                         "disabled",
                         "enabled"
                     ]
+                },
+                "title": {
+                    "description": "Menu title",
+                    "type": "string"
                 },
                 "type": {
                     "description": "Type of menu (catalog menu, button)",
@@ -1796,7 +1810,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "nickName",
-                "roles",
+                "roleIds",
                 "status",
                 "username"
             ],
@@ -1831,7 +1845,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64
                 },
-                "roles": {
+                "roleIds": {
                     "description": "Roles of user",
                     "type": "array",
                     "items": {
@@ -1891,7 +1905,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 64
                 },
-                "roles": {
+                "roleIds": {
                     "description": "Roles of user",
                     "type": "array",
                     "items": {
@@ -1987,17 +2001,14 @@ const docTemplate = `{
                     "description": "Create time",
                     "type": "string"
                 },
+                "extra": {
+                    "description": "Extra data for frontend",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "id": {
                     "description": "Unique ID",
                     "type": "string"
-                },
-                "meta": {
-                    "description": "Meta of menu",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.MenuMeta"
-                        }
-                    ]
                 },
                 "method": {
                     "description": "Http method of resource",
@@ -2011,13 +2022,13 @@ const docTemplate = `{
                     "description": "Parent ID (From Menu.ID)",
                     "type": "string"
                 },
-                "parentPath": {
-                    "description": "Parent path (split by .)",
-                    "type": "string"
-                },
                 "path": {
                     "description": "Access path of menu",
                     "type": "string"
+                },
+                "rank": {
+                    "description": "Rank for sorting (Order by desc)",
+                    "type": "integer"
                 },
                 "redirect": {
                     "description": "Redirect path of menu",
@@ -2030,25 +2041,16 @@ const docTemplate = `{
                     "description": "Status of menu (enabled, disabled)",
                     "type": "string"
                 },
+                "title": {
+                    "description": "Menu title",
+                    "type": "string"
+                },
                 "type": {
                     "description": "Type of menu (catalog, menu, button)",
                     "type": "string"
                 },
                 "updatedAt": {
                     "description": "Update time",
-                    "type": "string"
-                }
-            }
-        },
-        "models.MenuMeta": {
-            "type": "object",
-            "properties": {
-                "order": {
-                    "description": "Rank for sorting (Order by desc)",
-                    "type": "integer"
-                },
-                "title": {
-                    "description": "Menu title",
                     "type": "string"
                 }
             }

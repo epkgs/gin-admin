@@ -140,10 +140,10 @@ definitions:
       component:
         description: Component path of view
         type: string
-      meta:
-        allOf:
-        - $ref: '#/definitions/models.MenuMeta'
-        description: Meta of menu (JSON)
+      extra:
+        additionalProperties: {}
+        description: Extras
+        type: object
       method:
         description: Http method of resource
         type: string
@@ -157,11 +157,20 @@ definitions:
       path:
         description: Access path of menu
         type: string
+      rank:
+        description: Rank for sorting (Order by desc)
+        type: integer
+      redirect:
+        description: Redirect path of menu
+        type: string
       status:
         description: Status of menu (enabled, disabled)
         enum:
         - disabled
         - enabled
+        type: string
+      title:
+        description: Menu title
         type: string
       type:
         description: Type of menu (catalog menu, button)
@@ -179,10 +188,10 @@ definitions:
       component:
         description: Component path of view
         type: string
-      meta:
-        allOf:
-        - $ref: '#/definitions/models.MenuMeta'
+      extra:
+        additionalProperties: {}
         description: Meta of menu (JSON)
+        type: object
       method:
         description: Http method of resource
         type: string
@@ -196,11 +205,17 @@ definitions:
       path:
         description: Access path of menu
         type: string
+      rank:
+        description: Rank for sorting (Order by desc)
+        type: integer
       status:
         description: Status of menu (enabled, disabled)
         enum:
         - disabled
         - enabled
+        type: string
+      title:
+        description: Menu title
         type: string
       type:
         description: Type of menu (catalog menu, button)
@@ -396,7 +411,7 @@ definitions:
         description: Real name of user
         maxLength: 64
         type: string
-      roles:
+      roleIds:
         description: Roles of user
         items:
           type: string
@@ -417,7 +432,7 @@ definitions:
         type: string
     required:
     - nickName
-    - roles
+    - roleIds
     - status
     - username
     type: object
@@ -447,7 +462,7 @@ definitions:
         description: Real name of user
         maxLength: 64
         type: string
-      roles:
+      roleIds:
         description: Roles of user
         items:
           type: string
@@ -516,13 +531,13 @@ definitions:
       createdAt:
         description: Create time
         type: string
+      extra:
+        additionalProperties: {}
+        description: Extra data for frontend
+        type: object
       id:
         description: Unique ID
         type: string
-      meta:
-        allOf:
-        - $ref: '#/definitions/models.MenuMeta'
-        description: Meta of menu
       method:
         description: Http method of resource
         type: string
@@ -532,12 +547,12 @@ definitions:
       parentId:
         description: Parent ID (From Menu.ID)
         type: string
-      parentPath:
-        description: Parent path (split by .)
-        type: string
       path:
         description: Access path of menu
         type: string
+      rank:
+        description: Rank for sorting (Order by desc)
+        type: integer
       redirect:
         description: Redirect path of menu
         type: string
@@ -546,20 +561,14 @@ definitions:
       status:
         description: Status of menu (enabled, disabled)
         type: string
+      title:
+        description: Menu title
+        type: string
       type:
         description: Type of menu (catalog, menu, button)
         type: string
       updatedAt:
         description: Update time
-        type: string
-    type: object
-  models.MenuMeta:
-    properties:
-      order:
-        description: Rank for sorting (Order by desc)
-        type: integer
-      title:
-        description: Menu title
         type: string
     type: object
   models.Menus:
