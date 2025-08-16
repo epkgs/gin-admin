@@ -6,10 +6,10 @@ import (
 	"github.com/epkgs/i18n"
 )
 
-var userI18n = i18n.NewCatalog("user")
+var userI18n = i18n.NewBundle("user")
 
 func init() {
-	userI18n.LoadTranslations()
+	userI18n.Load()
 }
 
 type userErrors struct {

@@ -12,16 +12,16 @@ type Definition = i18nerr.Definition[*HttpError]
 type DefinitionF[Args any] = i18nerr.DefinitionF[*HttpError, Args]
 
 func httpError(code, httpStatus int) i18nerr.Wrapper[*HttpError] {
-	return func(err *i18nerr.Error) *HttpError {
+	return func(err error) *HttpError {
 		return NewHttpError(code, err.Error(), httpStatus)
 	}
 }
 
-func Definef[Args any](i18n *i18n.I18n, code int, format string, httpStatus int) *i18nerr.DefinitionF[*HttpError, Args] {
+func Definef[Args any](i18n *i18n.Bundle, code int, format string, httpStatus int) *i18nerr.DefinitionF[*HttpError, Args] {
 	return i18nerr.Definef[Args](i18n, format, httpError(code, httpStatus))
 }
 
-func Define(i18n *i18n.I18n, code int, format string, httpStatus int) *i18nerr.Definition[*HttpError] {
+func Define(i18n *i18n.Bundle, code int, format string, httpStatus int) *i18nerr.Definition[*HttpError] {
 	return i18nerr.Define(i18n, format, httpError(code, httpStatus))
 }
 

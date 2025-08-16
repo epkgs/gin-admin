@@ -6,10 +6,10 @@ import (
 	"github.com/epkgs/i18n"
 )
 
-var dbI18n = i18n.NewCatalog("database")
+var dbI18n = i18n.NewBundle("database")
 
 func init() {
-	dbI18n.LoadTranslations()
+	dbI18n.Load()
 }
 
 type dbErrors struct {

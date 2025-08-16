@@ -6,10 +6,10 @@ import (
 	"github.com/epkgs/i18n"
 )
 
-var fileI18n = i18n.NewCatalog("file")
+var fileI18n = i18n.NewBundle("file")
 
 func init() {
-	fileI18n.LoadTranslations()
+	fileI18n.Load()
 }
 
 type fileErrors struct {

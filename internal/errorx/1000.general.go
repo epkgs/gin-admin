@@ -6,10 +6,10 @@ import (
 	"github.com/epkgs/i18n"
 )
 
-var gnI18n = i18n.NewCatalog("general")
+var gnI18n = i18n.NewBundle("general")
 
 func init() {
-	gnI18n.LoadTranslations()
+	gnI18n.Load()
 }
 
 type generalError struct {
