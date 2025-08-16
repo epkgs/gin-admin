@@ -72,5 +72,9 @@ func (a *Logger) List(ctx context.Context, req dtos.LoggerListReq) (*dtos.List[*
 		return nil, err
 	}
 
-	return dtos.NewList(list, req.Page, req.Limit, count), nil
+	return dtos.NewList(list, &dtos.Pager{
+		Page:  req.Page,
+		Limit: req.Limit,
+		Total: count,
+	}), nil
 }

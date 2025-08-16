@@ -71,7 +71,11 @@ func (a *User) List(ctx context.Context, req dtos.UserListReq) (*dtos.List[*mode
 		return nil, errorx.WrapGormError(ctx, err)
 	}
 
-	return dtos.NewList(list, req.Page, req.Limit, count), nil
+	return dtos.NewList(list, &dtos.Pager{
+		Page:  req.Page,
+		Limit: req.Limit,
+		Total: count,
+	}), nil
 }
 
 // Get the specified user from the data access object.

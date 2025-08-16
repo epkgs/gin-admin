@@ -69,7 +69,11 @@ func (a *Role) List(ctx context.Context, req dtos.RoleListReq) (*dtos.List[*mode
 		return nil, errorx.WrapGormError(ctx, err)
 	}
 
-	result := dtos.NewList(list, req.Page, req.Limit, count)
+	result := dtos.NewList(list, &dtos.Pager{
+		Page:  req.Page,
+		Limit: req.Limit,
+		Total: count,
+	})
 	return result, nil
 }
 

@@ -111,23 +111,11 @@ func handleValidationErrors(ctx context.Context, errs ...error) *dtos.Result[any
 
 func List[T any](c *gin.Context, items []T, pager *dtos.Pager) {
 
-	var pg dtos.Pager
-	if pager != nil {
-		pg = *pager
-	}
-
 	if items == nil {
 		items = make([]T, 0) // 避免返回 null
 	}
 
-	if pg.Total == 0 && len(items) > 0 {
-		pg.Total = int64(len(items))
-	}
-
-	res := dtos.NewResult(Code_Success, "ok", dtos.List[T]{
-		Items: items,
-		Pager: pg,
-	})
+	res := dtos.NewResult(Code_Success, "ok", dtos.NewList(items, pager))
 
 	response(c, res)
 }

@@ -225,7 +225,11 @@ func (a *Menu) List(ctx context.Context, req dtos.MenuListReq) (*dtos.List[*mode
 		}
 	}
 
-	return dtos.NewList(list, req.Page, req.Limit, count), nil
+	return dtos.NewList(list, &dtos.Pager{
+		Page:  req.Page,
+		Limit: req.Limit,
+		Total: count,
+	}), nil
 }
 
 func (a *Menu) appendChildren(ctx context.Context, data models.Menus) (models.Menus, error) {

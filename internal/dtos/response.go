@@ -27,26 +27,35 @@ type List[T any] struct {
 
 type ResultList[T any] Result[List[T]]
 
-func NewList[T any](items []T, page, limit int, total int64) *List[T] {
+func NewList[T any](items []T, pager *Pager) *List[T] {
 
-	pager := Pager{
-		Total: total,
-		Page:  page,
-		Limit: limit,
+	var pg Pager
+	if pager != nil {
+		pg = *pager
+	} else {
+		pg = Pager{}
 	}
 
-	if pager.Page <= 0 {
-		pager.Page = 1
+	count := len(items)
+
+	if pg.Total == 0 && count > 0 {
+		pg.Total = int64(count)
 	}
-	if pager.Limit <= 0 {
-		pager.Limit = 20
+
+	if pg.Page <= 0 {
+		pg.Page = 1
 	}
-	if count := len(items); pager.Limit < count {
-		pager.Limit = count
+
+	if pg.Limit <= 0 {
+		pg.Limit = 20
+	}
+
+	if pg.Limit < count {
+		pg.Limit = count
 	}
 
 	return &List[T]{
-		Pager: pager,
+		Pager: pg,
 		Items: items,
 	}
 }
