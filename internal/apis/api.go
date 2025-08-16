@@ -29,6 +29,7 @@ func RegisterRouters(app types.AppContext, e *gin.Engine) error {
 		v1.NewMenu(app),
 		v1.NewRole(app),
 		v1.NewUser(app),
+		v1.NewAPI(app),
 	)
 
 	return nil
