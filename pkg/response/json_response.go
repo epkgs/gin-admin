@@ -3,7 +3,6 @@ package response
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/validatorx"
 
+	"github.com/epkgs/i18n/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -74,7 +74,17 @@ func Error(c *gin.Context, err error) {
 	} else if errors.As(err, &validationErr) {
 		res = handleValidationErrors(ctx, validationErr)
 	} else {
-		res = dtos.NewResult[any](errorx.Code(err), err.Error(), nil)
+
+		var msg string
+		if tran, ok := err.(interface {
+			Translate(ctx context.Context) string
+		}); ok {
+			msg = tran.Translate(ctx)
+		} else {
+			msg = err.Error()
+		}
+
+		res = dtos.NewResult[any](errorx.Code(err), msg, nil)
 		res.HttpStatus = errorx.HttpStatus(err)
 	}
 

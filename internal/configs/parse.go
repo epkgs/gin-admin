@@ -103,12 +103,12 @@ func Load(ctx context.Context, path string, setters ...Setter) error {
 	}
 
 	if !ok || err != nil {
-		return errorx.General.ReadConfigFile.New(ctx, struct{ File string }{path}).Wrap(err)
+		return errorx.General.ReadConfigFile.New(struct{ File string }{path}).Wrap(err)
 	}
 
 	// Unmarshal the configuration into the struct
 	if err := v.Unmarshal(C); err != nil {
-		return errorx.General.UnmarshalConfig.New(ctx, struct{ File string }{v.ConfigFileUsed()}).Wrap(err)
+		return errorx.General.UnmarshalConfig.New(struct{ File string }{v.ConfigFileUsed()}).Wrap(err)
 	}
 
 	C.preLoad()

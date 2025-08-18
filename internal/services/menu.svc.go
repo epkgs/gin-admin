@@ -21,8 +21,8 @@ import (
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/randx"
 
+	"github.com/epkgs/i18n/errors"
 	"github.com/epkgs/object"
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
@@ -56,7 +56,7 @@ func (a *Menu) InitIfNeed(ctx context.Context) error {
 
 	count, err := a.MenuRepo.Count(ctx)
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	if count > 0 {
@@ -88,14 +88,14 @@ func (a *Menu) initFromFile(ctx context.Context, menuFile string) error {
 
 	if ext := filepath.Ext(menuFile); ext == ".json" {
 		if err := json.Unmarshal(f, &tmpMenus); err != nil {
-			return errors.Wrapf(err, "Unmarshal JSON file '%s' failed", menuFile)
+			return errorx.General.UnmarshalJsonFileFailed.New(menuFile)
 		}
 	} else if ext == ".yaml" || ext == ".yml" {
 		if err := yaml.Unmarshal(f, &tmpMenus); err != nil {
-			return errors.Wrapf(err, "Unmarshal YAML file '%s' failed", menuFile)
+			return errorx.General.UnmarshalYamlFileFailed.New(menuFile)
 		}
 	} else {
-		return errors.Errorf("Unsupported file type '%s'", ext)
+		return errorx.General.UnsupportedFileType.New(ext)
 	}
 
 	menus = append(menus, tmpMenus...)
@@ -124,7 +124,7 @@ func (a *Menu) upsert(ctx context.Context, items models.Menus, parent *models.Me
 		}
 
 		if err != nil {
-			return errorx.WrapGormError(ctx, err)
+			return errorx.WrapGormError(err)
 		}
 
 		if item.Status == "" {
@@ -210,18 +210,18 @@ func (a *Menu) List(ctx context.Context, req dtos.MenuListReq) (*dtos.List[*mode
 
 	list, err := a.MenuRepo.Find(ctx, option, gormx.WithPage(req.Page, req.Limit), gormx.WithOrder("rank", "desc"), gormx.WithOrder("created_at", "desc"))
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	count, err := a.MenuRepo.Count(ctx, option)
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	if req.LikeName != "" {
 		list, err = a.appendChildren(ctx, list)
 		if err != nil {
-			return nil, errorx.WrapGormError(ctx, err)
+			return nil, errorx.WrapGormError(err)
 		}
 	}
 
@@ -255,7 +255,7 @@ func (a *Menu) appendChildren(ctx context.Context, data models.Menus) (models.Me
 	for _, item := range data {
 		children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", item.ParentPath+item.ID+gTreePathDelimiter+"%"))
 		if err != nil {
-			return nil, errorx.WrapGormError(ctx, err)
+			return nil, errorx.WrapGormError(err)
 		}
 		for _, child := range children {
 			appendData(child)
@@ -265,7 +265,7 @@ func (a *Menu) appendChildren(ctx context.Context, data models.Menus) (models.Me
 	if parentIDs := data.ParentIDs(); len(parentIDs) > 0 {
 		parents, err := a.MenuRepo.Find(ctx, gormx.WithWhere("id IN (?)", parentIDs))
 		if err != nil {
-			return nil, errorx.WrapGormError(ctx, err)
+			return nil, errorx.WrapGormError(err)
 		}
 		for _, p := range parents {
 			appendData(p)
@@ -280,12 +280,12 @@ func (a *Menu) appendChildren(ctx context.Context, data models.Menus) (models.Me
 func (a *Menu) Get(ctx context.Context, id string) (*models.Menu, error) {
 	menu, err := a.MenuRepo.Get(ctx, id)
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_id = ?", menu.ID))
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	var menus models.Menus = children
@@ -297,7 +297,7 @@ func (a *Menu) Get(ctx context.Context, id string) (*models.Menu, error) {
 // Create a new menu in the data access object.
 func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Menu, error) {
 	if configs.C.Menu.DenyOperate {
-		return nil, errorx.General.BadRequest.New(ctx)
+		return nil, errorx.General.BadRequest
 	}
 
 	menu := &models.Menu{
@@ -308,7 +308,7 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 	if parentID := req.ParentID; parentID != "" {
 		parent, err := a.MenuRepo.Get(ctx, parentID)
 		if err != nil {
-			return nil, errorx.WrapGormError(ctx, err)
+			return nil, errorx.WrapGormError(err)
 		}
 
 		menu.ParentPath = parent.ParentPath + parent.ID + gTreePathDelimiter
@@ -321,7 +321,7 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 	}
 
 	if err := a.MenuRepo.Create(ctx, menu); err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	return menu, nil
@@ -330,12 +330,12 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 // Update the specified menu in the data access object.
 func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) error {
 	if configs.C.Menu.DenyOperate {
-		return errorx.General.BadRequest.New(ctx)
+		return errorx.General.BadRequest
 	}
 
 	menu, err := a.MenuRepo.Get(ctx, id)
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	oldParentPath := menu.ParentPath
@@ -345,7 +345,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 		if parentID := *req.ParentID; parentID != "" {
 			parent, err := a.MenuRepo.Get(ctx, parentID)
 			if err != nil {
-				return errorx.WrapGormError(ctx, err)
+				return errorx.WrapGormError(err)
 			}
 			menu.ParentPath = parent.ParentPath + parent.ID + gTreePathDelimiter
 		} else {
@@ -354,13 +354,13 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 
 		res, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", oldParentPath+menu.ID+gTreePathDelimiter+"%"), gormx.WithSelect("id", "parent_path"))
 		if err != nil {
-			return errorx.WrapGormError(ctx, err)
+			return errorx.WrapGormError(err)
 		}
 		childData = res
 	}
 
 	if err := object.Assign(menu, req); err != nil {
-		return errorx.General.Internal.New(ctx).Wrap(err)
+		return errorx.General.Internal.Wrap(err)
 	}
 
 	err = a.MenuRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -392,23 +392,23 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 		return a.RoleSvc.RefreshUpdateTime(ctx)
 	})
 
-	return errorx.WrapGormError(ctx, err)
+	return errorx.WrapGormError(err)
 }
 
 // Delete the specified menu from the data access object.
 func (a *Menu) Delete(ctx context.Context, id string) error {
 	if configs.C.Menu.DenyOperate {
-		return errorx.General.BadRequest.New(ctx)
+		return errorx.General.BadRequest
 	}
 
 	menu, err := a.MenuRepo.Get(ctx, id)
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	children, err := a.MenuRepo.Find(ctx, gormx.WithWhere("parent_path LIKE ?", menu.ParentPath+menu.ID+gTreePathDelimiter+"%"), gormx.WithSelect("id"))
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	err = a.MenuRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -425,7 +425,7 @@ func (a *Menu) Delete(ctx context.Context, id string) error {
 		return a.RoleSvc.RefreshUpdateTime(ctx)
 	})
 
-	return errorx.WrapGormError(ctx, err)
+	return errorx.WrapGormError(err)
 }
 
 func (a *Menu) delete(ctx context.Context, id string) error {

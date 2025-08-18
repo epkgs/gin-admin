@@ -1,29 +1,24 @@
 package errorx
 
 import (
+	"gin-admin/locales"
 	"net/http"
 
-	"github.com/epkgs/i18n"
+	"github.com/epkgs/i18n/errors"
 )
 
-var fileI18n = i18n.NewBundle("file")
-
-func init() {
-	fileI18n.Load()
-}
-
 type fileErrors struct {
-	NotFound *Definition // 文件不存在
-	Upload   *Definition // 文件上传失败
-	Delete   *Definition // 文件删除失败
-	Update   *Definition // 文件更新失败
-	Download *Definition // 文件下载失败
+	NotFound errors.I18nError // 文件不存在
+	Upload   errors.I18nError // 文件上传失败
+	Delete   errors.I18nError // 文件删除失败
+	Update   errors.I18nError // 文件更新失败
+	Download errors.I18nError // 文件下载失败
 }
 
 var File = &fileErrors{
-	NotFound: Define(fileI18n, 4000, "file not found", http.StatusNotFound),                  // 文件不存在
-	Upload:   Define(fileI18n, 4001, "file upload failed", http.StatusInternalServerError),   // 文件上传失败
-	Delete:   Define(fileI18n, 4002, "file deletion failed", http.StatusInternalServerError), // 文件删除失败
-	Update:   Define(fileI18n, 4003, "file update failed", http.StatusInternalServerError),   // 文件更新失败
-	Download: Define(fileI18n, 4004, "file download failed", http.StatusInternalServerError), // 文件下载失败
+	NotFound: New(locales.File, 4000, "file not found", http.StatusNotFound),                  // 文件不存在
+	Upload:   New(locales.File, 4001, "file upload failed", http.StatusInternalServerError),   // 文件上传失败
+	Delete:   New(locales.File, 4002, "file deletion failed", http.StatusInternalServerError), // 文件删除失败
+	Update:   New(locales.File, 4003, "file update failed", http.StatusInternalServerError),   // 文件更新失败
+	Download: New(locales.File, 4004, "file download failed", http.StatusInternalServerError), // 文件下载失败
 }

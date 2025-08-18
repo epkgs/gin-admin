@@ -83,7 +83,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 	start := time.Now()
 	roles, err := a.RoleRepo.Find(ctx, gormx.WithWhere("status = ?", models.RoleStatus_Enabled), gormx.WithSelect("id"))
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	if len(roles) == 0 {

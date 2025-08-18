@@ -1,55 +1,102 @@
 package errorx
 
 import (
-	"context"
+	"net/http"
 
 	"github.com/epkgs/i18n"
-	i18nerr "github.com/epkgs/i18n/errorx"
+	"github.com/epkgs/i18n/errors"
 	"gorm.io/gorm"
 )
 
-type Definition = i18nerr.Definition[*HttpError]
-type DefinitionF[Args any] = i18nerr.DefinitionF[*HttpError, Args]
+const (
+	CodeFail    = 1
+	CodeSuccess = 0
+)
 
-func httpError(code, httpStatus int) i18nerr.Wrapper[*HttpError] {
-	return func(err error) *HttpError {
-		return NewHttpError(code, err.Error(), httpStatus)
+func Define[Args any](i18n *i18n.Bundle, code int, format string, httpStatus int) errors.Definition[Args] {
+	return errors.Define[Args](i18n, format, func(e errors.I18nError) errors.I18nError {
+		e.Set("code", code)
+		e.Set("httpStatus", httpStatus)
+		return e
+	})
+}
+
+func New(i18n *i18n.Bundle, code int, format string, httpStatus int) errors.I18nError {
+	e := errors.New(i18n.Sprintf(format))
+	e.Set("code", code)
+	e.Set("httpStatus", httpStatus)
+	return e
+}
+
+func Code(err error) int {
+	if err == nil {
+		return CodeFail
 	}
+
+	var getter interface{ Get(key string) (any, bool) }
+	if ok := errors.As(err, &getter); ok {
+		if code, ok := getter.Get("code"); ok {
+			if c, ok := code.(int); ok {
+				return c
+			}
+		}
+	}
+
+	var coder interface{ Code() int }
+	if ok := errors.As(err, &coder); ok {
+		return coder.Code()
+	}
+
+	return CodeFail
 }
 
-func Definef[Args any](i18n *i18n.Bundle, code int, format string, httpStatus int) *i18nerr.DefinitionF[*HttpError, Args] {
-	return i18nerr.Definef[Args](i18n, format, httpError(code, httpStatus))
+func HttpStatus(err error) int {
+	if err == nil {
+		return http.StatusInternalServerError
+	}
+
+	var getter interface{ Get(key string) (any, bool) }
+	if ok := errors.As(err, &getter); ok {
+		if httpStatus, ok := getter.Get("httpStatus"); ok {
+			if c, ok := httpStatus.(int); ok {
+				return c
+			}
+		}
+	}
+
+	var httpStatuser interface{ HttpStatus() int }
+	if ok := errors.As(err, &httpStatuser); ok {
+		return httpStatuser.HttpStatus()
+	}
+
+	return http.StatusInternalServerError
 }
 
-func Define(i18n *i18n.Bundle, code int, format string, httpStatus int) *i18nerr.Definition[*HttpError] {
-	return i18nerr.Define(i18n, format, httpError(code, httpStatus))
-}
-
-func WrapGormError(ctx context.Context, err error) error {
+func WrapGormError(err error) error {
 	if err == nil {
 		return nil
 	}
 
-	if _, ok := err.(*HttpError); ok {
+	if _, ok := err.(errors.I18nError); ok {
 		return err
 	}
 
 	switch err {
 	case gorm.ErrRecordNotFound:
-		return General.RecordNotFound.New(ctx).Wrap(err)
+		return General.RecordNotFound.Wrap(err)
 	case gorm.ErrInvalidTransaction:
-		return DB.Transaction.New(ctx).Wrap(err)
+		return DB.Transaction.Wrap(err)
 	case gorm.ErrNotImplemented:
-		return General.Internal.New(ctx).Wrap(err)
+		return General.Internal.Wrap(err)
 	case gorm.ErrMissingWhereClause:
-		return General.BadRequest.New(ctx).Wrap(err)
+		return General.BadRequest.Wrap(err)
 	case gorm.ErrUnsupportedRelation:
-		return General.BadRequest.New(ctx).Wrap(err)
+		return General.BadRequest.Wrap(err)
 	case gorm.ErrPrimaryKeyRequired:
-		return General.InvalidParams.New(ctx, struct{ Params string }{Params: "id"}).Wrap(err)
+		return General.InvalidParams.New(struct{ Params string }{Params: "id"}).Wrap(err)
 	case gorm.ErrModelValueRequired, gorm.ErrModelAccessibleFieldsRequired, gorm.ErrSubQueryRequired, gorm.ErrInvalidData, gorm.ErrUnsupportedDriver, gorm.ErrRegistered, gorm.ErrInvalidField, gorm.ErrEmptySlice, gorm.ErrDryRunModeUnsupported, gorm.ErrInvalidDB, gorm.ErrInvalidValue, gorm.ErrInvalidValueOfLength, gorm.ErrPreloadNotAllowed, gorm.ErrDuplicatedKey, gorm.ErrForeignKeyViolated, gorm.ErrCheckConstraintViolated:
-		return General.Internal.New(ctx).Wrap(err)
+		return General.Internal.Wrap(err)
 	}
 
-	return General.Internal.New(ctx).Wrap(err)
+	return General.Internal.Wrap(err)
 }

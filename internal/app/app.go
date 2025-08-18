@@ -135,10 +135,10 @@ func (a *App) InitHttp(ctx context.Context) error {
 		Skip: configs.C.Middleware.Recovery.Skip,
 	}))
 	e.NoMethod(func(c *gin.Context) {
-		response.Error(c, errorx.General.MethodNotAllowed.New(ctx))
+		response.Error(c, errorx.General.MethodNotAllowed)
 	})
 	e.NoRoute(func(c *gin.Context) {
-		response.Error(c, errorx.General.RouteNotFound.New(ctx))
+		response.Error(c, errorx.General.RouteNotFound)
 	})
 
 	if err := apis.RegisterRouters(a, e); err != nil {

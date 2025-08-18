@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"time"
 
 	"gin-admin/internal/configs"
@@ -17,6 +16,7 @@ import (
 	"gin-admin/pkg/gormx"
 	"gin-admin/pkg/randx"
 
+	"github.com/epkgs/i18n/errors"
 	"github.com/epkgs/object"
 	"gorm.io/gorm"
 )
@@ -63,12 +63,12 @@ func (a *User) List(ctx context.Context, req dtos.UserListReq) (*dtos.List[*mode
 
 	list, err := a.UserRepo.Find(ctx, option, gormx.WithPage(req.Page, req.Limit))
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	count, err := a.UserRepo.Count(ctx, option)
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	return dtos.NewList(list, &dtos.Pager{
@@ -82,7 +82,7 @@ func (a *User) List(ctx context.Context, req dtos.UserListReq) (*dtos.List[*mode
 func (a *User) Get(ctx context.Context, id string) (*models.User, error) {
 	user, err := a.UserRepo.Get(ctx, id, gormx.WithPreload("Roles"))
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	return user, nil
@@ -92,14 +92,14 @@ func (a *User) Get(ctx context.Context, id string) (*models.User, error) {
 func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.User, error) {
 
 	if req.Username == configs.C.Super.Username {
-		return nil, errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return nil, errorx.User.ModifySuperUser // 超级管理员不允许修改
 	}
 
 	existsUsername, err := a.UserRepo.ExistsUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	} else if existsUsername {
-		return nil, errorx.User.Exists.New(ctx, struct{ Name string }{Name: req.Username}) // 用户名已存在
+		return nil, errorx.User.Exists.New(struct{ Name string }{Name: req.Username}) // 用户名已存在
 	}
 
 	user := &models.User{
@@ -112,25 +112,25 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 	}
 
 	if err := object.Assign(user, req); err != nil {
-		return nil, errorx.General.Internal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.Wrap(err)
 	}
 
 	if pass := req.Password; pass != "" {
 		hashPass, err := hash.GeneratePassword(pass)
 		if err != nil {
-			return nil, errorx.User.PasswordEncrypt.New(ctx).Wrap(err)
+			return nil, errorx.User.PasswordEncrypt.Wrap(err)
 		}
 		user.Password = hashPass
 	}
 
 	roles, err := a.RoleRepo.Find(ctx, gormx.WithWhere("id IN ?", req.RoleIDs))
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	user.Roles = roles
 	if err := a.UserRepo.Create(ctx, user); err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	return user, nil
@@ -140,20 +140,20 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) error {
 
 	if id == configs.C.Super.ID {
-		return errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return errorx.User.ModifySuperUser // 超级管理员不允许修改
 	}
 
 	user, err := a.UserRepo.Get(ctx, id)
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	if req.Username != nil && user.Username != *req.Username {
 		existsUsername, err := a.UserRepo.ExistsUsername(ctx, *req.Username)
 		if err != nil {
-			return errorx.WrapGormError(ctx, err)
+			return errorx.WrapGormError(err)
 		} else if existsUsername {
-			return errorx.User.Exists.New(ctx, struct{ Name string }{Name: *req.Username}) // 用户名已存在
+			return errorx.User.Exists.New(struct{ Name string }{Name: *req.Username}) // 用户名已存在
 		}
 	}
 
@@ -161,7 +161,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 	if err := object.Assign(user, req, func(c *object.AssignConfig) {
 		c.Metadata = &md
 	}); err != nil {
-		return errorx.General.Internal.New(ctx).Wrap(err)
+		return errorx.General.Internal.Wrap(err)
 	}
 
 	selected := md.Keys
@@ -170,7 +170,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 		pass := *req.Password
 		hashPass, err := hash.GeneratePassword(pass)
 		if err != nil {
-			return errorx.User.PasswordEncrypt.New(ctx).Wrap(err)
+			return errorx.User.PasswordEncrypt.Wrap(err)
 		}
 		user.Password = hashPass
 	}
@@ -178,7 +178,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 	if req.RoleIDs != nil {
 		roles, err := a.RoleRepo.Find(ctx, gormx.WithWhere("id IN ?", req.RoleIDs))
 		if err != nil {
-			return errorx.WrapGormError(ctx, err)
+			return errorx.WrapGormError(err)
 		}
 		user.Roles = roles
 		selected = append(selected, "Roles")
@@ -187,7 +187,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 	user.UpdatedAt = time.Now()
 
 	if err := a.UserRepo.Update(ctx, user, gormx.WithSelect(selected)); err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	}
 
 	return nil
@@ -197,14 +197,14 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 func (a *User) Delete(ctx context.Context, id string) error {
 
 	if id == configs.C.Super.ID {
-		return errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return errorx.User.ModifySuperUser // 超级管理员不允许修改
 	}
 
 	exists, err := a.UserRepo.Exists(ctx, gormx.WithWhere("id = ?", id))
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	} else if !exists {
-		return errorx.User.NotFound.New(ctx)
+		return errorx.User.NotFound
 	}
 
 	err = a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -217,24 +217,24 @@ func (a *User) Delete(ctx context.Context, id string) error {
 		return a.DeleteRoleIDsCache(ctx, id)
 	})
 
-	return errorx.WrapGormError(ctx, err)
+	return errorx.WrapGormError(err)
 }
 
 func (a *User) ResetPassword(ctx context.Context, id string) error {
 	if id == configs.C.Super.ID {
-		return errorx.User.ModifySuperUser.New(ctx) // 超级管理员不允许修改
+		return errorx.User.ModifySuperUser // 超级管理员不允许修改
 	}
 
 	exists, err := a.UserRepo.Exists(ctx, gormx.WithWhere("id=?", id))
 	if err != nil {
-		return errorx.WrapGormError(ctx, err)
+		return errorx.WrapGormError(err)
 	} else if !exists {
-		return errorx.User.NotFound.New(ctx)
+		return errorx.User.NotFound
 	}
 
 	hashPass, err := hash.GeneratePassword(configs.C.DefaultLoginPwd)
 	if err != nil {
-		return errorx.User.PasswordEncrypt.New(ctx).Wrap(err)
+		return errorx.User.PasswordEncrypt.Wrap(err)
 	}
 
 	err = a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -244,7 +244,7 @@ func (a *User) ResetPassword(ctx context.Context, id string) error {
 		return nil
 	})
 
-	return errorx.WrapGormError(ctx, err)
+	return errorx.WrapGormError(err)
 }
 
 func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
@@ -252,7 +252,7 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 		return db.Where("user_id = ?", id)
 	})
 	if err != nil {
-		return nil, errorx.WrapGormError(ctx, err)
+		return nil, errorx.WrapGormError(err)
 	}
 
 	return models.UserRoles(userRoles).ToRoleIDs(), nil
@@ -261,7 +261,7 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 func (a *User) SetRoleIDsCache(ctx context.Context, userID string, roleIDs []string, expiration ...time.Duration) error {
 	byt, err := json.Marshal(roleIDs)
 	if err != nil {
-		return errorx.General.Internal.New(ctx).Wrap(err)
+		return errorx.General.Internal.Wrap(err)
 	}
 	return a.Cacher.Set(ctx, gCacheNSForUserRoles, userID, string(byt), expiration...)
 }
@@ -274,14 +274,14 @@ func (a *User) GetRoleIDsCache(ctx context.Context, userID string) ([]string, er
 	val, err := a.Cacher.Get(ctx, gCacheNSForUserRoles, userID)
 	if err != nil {
 		if err == cachex.ErrNotFound {
-			return nil, errorx.General.RecordNotFound.New(ctx).Wrap(err)
+			return nil, errorx.General.RecordNotFound.Wrap(err)
 		}
-		return nil, errorx.General.Internal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.Wrap(err)
 	}
 
 	var roleIDs []string
 	if err := json.Unmarshal([]byte(val), &roleIDs); err != nil {
-		return nil, errorx.General.Internal.New(ctx).Wrap(err)
+		return nil, errorx.General.Internal.Wrap(err)
 	}
 
 	return roleIDs, nil
@@ -332,5 +332,5 @@ func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 		return nil
 	}
 
-	return errorx.WrapGormError(ctx, err)
+	return errorx.WrapGormError(err)
 }
