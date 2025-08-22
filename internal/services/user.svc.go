@@ -11,12 +11,14 @@ import (
 	"gin-admin/internal/models"
 	"gin-admin/internal/repositories"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/crypto/hash"
 	"gin-admin/pkg/gormx"
 	"gin-admin/pkg/randx"
 
 	"github.com/epkgs/i18n/errors"
+
 	"github.com/epkgs/object"
 	"gorm.io/gorm"
 )
@@ -92,14 +94,14 @@ func (a *User) Get(ctx context.Context, id string) (*models.User, error) {
 func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.User, error) {
 
 	if req.Username == configs.C.Super.Username {
-		return nil, errorx.User.ModifySuperUser // 超级管理员不允许修改
+		return nil, errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
 	existsUsername, err := a.UserRepo.ExistsUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	} else if existsUsername {
-		return nil, errorx.User.Exists.New(struct{ Name string }{Name: req.Username}) // 用户名已存在
+		return nil, errorx.ErrConflict.WithMsg(locales.User.Str("User %s already exists", req.Username)) // 用户名已存在
 	}
 
 	user := &models.User{
@@ -112,13 +114,13 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 	}
 
 	if err := object.Assign(user, req); err != nil {
-		return nil, errorx.General.Internal.Wrap(err)
+		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	if pass := req.Password; pass != "" {
 		hashPass, err := hash.GeneratePassword(pass)
 		if err != nil {
-			return nil, errorx.User.PasswordEncrypt.Wrap(err)
+			return nil, errorx.ErrInternalServerError.WithMsg(locales.User.Str("Password encrypt failed")).Wrap(err)
 		}
 		user.Password = hashPass
 	}
@@ -140,7 +142,7 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) error {
 
 	if id == configs.C.Super.ID {
-		return errorx.User.ModifySuperUser // 超级管理员不允许修改
+		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
 	user, err := a.UserRepo.Get(ctx, id)
@@ -153,7 +155,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 		if err != nil {
 			return errorx.WrapGormError(err)
 		} else if existsUsername {
-			return errorx.User.Exists.New(struct{ Name string }{Name: *req.Username}) // 用户名已存在
+			return errorx.ErrConflict.WithMsg(locales.User.Str("User %s already exists", *req.Username)) // 用户名已存在
 		}
 	}
 
@@ -161,7 +163,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 	if err := object.Assign(user, req, func(c *object.AssignConfig) {
 		c.Metadata = &md
 	}); err != nil {
-		return errorx.General.Internal.Wrap(err)
+		return errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	selected := md.Keys
@@ -170,7 +172,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 		pass := *req.Password
 		hashPass, err := hash.GeneratePassword(pass)
 		if err != nil {
-			return errorx.User.PasswordEncrypt.Wrap(err)
+			return errorx.ErrInternalServerError.WithMsg(locales.User.Str("Password encrypt failed")).Wrap(err)
 		}
 		user.Password = hashPass
 	}
@@ -197,14 +199,14 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 func (a *User) Delete(ctx context.Context, id string) error {
 
 	if id == configs.C.Super.ID {
-		return errorx.User.ModifySuperUser // 超级管理员不允许修改
+		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
 	exists, err := a.UserRepo.Exists(ctx, gormx.WithWhere("id = ?", id))
 	if err != nil {
 		return errorx.WrapGormError(err)
 	} else if !exists {
-		return errorx.User.NotFound
+		return errorx.ErrNotFound.WithMsg(locales.User.Str("User not found"))
 	}
 
 	err = a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -222,19 +224,19 @@ func (a *User) Delete(ctx context.Context, id string) error {
 
 func (a *User) ResetPassword(ctx context.Context, id string) error {
 	if id == configs.C.Super.ID {
-		return errorx.User.ModifySuperUser // 超级管理员不允许修改
+		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
 	exists, err := a.UserRepo.Exists(ctx, gormx.WithWhere("id=?", id))
 	if err != nil {
 		return errorx.WrapGormError(err)
 	} else if !exists {
-		return errorx.User.NotFound
+		return errorx.ErrNotFound.WithMsg(locales.User.Str("User not found"))
 	}
 
 	hashPass, err := hash.GeneratePassword(configs.C.DefaultLoginPwd)
 	if err != nil {
-		return errorx.User.PasswordEncrypt.Wrap(err)
+		return errorx.ErrInternalServerError.WithMsg(locales.User.Str("Password encrypt failed")).Wrap(err)
 	}
 
 	err = a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -261,7 +263,7 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 func (a *User) SetRoleIDsCache(ctx context.Context, userID string, roleIDs []string, expiration ...time.Duration) error {
 	byt, err := json.Marshal(roleIDs)
 	if err != nil {
-		return errorx.General.Internal.Wrap(err)
+		return errorx.ErrInternalServerError.Wrap(err)
 	}
 	return a.Cacher.Set(ctx, gCacheNSForUserRoles, userID, string(byt), expiration...)
 }
@@ -274,14 +276,14 @@ func (a *User) GetRoleIDsCache(ctx context.Context, userID string) ([]string, er
 	val, err := a.Cacher.Get(ctx, gCacheNSForUserRoles, userID)
 	if err != nil {
 		if err == cachex.ErrNotFound {
-			return nil, errorx.General.RecordNotFound.Wrap(err)
+			return nil, errorx.ErrNotFound.WithMsg("record not found").Wrap(err)
 		}
-		return nil, errorx.General.Internal.Wrap(err)
+		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	var roleIDs []string
 	if err := json.Unmarshal([]byte(val), &roleIDs); err != nil {
-		return nil, errorx.General.Internal.Wrap(err)
+		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	return roleIDs, nil

@@ -14,6 +14,7 @@ import (
 	"gin-admin/internal/models"
 	"gin-admin/internal/repositories"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/encoding/json"
 	"gin-admin/pkg/encoding/yaml"
@@ -22,6 +23,7 @@ import (
 	"gin-admin/pkg/randx"
 
 	"github.com/epkgs/i18n/errors"
+
 	"github.com/epkgs/object"
 	"gorm.io/gorm"
 )
@@ -88,14 +90,14 @@ func (a *Menu) initFromFile(ctx context.Context, menuFile string) error {
 
 	if ext := filepath.Ext(menuFile); ext == ".json" {
 		if err := json.Unmarshal(f, &tmpMenus); err != nil {
-			return errorx.General.UnmarshalJsonFileFailed.New(menuFile)
+			return errorx.ErrInternalServerError.WithMsg(locales.Def.Str("Unmarshal JSON file '%s' failed", menuFile))
 		}
 	} else if ext == ".yaml" || ext == ".yml" {
 		if err := yaml.Unmarshal(f, &tmpMenus); err != nil {
-			return errorx.General.UnmarshalYamlFileFailed.New(menuFile)
+			return errorx.ErrInternalServerError.WithMsg(locales.Def.Str("unmarshal YAML file '%s' failed", menuFile))
 		}
 	} else {
-		return errorx.General.UnsupportedFileType.New(ext)
+		return errorx.ErrBadRequest.WithMsg(locales.Def.Str("unsupported file type '%s'", ext))
 	}
 
 	menus = append(menus, tmpMenus...)
@@ -297,7 +299,7 @@ func (a *Menu) Get(ctx context.Context, id string) (*models.Menu, error) {
 // Create a new menu in the data access object.
 func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Menu, error) {
 	if configs.C.Menu.DenyOperate {
-		return nil, errorx.General.BadRequest
+		return nil, errorx.ErrBadRequest
 	}
 
 	menu := &models.Menu{
@@ -330,7 +332,7 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 // Update the specified menu in the data access object.
 func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) error {
 	if configs.C.Menu.DenyOperate {
-		return errorx.General.BadRequest
+		return errorx.ErrBadRequest
 	}
 
 	menu, err := a.MenuRepo.Get(ctx, id)
@@ -360,7 +362,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 	}
 
 	if err := object.Assign(menu, req); err != nil {
-		return errorx.General.Internal.Wrap(err)
+		return errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	err = a.MenuRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -398,7 +400,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 // Delete the specified menu from the data access object.
 func (a *Menu) Delete(ctx context.Context, id string) error {
 	if configs.C.Menu.DenyOperate {
-		return errorx.General.BadRequest
+		return errorx.ErrBadRequest
 	}
 
 	menu, err := a.MenuRepo.Get(ctx, id)

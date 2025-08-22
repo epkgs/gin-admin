@@ -8,6 +8,7 @@ import (
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 
 	"github.com/LyricTian/captcha"
 )
@@ -31,15 +32,15 @@ func (a *Captcha) GetCaptcha(ctx context.Context) (*dtos.Captcha, error) {
 // Response captcha image
 func (a *Captcha) ResponseCaptcha(ctx context.Context, w http.ResponseWriter, id string, reload bool) error {
 	if reload && !captcha.Reload(id) {
-		return errorx.User.CaptchaIDNotFound
+		return errorx.ErrBadRequest.WithMsg(locales.User.Str("Captcha id not found"))
 	}
 
 	err := captcha.WriteImage(w, id, configs.C.Captcha.Width, configs.C.Captcha.Height)
 	if err != nil {
 		if err == captcha.ErrNotFound {
-			return errorx.User.CaptchaIDNotFound.Wrap(err)
+			return errorx.ErrBadRequest.WithMsg(locales.User.Str("Captcha id not found")).Wrap(err)
 		}
-		return errorx.General.Internal.Wrap(err)
+		return errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")

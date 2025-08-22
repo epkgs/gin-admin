@@ -1,0 +1,16 @@
+{
+  "Old password incorrect": "Old password incorrect",
+  "Captcha id not found": "Captcha id not found",
+  "Role code already exists": "Role code already exists",
+  "Role not found": "Role not found",
+  "User %s already exists": "User %s already exists",
+  "Incorrect username or password": "Incorrect username or password",
+  "User %s is disabled": "User %s is disabled",
+  "Incorrect user": "Incorrect user",
+  "Nothing to update": "Nothing to update",
+  "Password encrypt failed": "Password encrypt failed",
+  "User not found": "User not found",
+  "invalid token": "invalid token",
+  "User is not logged in": "User is not logged in",
+  "Super user can not modify": "Super user can not modify"
+}

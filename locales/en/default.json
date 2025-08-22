@@ -1,0 +1,11 @@
+{
+  "Unmarshal JSON file '%s' failed": "Unmarshal JSON file '%s' failed",
+  "Route not found": "Route not found",
+  "failed to unmarshal config: %s": "failed to unmarshal config: %s",
+  "record not found": "record not found",
+  "unmarshal YAML file '%s' failed": "unmarshal YAML file '%s' failed",
+  "unsupported file type '%s'": "unsupported file type '%s'",
+  "request body too large, limit %s byte": "request body too large, limit %s byte",
+  "failed to read config file: %s": "failed to read config file: %s",
+  "invalid parameters": "invalid parameters"
+}

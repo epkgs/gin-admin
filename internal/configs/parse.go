@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"gin-admin/internal/errorx"
+	"gin-admin/locales"
 
 	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
@@ -103,12 +104,12 @@ func Load(ctx context.Context, path string, setters ...Setter) error {
 	}
 
 	if !ok || err != nil {
-		return errorx.General.ReadConfigFile.New(struct{ File string }{path}).Wrap(err)
+		return errorx.ErrInternalServerError.WithMsg(locales.Def.Str("failed to read config file: %s", path)).Wrap(err)
 	}
 
 	// Unmarshal the configuration into the struct
 	if err := v.Unmarshal(C); err != nil {
-		return errorx.General.UnmarshalConfig.New(struct{ File string }{v.ConfigFileUsed()}).Wrap(err)
+		return errorx.ErrInternalServerError.WithMsg(locales.Def.Str("failed to unmarshal config: %s", v.ConfigFileUsed())).Wrap(err)
 	}
 
 	C.preLoad()

@@ -14,6 +14,7 @@ import (
 	"gin-admin/internal/models"
 	"gin-admin/internal/services"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
 	"gin-admin/pkg/logger"
@@ -135,10 +136,10 @@ func (a *App) InitHttp(ctx context.Context) error {
 		Skip: configs.C.Middleware.Recovery.Skip,
 	}))
 	e.NoMethod(func(c *gin.Context) {
-		response.Error(c, errorx.General.MethodNotAllowed)
+		response.Error(c, errorx.ErrMethodNotAllowed)
 	})
 	e.NoRoute(func(c *gin.Context) {
-		response.Error(c, errorx.General.RouteNotFound)
+		response.Error(c, errorx.ErrNotFound.WithMsg(locales.Def.Str("Route not found")))
 	})
 
 	if err := apis.RegisterRouters(a, e); err != nil {

@@ -5,6 +5,7 @@ import (
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/services"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/response"
 
@@ -87,7 +88,7 @@ func (a *Auth) RefreshToken(c *gin.Context) {
 
 	refreshToken := helper.GetToken(c)
 	if refreshToken == "" {
-		response.Error(c, errorx.User.InvalidToken)
+		response.Error(c, errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token")))
 		return
 	}
 

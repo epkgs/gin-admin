@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"gin-admin/internal/errorx"
+	"gin-admin/locales"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/response"
 
@@ -51,7 +52,7 @@ func CopyBodyWithConfig(config CopyBodyConfig) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			response.Error(c, errorx.General.RequestTooLarge.New(struct{ Byte int64 }{config.MaxContentLen}))
+			response.Error(c, errorx.ErrRequestEntityTooLarge.WithMsg(locales.Def.Str("request body too large, limit %s byte", config.MaxContentLen)))
 			return
 		}
 

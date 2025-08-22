@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//go:generate go run github.com/epkgs/i18n/i18ntool extract
+
 // Usage: go build -ldflags "-X main.VERSION=x.x.x"
 var VERSION = "v1.0.0"
 

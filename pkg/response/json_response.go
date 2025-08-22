@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"gin-admin/internal/dtos"
-	"gin-admin/internal/errorx"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/validatorx"
 
 	"github.com/epkgs/i18n/errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -77,15 +77,15 @@ func Error(c *gin.Context, err error) {
 
 		var msg string
 		if tran, ok := err.(interface {
-			Translate(ctx context.Context) string
+			T(ctx context.Context) string
 		}); ok {
-			msg = tran.Translate(ctx)
+			msg = tran.T(ctx)
 		} else {
 			msg = err.Error()
 		}
 
-		res = dtos.NewResult[any](errorx.Code(err), msg, nil)
-		res.HttpStatus = errorx.HttpStatus(err)
+		res = dtos.NewResult[any](errors.Code(err), msg, nil)
+		res.HttpStatus = errors.HttpStatus(err)
 	}
 
 	if res.HttpStatus <= 0 || res.HttpStatus == 200 {

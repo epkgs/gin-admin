@@ -9,7 +9,7 @@ require (
 	github.com/casbin/casbin/v2 v2.68.0
 	github.com/creasty/defaults v1.7.0
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/epkgs/i18n v1.2.8
+	github.com/epkgs/i18n v1.4.3
 	github.com/epkgs/object v1.0.6
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/gin-contrib/cors v1.4.0
@@ -22,6 +22,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
+	github.com/iancoleman/orderedmap v0.3.0
 	github.com/json-iterator/go v1.1.12
 	github.com/minio/minio-go/v7 v7.0.51
 	github.com/mssola/user_agent v0.6.0
@@ -143,7 +144,7 @@ require (
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/tools v0.35.0 // indirect
-	google.golang.org/protobuf v1.36.7 // indirect
+	google.golang.org/protobuf v1.36.8 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect

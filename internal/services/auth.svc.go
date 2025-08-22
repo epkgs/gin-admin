@@ -11,6 +11,7 @@ import (
 	"gin-admin/internal/models"
 	"gin-admin/internal/repositories"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/crypto/hash"
 	"gin-admin/pkg/gormx"
@@ -19,10 +20,13 @@ import (
 	"gin-admin/pkg/logger"
 
 	"github.com/epkgs/i18n/errors"
+
 	"github.com/epkgs/object"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+var ErrInvalidToken = errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token"))
 
 // Auth management for SYS
 type Auth struct {
@@ -57,7 +61,7 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 
 	token := helper.GetToken(c)
 	if token == "" {
-		return "", errorx.User.InvalidToken
+		return "", ErrInvalidToken
 	}
 
 	ctx = helper.WithUserToken(ctx, token)
@@ -65,9 +69,9 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 	claims, err := a.Jwt.ParseToken(ctx, token)
 	if err != nil {
 		if err == jwtx.ErrInvalidToken {
-			return "", errorx.User.InvalidToken
+			return "", ErrInvalidToken
 		}
-		return "", errorx.General.Internal.Wrap(err)
+		return "", errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	userID, _ := claims.GetSubject()
@@ -85,13 +89,13 @@ func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 			user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status"))
 			if err != nil {
 				if errors.Is(err, gorm.ErrRecordNotFound) {
-					return "", errorx.User.InvalidToken
+					return "", ErrInvalidToken
 				}
 				return "", errorx.WrapGormError(err)
 			}
 
 			if user == nil || user.Status != models.UserStatus_Activated {
-				return "", errorx.User.InvalidToken
+				return "", ErrInvalidToken
 			}
 
 			roleIDs, err := a.UserSvc.GetRoleIDs(ctx, userID)
@@ -123,18 +127,18 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	user, err := a.UserRepo.GetByUsername(ctx, req.Username, gormx.WithSelect("id", "password", "status"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errorx.User.UsernamePassword
+			return nil, errorx.ErrUnauthorized.WithMsg(locales.User.Str("Incorrect username or password"))
 		}
 		return nil, errorx.WrapGormError(err)
 	}
 
 	if user.Status != models.UserStatus_Activated {
-		return nil, errorx.User.Disabled.New(struct{ Name string }{req.Username})
+		return nil, errorx.ErrForbidden.WithMsg(locales.User.Str("User %s is disabled", req.Username))
 	}
 
 	// check password
 	if err := hash.CompareHashAndPassword(user.Password, req.Password); err != nil {
-		return nil, errorx.User.UsernamePassword
+		return nil, errorx.ErrUnauthorized.WithMsg(locales.User.Str("Incorrect username or password"))
 	}
 
 	userID := user.ID
@@ -154,7 +158,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 	// generate token
 	token, err := a.Jwt.GenerateToken(ctx, userID)
 	if err != nil {
-		return nil, errorx.General.Internal.Wrap(err)
+		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	loginToken := &dtos.LoginToken{
@@ -185,7 +189,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 	claims, err := a.Jwt.ParseRefreshToken(ctx, refreshToken)
 	if err != nil {
 		if err == jwtx.ErrInvalidToken {
-			return nil, errorx.User.InvalidToken.Wrap(err)
+			return nil, ErrInvalidToken.Wrap(err)
 		}
 		return nil, err
 	}
@@ -195,13 +199,13 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dtos.Log
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("status", "username"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errorx.User.Incorrect
+			return nil, errorx.ErrBadRequest.WithMsg(locales.User.Str("Incorrect user"))
 		}
 		return nil, errorx.WrapGormError(err)
 	}
 
 	if user.Status != models.UserStatus_Activated {
-		return nil, errorx.User.Disabled.New(struct{ Name string }{user.NickName})
+		return nil, errorx.ErrForbidden.WithMsg(locales.User.Str("User %s is disabled", user.NickName))
 	}
 
 	ctx = logger.WithUserID(ctx, userID)
@@ -259,7 +263,7 @@ func (a *Auth) GetUserInfo(ctx context.Context) (*models.User, error) {
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithPreload("Roles"), gormx.WithOmit("password"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errorx.User.NotLogin
+			return nil, errorx.ErrUnauthorized.WithMsg(locales.User.Str("User is not logged in"))
 		}
 		return nil, errorx.WrapGormError(err)
 	}
@@ -270,27 +274,27 @@ func (a *Auth) GetUserInfo(ctx context.Context) (*models.User, error) {
 // Change login password
 func (a *Auth) UpdatePassword(ctx context.Context, req *dtos.AuthUpdatePasswordReq) error {
 	if helper.GetIsRootUser(ctx) {
-		return errorx.User.ModifySuperUser
+		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify"))
 	}
 
 	userID := helper.GetUserID(ctx)
 	user, err := a.UserRepo.Get(ctx, userID, gormx.WithSelect("password"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errorx.User.NotLogin
+			return errorx.ErrUnauthorized.WithMsg(locales.User.Str("User is not logged in"))
 		}
 		return errorx.WrapGormError(err)
 	}
 
 	// check old password
 	if err := hash.CompareHashAndPassword(user.Password, req.OldPassword); err != nil {
-		return errorx.User.OldPassword.Wrap(err)
+		return errorx.ErrBadRequest.WithMsg(locales.User.Str("Old password incorrect")).Wrap(err)
 	}
 
 	// update password
 	newPassword, err := hash.GeneratePassword(req.NewPassword)
 	if err != nil {
-		return errorx.General.Internal.Wrap(err)
+		return errorx.ErrInternalServerError.Wrap(err)
 	}
 	return a.UserRepo.UpdatePassword(ctx, userID, newPassword)
 }
@@ -354,7 +358,7 @@ func (a *Auth) UpdateUser(ctx context.Context, req *dtos.AuthUpdateUserReq) erro
 	user, err := a.UserRepo.Get(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errorx.User.NotLogin
+			return errorx.ErrUnauthorized.WithMsg(locales.User.Str("User is not logged in"))
 		}
 		return errorx.WrapGormError(err)
 	}
@@ -365,11 +369,11 @@ func (a *Auth) UpdateUser(ctx context.Context, req *dtos.AuthUpdateUserReq) erro
 		c.Metadata = &md
 	})
 	if err != nil {
-		return errorx.General.Internal.Wrap(err)
+		return errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	if len(md.Keys) == 0 {
-		return errorx.DB.NothingUpdate
+		return errorx.ErrBadRequest.WithMsg(locales.User.Str("Nothing to update"))
 	}
 
 	return a.UserRepo.Update(ctx, user, gormx.WithSelect(md.Keys))

@@ -11,6 +11,7 @@ import (
 	"gin-admin/internal/models"
 	"gin-admin/internal/repositories"
 	"gin-admin/internal/types"
+	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/gormx"
 	"gin-admin/pkg/randx"
@@ -92,7 +93,7 @@ func (a *Role) Create(ctx context.Context, req dtos.RoleCreateReq) (*models.Role
 	if exists, err := a.RoleRepo.ExistsCode(ctx, req.Code); err != nil {
 		return nil, errorx.WrapGormError(err)
 	} else if exists {
-		return nil, errorx.User.RoleCodeExists
+		return nil, errorx.ErrBadRequest.WithMsg(locales.User.Str("Role code already exists"))
 	}
 
 	role := &models.Role{
@@ -103,7 +104,7 @@ func (a *Role) Create(ctx context.Context, req dtos.RoleCreateReq) (*models.Role
 	if err := object.Assign(role, req, func(c *object.AssignConfig) {
 		c.SkipKeys = []string{"Menus"}
 	}); err != nil {
-		return nil, errorx.General.Internal.Wrap(err)
+		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	if len(req.MenuIDs) > 0 {
@@ -133,7 +134,7 @@ func (a *Role) Update(ctx context.Context, id string, req *dtos.RoleUpdateReq) e
 		if exists, err := a.RoleRepo.ExistsCode(ctx, *req.Code); err != nil {
 			return errorx.WrapGormError(err)
 		} else if exists {
-			return errorx.User.RoleCodeExists
+			return errorx.ErrBadRequest.WithMsg(locales.User.Str("Role code already exists"))
 		}
 	}
 
@@ -175,7 +176,7 @@ func (a *Role) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return errorx.WrapGormError(err)
 	} else if !exists {
-		return errorx.User.RoleNotFount
+		return errorx.ErrNotFound.WithMsg(locales.User.Str("Role not found"))
 	}
 
 	err = a.RoleRepo.Transaction(ctx, func(tx *gorm.DB) error {
@@ -196,14 +197,14 @@ func (a *Role) GetUpdateTime(ctx context.Context) (int64, error) {
 	val, err := a.Cacher.Get(ctx, gCacheNSForRole, gCacheKeyForCasbin)
 	if err != nil {
 		if err == cachex.ErrNotFound {
-			return 0, errorx.General.RecordNotFound.Wrap(err)
+			return 0, errorx.ErrNotFound.WithMsg(locales.DB.Str("record not found")).Wrap(err)
 		}
 		return 0, err
 	}
 
 	updated, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		return 0, errorx.General.Internal.Wrap(err)
+		return 0, errorx.ErrInternalServerError.Wrap(err)
 	}
 
 	return updated, nil

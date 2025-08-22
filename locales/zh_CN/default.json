@@ -1,0 +1,11 @@
+{
+  "Unmarshal JSON file '%s' failed": "解析JSON文件 '%s' 失败",
+  "Route not found": "路由未找到",
+  "failed to unmarshal config: %s": "解析配置失败: %s",
+  "record not found": "记录未找到",
+  "unmarshal YAML file '%s' failed": "解析YAML文件 '%s' 失败",
+  "unsupported file type '%s'": "不支持的文件类型 '%s'",
+  "request body too large, limit %s byte": "请求体过大，限制 %s 字节",
+  "failed to read config file: %s": "读取配置文件失败: %s",
+  "invalid parameters": "无效参数"
+}

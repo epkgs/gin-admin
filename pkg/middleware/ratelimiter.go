@@ -55,11 +55,11 @@ func RateLimiterWithConfig(config RateLimiterConfig) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error(ctx, "Rate limiter middleware error", err)
-			response.Error(c, errorx.General.Internal)
+			response.Error(c, errorx.ErrInternalServerError)
 		} else if allowed {
 			c.Next()
 		} else {
-			response.Error(c, errorx.General.TooManyRequests)
+			response.Error(c, errorx.ErrTooManyRequests)
 		}
 	}
 }

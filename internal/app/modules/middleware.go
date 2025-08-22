@@ -8,8 +8,9 @@ import (
 	"gin-admin/pkg/promx"
 	"time"
 
-	"github.com/casbin/casbin/v2"
 	"github.com/epkgs/i18n"
+
+	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
 

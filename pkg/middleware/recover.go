@@ -70,7 +70,7 @@ func RecoveryWithConfig(config RecoveryConfig) gin.HandlerFunc {
 					values,
 				)
 
-				response.Error(c, errorx.General.Internal)
+				response.Error(c, errorx.ErrInternalServerError)
 			}
 		}()
 
