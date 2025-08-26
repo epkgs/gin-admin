@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"gin-admin/internal/configs"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/types"
@@ -15,17 +14,20 @@ import (
 
 // Captcha management for SYS
 type Captcha struct {
+	app types.AppContext
 }
 
 func NewCaptcha(app types.AppContext) *Captcha {
-	return &Captcha{}
+	return &Captcha{
+		app: app,
+	}
 }
 
 // This function generates a new captcha ID and returns it as a `dtos.Captcha` struct. The length of
-// the captcha is determined by the `configs.C.Captcha.Length` configuration value.
+// the captcha is determined by the `config.Captcha.Length` configuration value.
 func (a *Captcha) GetCaptcha(ctx context.Context) (*dtos.Captcha, error) {
 	return &dtos.Captcha{
-		CaptchaID: captcha.NewLen(configs.C.Captcha.Length),
+		CaptchaID: captcha.NewLen(a.app.Config().Captcha.Length),
 	}, nil
 }
 
@@ -35,7 +37,7 @@ func (a *Captcha) ResponseCaptcha(ctx context.Context, w http.ResponseWriter, id
 		return errorx.ErrBadRequest.WithMsg(locales.User.Str("Captcha id not found"))
 	}
 
-	err := captcha.WriteImage(w, id, configs.C.Captcha.Width, configs.C.Captcha.Height)
+	err := captcha.WriteImage(w, id, a.app.Config().Captcha.Width, a.app.Config().Captcha.Height)
 	if err != nil {
 		if err == captcha.ErrNotFound {
 			return errorx.ErrBadRequest.WithMsg(locales.User.Str("Captcha id not found")).Wrap(err)

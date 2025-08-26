@@ -6,36 +6,30 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"gin-admin/internal/errorx"
 	"gin-admin/locales"
+	"gin-admin/pkg/utils/util"
 
 	"github.com/creasty/defaults"
 	"github.com/spf13/viper"
 )
 
-var (
-	once sync.Once
-	C    = new(Config)
-)
-
 type Setter func(ctx context.Context, c *Config) error
 
-func MustLoad(ctx context.Context, file string, setters ...Setter) {
-	once.Do(func() {
-		if err := Load(ctx, file, setters...); err != nil {
-			panic(err)
-		}
-	})
+func MustLoad(ctx context.Context, file string, setters ...Setter) *Config {
+	return util.Must(Load(ctx, file, setters...))
 }
 
 // Loads configuration files in various formats from a directory and parses them into
 // a struct.
-func Load(ctx context.Context, path string, setters ...Setter) error {
+func Load(ctx context.Context, path string, setters ...Setter) (*Config, error) {
+
+	cfg := new(Config)
+
 	// Set default values
-	if err := defaults.Set(C); err != nil {
-		return err
+	if err := defaults.Set(cfg); err != nil {
+		return nil, err
 	}
 
 	// Create a new viper instance
@@ -104,26 +98,26 @@ func Load(ctx context.Context, path string, setters ...Setter) error {
 	}
 
 	if !ok || err != nil {
-		return errorx.ErrInternalServerError.WithMsg(locales.Def.Str("failed to read config file: %s", path)).Wrap(err)
+		return nil, errorx.ErrInternalServerError.WithMsg(locales.Def.Str("failed to read config file: %s", path)).Wrap(err)
 	}
 
 	// Unmarshal the configuration into the struct
-	if err := v.Unmarshal(C); err != nil {
-		return errorx.ErrInternalServerError.WithMsg(locales.Def.Str("failed to unmarshal config: %s", v.ConfigFileUsed())).Wrap(err)
+	if err := v.Unmarshal(cfg); err != nil {
+		return nil, errorx.ErrInternalServerError.WithMsg(locales.Def.Str("failed to unmarshal config: %s", v.ConfigFileUsed())).Wrap(err)
 	}
 
-	C.preLoad()
+	cfg.preLoad()
 	for _, setter := range setters {
-		if err := setter(ctx, C); err != nil {
-			return err
+		if err := setter(ctx, cfg); err != nil {
+			return nil, err
 		}
 	}
 
-	if C.PrintConfig {
-		C.Print()
+	if cfg.PrintConfig {
+		cfg.Print()
 	}
 
-	return nil
+	return cfg, nil
 }
 
 func splitFileName(fileName string) (name, ext string) {

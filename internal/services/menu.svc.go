@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"gin-admin/internal/configs"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -34,6 +33,7 @@ const (
 
 // Menu management for SYS
 type Menu struct {
+	app          types.AppContext
 	Cacher       cachex.Cacher
 	MenuRepo     *repositories.Menu
 	MenuRoleRepo *repositories.MenuRole
@@ -43,6 +43,7 @@ type Menu struct {
 
 func NewMenu(app types.AppContext) *Menu {
 	return &Menu{
+		app:          app,
 		Cacher:       app.Cacher(),
 		MenuRepo:     repositories.NewMenu(app.DB()),
 		MenuRoleRepo: repositories.NewMenuRole(app.DB()),
@@ -52,7 +53,7 @@ func NewMenu(app types.AppContext) *Menu {
 }
 
 func (a *Menu) InitIfNeed(ctx context.Context) error {
-	if configs.C.Menu.File == "" {
+	if a.app.Config().Menu.File == "" {
 		return nil
 	}
 
@@ -66,8 +67,8 @@ func (a *Menu) InitIfNeed(ctx context.Context) error {
 		return nil // 已有数据就跳过
 	}
 
-	if err := a.initFromFile(ctx, configs.C.Menu.File); err != nil {
-		logger.Error(ctx, "failed to init menu data", err, map[string]any{"file": configs.C.Menu.File})
+	if err := a.initFromFile(ctx, a.app.Config().Menu.File); err != nil {
+		logger.Error(ctx, "failed to init menu data", err, map[string]any{"file": a.app.Config().Menu.File})
 	}
 
 	return a.RoleSvc.RefreshUpdateTime(ctx)
@@ -298,7 +299,7 @@ func (a *Menu) Get(ctx context.Context, id string) (*models.Menu, error) {
 
 // Create a new menu in the data access object.
 func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Menu, error) {
-	if configs.C.Menu.DenyOperate {
+	if a.app.Config().Menu.DenyOperate {
 		return nil, errorx.ErrBadRequest
 	}
 
@@ -331,7 +332,7 @@ func (a *Menu) Create(ctx context.Context, req *dtos.MenuCreateReq) (*models.Men
 
 // Update the specified menu in the data access object.
 func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) error {
-	if configs.C.Menu.DenyOperate {
+	if a.app.Config().Menu.DenyOperate {
 		return errorx.ErrBadRequest
 	}
 
@@ -399,7 +400,7 @@ func (a *Menu) Update(ctx context.Context, id string, req *dtos.MenuUpdateReq) e
 
 // Delete the specified menu from the data access object.
 func (a *Menu) Delete(ctx context.Context, id string) error {
-	if configs.C.Menu.DenyOperate {
+	if a.app.Config().Menu.DenyOperate {
 		return errorx.ErrBadRequest
 	}
 

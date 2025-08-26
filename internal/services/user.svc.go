@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"gin-admin/internal/configs"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -29,6 +28,7 @@ const (
 
 // User management for SYS
 type User struct {
+	app          types.AppContext
 	Cacher       cachex.Cacher
 	UserRepo     *repositories.User
 	RoleRepo     *repositories.Role
@@ -37,6 +37,7 @@ type User struct {
 
 func NewUser(app types.AppContext) *User {
 	return &User{
+		app:          app,
 		Cacher:       app.Cacher(),
 		UserRepo:     repositories.NewUser(app.DB()),
 		RoleRepo:     repositories.NewRole(app.DB()),
@@ -93,7 +94,7 @@ func (a *User) Get(ctx context.Context, id string) (*models.User, error) {
 // Create a new user in the data access object.
 func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.User, error) {
 
-	if req.Username == configs.C.Super.Username {
+	if req.Username == a.app.Config().Super.Username {
 		return nil, errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
@@ -110,7 +111,7 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 	}
 
 	if req.Password == "" {
-		req.Password = configs.C.DefaultLoginPwd
+		req.Password = a.app.Config().DefaultLoginPwd
 	}
 
 	if err := object.Assign(user, req); err != nil {
@@ -141,7 +142,7 @@ func (a *User) Create(ctx context.Context, req *dtos.UserCreateReq) (*models.Use
 // Update the specified user in the data access object.
 func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) error {
 
-	if id == configs.C.Super.ID {
+	if id == a.app.Config().Super.ID {
 		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
@@ -198,7 +199,7 @@ func (a *User) Update(ctx context.Context, id string, req *dtos.UserUpdateReq) e
 // Delete the specified user from the data access object.
 func (a *User) Delete(ctx context.Context, id string) error {
 
-	if id == configs.C.Super.ID {
+	if id == a.app.Config().Super.ID {
 		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
@@ -223,7 +224,7 @@ func (a *User) Delete(ctx context.Context, id string) error {
 }
 
 func (a *User) ResetPassword(ctx context.Context, id string) error {
-	if id == configs.C.Super.ID {
+	if id == a.app.Config().Super.ID {
 		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify")) // 超级管理员不允许修改
 	}
 
@@ -234,7 +235,7 @@ func (a *User) ResetPassword(ctx context.Context, id string) error {
 		return errorx.ErrNotFound.WithMsg(locales.User.Str("User not found"))
 	}
 
-	hashPass, err := hash.GeneratePassword(configs.C.DefaultLoginPwd)
+	hashPass, err := hash.GeneratePassword(a.app.Config().DefaultLoginPwd)
 	if err != nil {
 		return errorx.ErrInternalServerError.WithMsg(locales.User.Str("Password encrypt failed")).Wrap(err)
 	}
@@ -293,17 +294,17 @@ func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 
 	err := a.UserRepo.Transaction(ctx, func(tx *gorm.DB) error {
 
-		user, err := a.UserRepo.Get(ctx, configs.C.Super.ID)
+		user, err := a.UserRepo.Get(ctx, a.app.Config().Super.ID)
 		if user == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 			// 如果没有 root 账户，则插入数据库
-			hashedPass, err := hash.GeneratePassword(configs.C.Super.Password)
+			hashedPass, err := hash.GeneratePassword(a.app.Config().Super.Password)
 			if err != nil {
 				return err
 			}
 			user := &models.User{
-				ID:       configs.C.Super.ID,
-				Username: configs.C.Super.Username,
-				NickName: configs.C.Super.NickName,
+				ID:       a.app.Config().Super.ID,
+				Username: a.app.Config().Super.Username,
+				NickName: a.app.Config().Super.NickName,
 				Password: hashedPass,
 				Status:   models.UserStatus_Activated,
 			}
@@ -313,16 +314,16 @@ func (a *User) InitSuperUserIfNeed(ctx context.Context) error {
 			return err
 		}
 
-		if user.Username != configs.C.Super.Username || hash.CompareHashAndPassword(user.Password, configs.C.Super.Password) != nil || user.NickName != configs.C.Super.NickName {
+		if user.Username != a.app.Config().Super.Username || hash.CompareHashAndPassword(user.Password, a.app.Config().Super.Password) != nil || user.NickName != a.app.Config().Super.NickName {
 			// 如果root账户信息有误，则更新数据库
-			hashedPass, err := hash.GeneratePassword(configs.C.Super.Password)
+			hashedPass, err := hash.GeneratePassword(a.app.Config().Super.Password)
 			if err != nil {
 				return err
 			}
 
-			user.NickName = configs.C.Super.NickName
+			user.NickName = a.app.Config().Super.NickName
 			user.Password = hashedPass
-			user.Username = configs.C.Super.Username
+			user.Username = a.app.Config().Super.Username
 			return a.UserRepo.Update(ctx, user, gormx.WithSelect("NickName", "Password", "Username"))
 		}
 

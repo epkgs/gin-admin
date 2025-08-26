@@ -5,7 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"gin-admin/internal/configs"
 	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
 	"gin-admin/internal/models"
@@ -30,6 +29,7 @@ var ErrInvalidToken = errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid t
 
 // Auth management for SYS
 type Auth struct {
+	app          types.AppContext
 	Cacher       cachex.Cacher
 	Jwt          jwtx.Auther
 	UserRepo     *repositories.User
@@ -41,6 +41,7 @@ type Auth struct {
 
 func NewAuth(app types.AppContext) *Auth {
 	return &Auth{
+		app:          app,
 		Cacher:       app.Cacher(),
 		Jwt:          app.Jwt(),
 		UserRepo:     repositories.NewUser(app.DB()),
@@ -54,8 +55,8 @@ func NewAuth(app types.AppContext) *Auth {
 func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
 	ctx := c.Request.Context()
 
-	rootID := configs.C.Super.ID
-	if configs.C.Middleware.Auth.Disable {
+	rootID := a.app.Config().Super.ID
+	if a.app.Config().Middleware.Auth.Disable {
 		return rootID, nil
 	}
 
@@ -150,7 +151,7 @@ func (a *Auth) Login(ctx context.Context, req *dtos.Login) (*dtos.LoginToken, er
 		return nil, err
 	}
 
-	err = a.UserSvc.SetRoleIDsCache(ctx, userID, roleIDs, time.Duration(configs.C.Cache.Expiration.User)*time.Hour)
+	err = a.UserSvc.SetRoleIDsCache(ctx, userID, roleIDs, time.Duration(a.app.Config().Cache.Expiration.User)*time.Hour)
 	if err != nil {
 		logger.Error(ctx, "Failed to set cache", err)
 	}

@@ -25,10 +25,10 @@ func Run(ctx context.Context, configFile string) error {
 	}()
 
 	// Load configuration.
-	configs.MustLoad(ctx, configFile)
+	cfg := configs.MustLoad(ctx, configFile)
 
 	// Initialize logger.
-	cleanLoggerFn, err := logger.InitWithConfig(ctx, &configs.C.Logger)
+	cleanLoggerFn, err := logger.InitWithConfig(ctx, &cfg.Logger)
 	if err != nil {
 		return err
 	}
@@ -36,15 +36,15 @@ func Run(ctx context.Context, configFile string) error {
 
 	logger.Info(ctx, "starting service ...",
 		map[string]any{
-			"version": configs.C.Version,
+			"version": cfg.Version,
 			"pid":     os.Getpid(),
-			"config":  configs.C.ConfigFile,
-			"env":     configs.C.AppEnv,
+			"config":  cfg.ConfigFile,
+			"env":     cfg.AppEnv,
 		},
 	)
 
 	// Start pprof server.
-	if addr := configs.C.Pprof.Addr; addr != "" {
+	if addr := cfg.Pprof.Addr; addr != "" {
 		logger.Info(ctx, "pprof server is listening on "+addr)
 		go func() {
 			err := http.ListenAndServe(addr, nil)
@@ -54,7 +54,7 @@ func Run(ctx context.Context, configFile string) error {
 		}()
 	}
 
-	app := New(ctx, configs.C)
+	app := New(ctx, cfg)
 
 	if err := app.Init(ctx); err != nil {
 		return err

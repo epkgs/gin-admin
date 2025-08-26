@@ -133,7 +133,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 		response.OK(c)
 	})
 	e.Use(middleware.RecoveryWithConfig(middleware.RecoveryConfig{
-		Skip: configs.C.Middleware.Recovery.Skip,
+		Skip: a.config.Middleware.Recovery.Skip,
 	}))
 	e.NoMethod(func(c *gin.Context) {
 		response.Error(c, errorx.ErrMethodNotAllowed)
@@ -147,34 +147,34 @@ func (a *App) InitHttp(ctx context.Context) error {
 	}
 
 	// Register swagger
-	if configs.C.Swagger.Enable {
+	if a.config.Swagger.Enable {
 		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.RBAC())
-		g.StaticFile("/openapi.json", configs.C.Swagger.StaticFile)
+		g.StaticFile("/openapi.json", a.config.Swagger.StaticFile)
 		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	if dir := configs.C.Middleware.Static.Root; dir != "" {
+	if dir := a.config.Middleware.Static.Root; dir != "" {
 		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:                 dir,
-			ExcludedPathPrefixes: configs.C.Middleware.Static.ExcludedPathPrefixes,
+			ExcludedPathPrefixes: a.config.Middleware.Static.ExcludedPathPrefixes,
 		}))
 	}
 
-	addr := configs.C.HTTP.Addr
+	addr := a.config.HTTP.Addr
 	logger.Info(ctx, fmt.Sprintf("HTTP server is listening on %s", addr))
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      e,
-		ReadTimeout:  time.Second * time.Duration(configs.C.HTTP.ReadTimeout),
-		WriteTimeout: time.Second * time.Duration(configs.C.HTTP.WriteTimeout),
-		IdleTimeout:  time.Second * time.Duration(configs.C.HTTP.IdleTimeout),
+		ReadTimeout:  time.Second * time.Duration(a.config.HTTP.ReadTimeout),
+		WriteTimeout: time.Second * time.Duration(a.config.HTTP.WriteTimeout),
+		IdleTimeout:  time.Second * time.Duration(a.config.HTTP.IdleTimeout),
 	}
 
 	go func() {
 		var err error
-		if configs.C.HTTP.CertFile != "" && configs.C.HTTP.KeyFile != "" {
+		if a.config.HTTP.CertFile != "" && a.config.HTTP.KeyFile != "" {
 			srv.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
-			err = srv.ListenAndServeTLS(configs.C.HTTP.CertFile, configs.C.HTTP.KeyFile)
+			err = srv.ListenAndServeTLS(a.config.HTTP.CertFile, a.config.HTTP.KeyFile)
 		} else {
 			err = srv.ListenAndServe()
 		}
@@ -185,7 +185,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 	}()
 
 	a.AddCleaner(ctx, func() {
-		ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(configs.C.HTTP.ShutdownTimeout))
+		ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(a.config.HTTP.ShutdownTimeout))
 		defer cancel()
 
 		srv.SetKeepAlivesEnabled(false)

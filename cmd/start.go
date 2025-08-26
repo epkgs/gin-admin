@@ -53,13 +53,15 @@ func StartCmd() *cobra.Command {
 					return err
 				}
 
+				cfg := configs.MustLoad(context.Background(), configFile)
+
 				// Don't wait for the command to finish
 				// The main process will exit, allowing the daemon to run independently
-				fmt.Printf("Service %s daemon thread started successfully\n", configs.C.AppName)
+				fmt.Printf("Service %s daemon thread started successfully\n", cfg.AppName)
 
 				pid := command.Process.Pid
 				_ = os.WriteFile(fmt.Sprintf("%s.lock", cmd.Root().Name()), []byte(fmt.Sprintf("%d", pid)), 0666)
-				fmt.Printf("service %s daemon thread started with pid %d \n", configs.C.AppName, pid)
+				fmt.Printf("service %s daemon thread started with pid %d \n", cfg.AppName, pid)
 				os.Exit(0)
 			}
 

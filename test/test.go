@@ -24,11 +24,11 @@ var (
 
 func init() {
 
-	configs.MustLoad(context.Background(), "config.yml")
+	cfg := configs.MustLoad(context.Background(), "config.yml")
 
-	_ = os.RemoveAll(configs.C.DB.DSN)
+	_ = os.RemoveAll(cfg.DB.DSN)
 	ctx := context.Background()
-	app := app.New(ctx, configs.C)
+	app := app.New(ctx, cfg)
 
 	if err := app.Init(ctx); err != nil {
 		panic(err)
