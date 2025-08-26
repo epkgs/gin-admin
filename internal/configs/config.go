@@ -88,10 +88,6 @@ func (c *Config) Print() {
 	fmt.Println("// ----------------------- Load configurations end --------------------------")
 }
 
-func (c *Config) FormatTableName(name string) string {
-	return c.DB.TablePrefix + name
-}
-
 func (c *Config) IsSuper(id string) bool {
 	return c.Super.ID == id
 }

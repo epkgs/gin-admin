@@ -27,7 +27,6 @@ type Config struct {
 		Level        string
 		Type         string // Database type: sqlite3/mysql/postgres
 		DSN          string // Database connection string
-		TablePrefix  string // Table prefix for database tables
 		MaxBuffer    int
 		MaxThread    int
 		MaxOpenConns int // Maximum open connections
@@ -130,7 +129,6 @@ func InitWithConfig(ctx context.Context, cfg *Config, hooks ...HookHandlerFunc) 
 			MaxIdleTime:  cfg.Database.MaxIdleTime,
 			MaxOpenConns: cfg.Database.MaxOpenConns,
 			MaxIdleConns: cfg.Database.MaxIdleConns,
-			TablePrefix:  cfg.Database.TablePrefix,
 		})
 
 		if err != nil {

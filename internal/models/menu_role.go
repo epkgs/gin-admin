@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gin-admin/internal/configs"
 )
 
 // Role permissions for SYS
@@ -16,7 +14,7 @@ type MenuRole struct {
 }
 
 func (a MenuRole) TableName() string {
-	return configs.C.FormatTableName("role_menus")
+	return "role_menus"
 }
 
 // Defining the slice of `MenuRole` struct.

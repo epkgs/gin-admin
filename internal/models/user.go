@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"gin-admin/internal/configs"
 )
 
 const (
@@ -35,7 +33,7 @@ type User struct {
 }
 
 func (a User) TableName() string {
-	return configs.C.FormatTableName("user")
+	return "user"
 }
 
 // Defining the slice of `User` struct.

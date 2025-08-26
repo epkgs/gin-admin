@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
-
-	"gin-admin/internal/configs"
 )
 
 const (
@@ -41,7 +39,7 @@ type Menu struct {
 }
 
 func (a Menu) TableName() string {
-	return configs.C.FormatTableName("menu")
+	return "menu"
 }
 
 // Defining the slice of `Menu` struct.

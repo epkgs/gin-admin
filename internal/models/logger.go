@@ -1,7 +1,6 @@
 package models
 
 import (
-	"gin-admin/internal/configs"
 	"gin-admin/pkg/logger"
 )
 
@@ -14,7 +13,7 @@ type Logger struct {
 }
 
 func (a Logger) TableName() string {
-	return configs.C.FormatTableName("logger")
+	return "logger"
 }
 
 // Defining the slice of `Logger` struct.

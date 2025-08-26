@@ -29,7 +29,6 @@ type DB struct {
 	MaxIdleTime  int    `default:"3600"`        // seconds
 	MaxOpenConns int    `default:"100"`         // connections
 	MaxIdleConns int    `default:"50"`          // connections
-	TablePrefix  string `default:""`
 	AutoMigrate  bool
 	PrepareStmt  bool
 	Resolver     []struct {

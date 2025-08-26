@@ -35,7 +35,6 @@ type Config struct {
 	MaxIdleTime  int
 	MaxOpenConns int
 	MaxIdleConns int
-	TablePrefix  string
 	Resolver     []ResolverConfig
 }
 
@@ -59,7 +58,6 @@ func New(cfg Config) (*gorm.DB, error) {
 
 	ormCfg := &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   cfg.TablePrefix,
 			SingularTable: true,
 		},
 		Logger:      logger.Discard,

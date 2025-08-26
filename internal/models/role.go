@@ -3,8 +3,6 @@ package models
 import (
 	"encoding/json"
 	"time"
-
-	"gin-admin/internal/configs"
 )
 
 const (
@@ -30,7 +28,7 @@ type Role struct {
 }
 
 func (a Role) TableName() string {
-	return configs.C.FormatTableName("role")
+	return "role"
 }
 
 // Defining the slice of `Role` struct.

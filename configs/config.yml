@@ -55,7 +55,6 @@ DB:
   MaxIdleTime: 3600                  # Maximum connection idle time in seconds (default: 3600)
   MaxOpenConns: 100                  # Maximum open connections (default: 100)
   MaxIdleConns: 50                   # Maximum idle connections (default: 50)
-  TablePrefix: ""                    # Table prefix
   AutoMigrate: true                  # Auto migrate database tables
   PrepareStmt: false                 # Prepare SQL statements
 
@@ -110,7 +109,6 @@ Logger:
     Level: "info"                      # Hook log level
     Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres
     DSN: "data/ginadmin.db"            # Database connection string
-    TablePrefix: ""                    # Table prefix
     MaxBuffer: 1024                    # Maximum buffer size
     MaxThread: 2                       # Maximum number of threads
     MaxOpenConns: 16                   # Maximum open connections

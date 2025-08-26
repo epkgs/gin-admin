@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gin-admin/internal/configs"
 )
 
 // User roles association
@@ -17,7 +15,7 @@ type UserRole struct {
 }
 
 func (a UserRole) TableName() string {
-	return configs.C.FormatTableName("user_roles")
+	return "user_roles"
 }
 
 // Defining the slice of `UserRole` struct.

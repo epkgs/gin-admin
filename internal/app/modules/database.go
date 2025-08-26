@@ -32,7 +32,6 @@ func InitDB(ctx context.Context, app types.AppContext) (*gorm.DB, error) {
 		MaxIdleTime:  cfg.MaxIdleTime,
 		MaxOpenConns: cfg.MaxOpenConns,
 		MaxIdleConns: cfg.MaxIdleConns,
-		TablePrefix:  cfg.TablePrefix,
 		Resolver:     resolver,
 	})
 	if err != nil {
