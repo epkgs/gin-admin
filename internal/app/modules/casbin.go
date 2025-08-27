@@ -10,14 +10,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gin-admin/internal/dtos"
 	"gin-admin/internal/errorx"
-	"gin-admin/internal/models"
-	"gin-admin/internal/repositories"
-	"gin-admin/internal/services"
+	"gin-admin/internal/model/bo"
+	"gin-admin/internal/model/dto"
+	"gin-admin/internal/model/po"
+	"gin-admin/internal/service"
 	"gin-admin/internal/types"
 	"gin-admin/pkg/cachex"
-	"gin-admin/pkg/gormx"
 	"gin-admin/pkg/logger"
 
 	"github.com/casbin/casbin/v2"
@@ -27,24 +26,26 @@ import (
 type Casbinx struct {
 	app      types.AppContext
 	enforcer *atomic.Value
-	ticker   *time.Ticker
-	Cache    cachex.Cacher
-	// MenuRepo *repositories.Menu
-	RoleRepo *repositories.Role
-	MenuSvc  *services.Menu
-	RoleSvc  *services.Role
+	cacher   cachex.Cacher
+
+	menuSVC *service.Menu
+	roleSVC *service.Role
+
+	q *bo.Query
+
+	ticker *time.Ticker
 }
 
 var _ types.Casbinx = (*Casbinx)(nil)
 
 func InitCasbinx(ctx context.Context, app types.AppContext) (types.Casbinx, error) {
 	cb := &Casbinx{
-		app:   app,
-		Cache: app.Cacher(),
-		// MenuRepo: repositories.NewMenu(app.DB()),
-		RoleRepo: repositories.NewRole(app.DB()),
-		MenuSvc:  services.NewMenu(app),
-		RoleSvc:  services.NewRole(app),
+		app:      app,
+		enforcer: new(atomic.Value),
+		cacher:   app.Cacher(),
+		menuSVC:  service.NewMenu(app),
+		roleSVC:  service.NewRole(app),
+		q:        bo.Use(app.DB()),
 	}
 
 	app.AddCleaner(ctx, func() {
@@ -63,7 +64,7 @@ func (a *Casbinx) GetEnforcer() *casbin.Enforcer {
 
 type policyQueueItem struct {
 	RoleID string
-	Menus  models.Menus
+	Menus  po.Menus
 }
 
 func (a *Casbinx) Load(ctx context.Context) error {
@@ -71,7 +72,6 @@ func (a *Casbinx) Load(ctx context.Context) error {
 		return nil
 	}
 
-	a.enforcer = new(atomic.Value)
 	if err := a.load(ctx); err != nil {
 		return err
 	}
@@ -82,7 +82,10 @@ func (a *Casbinx) Load(ctx context.Context) error {
 
 func (a *Casbinx) load(ctx context.Context) error {
 	start := time.Now()
-	roles, err := a.RoleRepo.Find(ctx, gormx.WithWhere("status = ?", models.RoleStatus_Enabled), gormx.WithSelect("id"))
+
+	r := a.q.Role
+
+	roles, err := r.WithContext(ctx).Select(r.ID).Where(r.Status.Eq(po.RoleStatus_Enabled)).Find()
 	if err != nil {
 		return errorx.WrapGormError(err)
 	}
@@ -115,10 +118,10 @@ func (a *Casbinx) load(ctx context.Context) error {
 	}
 
 	for _, item := range roles {
-		list, err := a.MenuSvc.List(ctx, dtos.MenuListReq{
+		list, err := a.menuSVC.List(ctx, dto.MenuListReq{
 			RoleID: item.ID,
-			Type:   models.MenuType_BUTTON,
-			Pager: dtos.Pager{
+			Type:   po.MenuType_BUTTON,
+			Pager: dto.Pager{
 				Page: -1,
 			},
 		})
@@ -171,11 +174,11 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 	var lastUpdated int64
 	a.ticker = time.NewTicker(time.Duration(a.app.Config().Middleware.Casbin.AutoLoadInterval) * time.Second)
 	for range a.ticker.C {
-		updated, err := a.RoleSvc.GetUpdateTime(ctx)
+		updated, err := a.roleSVC.GetUpdateTime(ctx)
 		if err != nil {
 			logger.Error(ctx, "Failed to get role update time", err)
 
-			if err := a.RoleSvc.RefreshUpdateTime(ctx); err != nil {
+			if err := a.roleSVC.RefreshUpdateTime(ctx); err != nil {
 				panic(err)
 			}
 			continue

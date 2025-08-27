@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"gin-admin/internal/configs"
+	"gin-admin/internal/config"
 	_ "gin-admin/internal/swagger"
 	"gin-admin/pkg/logger"
 )
@@ -25,7 +25,7 @@ func Run(ctx context.Context, configFile string) error {
 	}()
 
 	// Load configuration.
-	cfg := configs.MustLoad(ctx, configFile)
+	cfg := config.MustLoad(ctx, configFile)
 
 	// Initialize logger.
 	cleanLoggerFn, err := logger.InitWithConfig(ctx, &cfg.Logger)

@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/internal/dtos"
-	"gin-admin/internal/models"
+	"gin-admin/internal/model/dto"
+	"gin-admin/internal/model/po"
 	"gin-admin/pkg/crypto/hash"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +19,7 @@ func TestUser(t *testing.T) {
 		os.RemoveAll("data")
 	})
 
-	menuFormItem := dtos.MenuCreateReq{
+	menuFormItem := dto.MenuCreateReq{
 		Name:  "user",
 		Type:  "menu",
 		Path:  "/system/user",
@@ -29,10 +29,10 @@ func TestUser(t *testing.T) {
 			"icon": "user",
 		},
 
-		Status: models.MenuStatus_ENABLED,
+		Status: po.MenuStatus_ENABLED,
 	}
 
-	var createMenu dtos.Result[*models.Menu]
+	var createMenu dto.Result[*po.Menu]
 	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
 		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
 
@@ -47,16 +47,16 @@ func TestUser(t *testing.T) {
 	assert.Equal(menuFormItem.Extra, menu.Extra)
 	assert.Equal(menuFormItem.Status, menu.Status)
 
-	roleFormItem := dtos.RoleCreateReq{
+	roleFormItem := dto.RoleCreateReq{
 		Code:        "user",
 		Name:        "Normal",
 		MenuIDs:     []string{menu.ID},
 		Description: "Normal",
 		Rank:        8,
-		Status:      models.RoleStatus_Enabled,
+		Status:      po.RoleStatus_Enabled,
 	}
 
-	var createRole dtos.Result[*models.Role]
+	var createRole dto.Result[*po.Role]
 	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
 
 	role := createRole.Data
@@ -68,18 +68,18 @@ func TestUser(t *testing.T) {
 	assert.Equal(roleFormItem.Status, role.Status)
 	assert.Equal(len(roleFormItem.MenuIDs), len(role.Menus))
 
-	userFormItem := dtos.UserCreateReq{
+	userFormItem := dto.UserCreateReq{
 		Username:    "test",
 		NickName:    "Test",
 		Password:    hash.MD5String("test"),
 		Phone:       "0720",
 		Email:       "test@gmail.com",
 		Description: "test user",
-		Status:      models.UserStatus_Activated,
+		Status:      po.UserStatus_Activated,
 		RoleIDs:     []string{role.ID},
 	}
 
-	var createUser dtos.Result[*models.User]
+	var createUser dto.Result[*po.User]
 	e.POST(baseAPI + "/users").WithJSON(userFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createUser)
 	user := createUser.Data
 	assert.NotEmpty(user.ID)
@@ -91,18 +91,18 @@ func TestUser(t *testing.T) {
 	assert.Equal(userFormItem.Status, user.Status)
 	assert.Equal(len(userFormItem.RoleIDs), len(user.Roles))
 
-	var listUsers dtos.ResultList[*models.User]
+	var listUsers dto.ResultList[*po.User]
 	e.GET(baseAPI+"/users").WithQuery("username", userFormItem.Username).Expect().Status(http.StatusOK).JSON().Decode(&listUsers)
 	users := listUsers.Data.Items
 	assert.GreaterOrEqual(len(users), 1)
 
 	newName := "Test 1"
-	newStatus := models.UserStatus_Freezed
+	newStatus := po.UserStatus_Freezed
 	user.NickName = newName
 	user.Status = newStatus
 	e.PUT(baseAPI + "/users/" + user.ID).WithJSON(user).Expect().Status(http.StatusOK)
 
-	var getUser dtos.Result[*models.User]
+	var getUser dto.Result[*po.User]
 	e.GET(baseAPI + "/users/" + user.ID).Expect().Status(http.StatusOK).JSON().Decode(&getUser)
 	assert.Equal(newName, getUser.Data.NickName)
 	assert.Equal(newStatus, getUser.Data.Status)

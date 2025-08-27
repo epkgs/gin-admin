@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/internal/apis"
+	"gin-admin/internal/api"
 	"gin-admin/internal/app"
-	"gin-admin/internal/configs"
+	"gin-admin/internal/config"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gin-gonic/gin"
@@ -24,7 +24,7 @@ var (
 
 func init() {
 
-	cfg := configs.MustLoad(context.Background(), "config.yml")
+	cfg := config.MustLoad(context.Background(), "config.yml")
 
 	_ = os.RemoveAll(cfg.DB.DSN)
 	ctx := context.Background()
@@ -35,7 +35,7 @@ func init() {
 	}
 
 	engine = gin.New()
-	err := apis.RegisterRouters(app, engine)
+	err := api.RegisterRouters(app, engine)
 	if err != nil {
 		panic(err)
 	}

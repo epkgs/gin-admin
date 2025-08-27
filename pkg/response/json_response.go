@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gin-admin/internal/dtos"
+	"gin-admin/internal/model/dto"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/validatorx"
@@ -26,7 +26,7 @@ const (
 
 var null any = nil
 
-func response[T any](c *gin.Context, res *dtos.Result[T]) {
+func response[T any](c *gin.Context, res *dto.Result[T]) {
 
 	httpStatus := http.StatusOK
 
@@ -55,14 +55,14 @@ func OkData[T any](c *gin.Context, data T, message ...string) {
 		msg = message[0]
 	}
 
-	response(c, dtos.NewResult(Code_Success, msg, data))
+	response(c, dto.NewResult(Code_Success, msg, data))
 }
 
 func Error(c *gin.Context, err error) {
 
 	ctx := c.Request.Context()
 
-	var res *dtos.Result[any]
+	var res *dto.Result[any]
 
 	// ============== validation error ==============
 
@@ -84,7 +84,7 @@ func Error(c *gin.Context, err error) {
 			msg = err.Error()
 		}
 
-		res = dtos.NewResult[any](errors.Code(err), msg, nil)
+		res = dto.NewResult[any](errors.Code(err), msg, nil)
 		res.HttpStatus = errors.HttpStatus(err)
 	}
 
@@ -101,9 +101,9 @@ func Error(c *gin.Context, err error) {
 	response(c, res)
 }
 
-func handleValidationErrors(ctx context.Context, errs ...error) *dtos.Result[any] {
+func handleValidationErrors(ctx context.Context, errs ...error) *dto.Result[any] {
 
-	res := dtos.NewResult[any](http.StatusUnprocessableEntity, "form validation failed", nil)
+	res := dto.NewResult[any](http.StatusUnprocessableEntity, "form validation failed", nil)
 
 	faileds := map[string][]string{}
 	for _, err := range errs {
@@ -119,13 +119,13 @@ func handleValidationErrors(ctx context.Context, errs ...error) *dtos.Result[any
 	return res
 }
 
-func List[T any](c *gin.Context, items []T, pager *dtos.Pager) {
+func List[T any](c *gin.Context, items []T, pager *dto.Pager) {
 
 	if items == nil {
 		items = make([]T, 0) // 避免返回 null
 	}
 
-	res := dtos.NewResult(Code_Success, "ok", dtos.NewList(items, pager))
+	res := dto.NewResult(Code_Success, "ok", dto.NewList(items, pager))
 
 	response(c, res)
 }

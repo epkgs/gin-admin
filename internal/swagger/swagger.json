@@ -20,7 +20,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.Login"
+                            "$ref": "#/definitions/dto.Login"
                         }
                     }
                 ],
@@ -28,19 +28,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-dtos_LoginToken"
+                            "$ref": "#/definitions/dto.Result-dto_LoginToken"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -61,13 +61,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -88,19 +88,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Menus"
+                            "$ref": "#/definitions/dto.Result-po_Menus"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -124,7 +124,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.AuthUpdatePasswordReq"
+                            "$ref": "#/definitions/dto.AuthUpdatePasswordReq"
                         }
                     }
                 ],
@@ -132,25 +132,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -171,19 +171,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-dtos_LoginToken"
+                            "$ref": "#/definitions/dto.Result-dto_LoginToken"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -204,19 +204,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -238,7 +238,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.AuthUpdateUserReq"
+                            "$ref": "#/definitions/dto.AuthUpdateUserReq"
                         }
                     }
                 ],
@@ -246,25 +246,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -280,7 +280,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-dtos_Captcha"
+                            "$ref": "#/definitions/dto.Result-dto_Captcha"
                         }
                     }
                 }
@@ -316,7 +316,7 @@
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -399,19 +399,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_Logger"
+                            "$ref": "#/definitions/dto.ResultList-po_Logger"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -482,19 +482,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_Menu"
+                            "$ref": "#/definitions/dto.ResultList-po_Menu"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -516,7 +516,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.MenuCreateReq"
+                            "$ref": "#/definitions/dto.MenuCreateReq"
                         }
                     }
                 ],
@@ -524,25 +524,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Menu"
+                            "$ref": "#/definitions/dto.Result-po_Menu"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -572,19 +572,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Menu"
+                            "$ref": "#/definitions/dto.Result-po_Menu"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -613,7 +613,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.MenuUpdateReq"
+                            "$ref": "#/definitions/dto.MenuUpdateReq"
                         }
                     }
                 ],
@@ -621,25 +621,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -667,19 +667,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -743,19 +743,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_Role"
+                            "$ref": "#/definitions/dto.ResultList-po_Role"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -777,7 +777,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RoleCreateReq"
+                            "$ref": "#/definitions/dto.RoleCreateReq"
                         }
                     }
                 ],
@@ -785,25 +785,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Role"
+                            "$ref": "#/definitions/dto.Result-po_Role"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -833,19 +833,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Role"
+                            "$ref": "#/definitions/dto.Result-po_Role"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -874,7 +874,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RoleUpdateReq"
+                            "$ref": "#/definitions/dto.RoleUpdateReq"
                         }
                     }
                 ],
@@ -882,25 +882,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -928,19 +928,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1009,19 +1009,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_User"
+                            "$ref": "#/definitions/dto.ResultList-po_User"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1043,7 +1043,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UserCreateReq"
+                            "$ref": "#/definitions/dto.UserCreateReq"
                         }
                     }
                 ],
@@ -1051,25 +1051,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1099,19 +1099,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1140,7 +1140,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UserUpdateReq"
+                            "$ref": "#/definitions/dto.UserUpdateReq"
                         }
                     }
                 ],
@@ -1148,25 +1148,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1194,19 +1194,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1236,19 +1236,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1256,7 +1256,7 @@
         }
     },
     "definitions": {
-        "dtos.AuthUpdatePasswordReq": {
+        "dto.AuthUpdatePasswordReq": {
             "type": "object",
             "required": [
                 "newPassword",
@@ -1273,7 +1273,7 @@
                 }
             }
         },
-        "dtos.AuthUpdateUserReq": {
+        "dto.AuthUpdateUserReq": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1281,7 +1281,7 @@
                     "type": "string",
                     "maxLength": 128
                 },
-                "name": {
+                "nickName": {
                     "description": "Name of user",
                     "type": "string",
                     "maxLength": 64
@@ -1291,11 +1291,6 @@
                     "type": "string",
                     "maxLength": 32
                 },
-                "remark": {
-                    "description": "Remark of user",
-                    "type": "string",
-                    "maxLength": 1024
-                },
                 "wechat": {
                     "description": "Wechat account",
                     "type": "string",
@@ -1303,7 +1298,7 @@
                 }
             }
         },
-        "dtos.Captcha": {
+        "dto.Captcha": {
             "type": "object",
             "properties": {
                 "captchaId": {
@@ -1312,13 +1307,13 @@
                 }
             }
         },
-        "dtos.List-models_Logger": {
+        "dto.List-po_Logger": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Logger"
+                        "$ref": "#/definitions/po.Logger"
                     }
                 },
                 "limit": {
@@ -1335,13 +1330,13 @@
                 }
             }
         },
-        "dtos.List-models_Menu": {
+        "dto.List-po_Menu": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "limit": {
@@ -1358,13 +1353,13 @@
                 }
             }
         },
-        "dtos.List-models_Role": {
+        "dto.List-po_Role": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Role"
+                        "$ref": "#/definitions/po.Role"
                     }
                 },
                 "limit": {
@@ -1381,13 +1376,13 @@
                 }
             }
         },
-        "dtos.List-models_User": {
+        "dto.List-po_User": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.User"
+                        "$ref": "#/definitions/po.User"
                     }
                 },
                 "limit": {
@@ -1404,7 +1399,7 @@
                 }
             }
         },
-        "dtos.Login": {
+        "dto.Login": {
             "type": "object",
             "required": [
                 "password",
@@ -1421,7 +1416,7 @@
                 }
             }
         },
-        "dtos.LoginToken": {
+        "dto.LoginToken": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -1442,7 +1437,7 @@
                 }
             }
         },
-        "dtos.MenuCreateReq": {
+        "dto.MenuCreateReq": {
             "type": "object",
             "required": [
                 "status",
@@ -1506,7 +1501,7 @@
                 }
             }
         },
-        "dtos.MenuUpdateReq": {
+        "dto.MenuUpdateReq": {
             "type": "object",
             "properties": {
                 "component": {
@@ -1562,7 +1557,7 @@
                 }
             }
         },
-        "dtos.Result-any": {
+        "dto.Result-any": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1574,49 +1569,49 @@
                 }
             }
         },
-        "dtos.Result-dtos_Captcha": {
+        "dto.Result-dto_Captcha": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.Captcha"
+                    "$ref": "#/definitions/dto.Captcha"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-dtos_LoginToken": {
+        "dto.Result-dto_LoginToken": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.LoginToken"
+                    "$ref": "#/definitions/dto.LoginToken"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-models_Menu": {
+        "dto.Result-po_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/models.Menu"
+                    "$ref": "#/definitions/po.Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-models_Menus": {
+        "dto.Result-po_Menus": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1625,7 +1620,7 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "message": {
@@ -1633,91 +1628,91 @@
                 }
             }
         },
-        "dtos.Result-models_Role": {
+        "dto.Result-po_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/models.Role"
+                    "$ref": "#/definitions/po.Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-models_User": {
+        "dto.Result-po_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/models.User"
+                    "$ref": "#/definitions/po.User"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_Logger": {
+        "dto.ResultList-po_Logger": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_Logger"
+                    "$ref": "#/definitions/dto.List-po_Logger"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_Menu": {
+        "dto.ResultList-po_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_Menu"
+                    "$ref": "#/definitions/dto.List-po_Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_Role": {
+        "dto.ResultList-po_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_Role"
+                    "$ref": "#/definitions/dto.List-po_Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_User": {
+        "dto.ResultList-po_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_User"
+                    "$ref": "#/definitions/dto.List-po_User"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.RoleCreateReq": {
+        "dto.RoleCreateReq": {
             "type": "object",
             "required": [
                 "code",
@@ -1760,7 +1755,7 @@
                 }
             }
         },
-        "dtos.RoleUpdateReq": {
+        "dto.RoleUpdateReq": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1798,7 +1793,7 @@
                 }
             }
         },
-        "dtos.UserCreateReq": {
+        "dto.UserCreateReq": {
             "type": "object",
             "required": [
                 "nickName",
@@ -1864,7 +1859,7 @@
                 }
             }
         },
-        "dtos.UserUpdateReq": {
+        "dto.UserUpdateReq": {
             "type": "object",
             "properties": {
                 "description": {
@@ -1924,7 +1919,7 @@
                 }
             }
         },
-        "models.Logger": {
+        "po.Logger": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1974,14 +1969,14 @@
                 }
             }
         },
-        "models.Menu": {
+        "po.Menu": {
             "type": "object",
             "properties": {
                 "children": {
                     "description": "Child menus",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Menus"
+                            "$ref": "#/definitions/po.Menus"
                         }
                     ]
                 },
@@ -2027,7 +2022,7 @@
                     "type": "string"
                 },
                 "roles": {
-                    "$ref": "#/definitions/models.Roles"
+                    "$ref": "#/definitions/po.Roles"
                 },
                 "status": {
                     "description": "Status of menu (enabled, disabled)",
@@ -2047,13 +2042,13 @@
                 }
             }
         },
-        "models.Menus": {
+        "po.Menus": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.Menu"
+                "$ref": "#/definitions/po.Menu"
             }
         },
-        "models.Role": {
+        "po.Role": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2075,7 +2070,7 @@
                 "menus": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "name": {
@@ -2097,18 +2092,18 @@
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.User"
+                        "$ref": "#/definitions/po.User"
                     }
                 }
             }
         },
-        "models.Roles": {
+        "po.Roles": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.Role"
+                "$ref": "#/definitions/po.Role"
             }
         },
-        "models.User": {
+        "po.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -2147,7 +2142,7 @@
                     "description": "Roles of user",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Role"
+                        "$ref": "#/definitions/po.Role"
                     }
                 },
                 "status": {

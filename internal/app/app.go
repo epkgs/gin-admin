@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
-	"gin-admin/internal/apis"
+	"gin-admin/internal/api"
 	"gin-admin/internal/app/modules"
-	"gin-admin/internal/configs"
+	"gin-admin/internal/config"
 	"gin-admin/internal/errorx"
-	"gin-admin/internal/models"
-	"gin-admin/internal/services"
+	"gin-admin/internal/model/po"
+	"gin-admin/internal/service"
 	"gin-admin/internal/types"
 	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
@@ -29,7 +29,7 @@ import (
 )
 
 type App struct {
-	config *configs.Config
+	cfg    *config.Config
 	db     *gorm.DB
 	cacher cachex.Cacher
 	jwt    jwtx.Auther
@@ -42,10 +42,10 @@ type App struct {
 
 var _ types.AppContext = (*App)(nil)
 
-func New(ctx context.Context, c *configs.Config) *App {
+func New(ctx context.Context, c *config.Config) *App {
 
 	app := &App{
-		config:   c,
+		cfg:      c,
 		cleaners: []func(){},
 	}
 
@@ -59,8 +59,8 @@ func New(ctx context.Context, c *configs.Config) *App {
 	return app
 }
 
-func (a *App) Config() *configs.Config {
-	return a.config
+func (a *App) Config() *config.Config {
+	return a.cfg
 }
 
 func (a *App) DB() *gorm.DB {
@@ -88,14 +88,7 @@ func (a *App) AddCleaner(ctx context.Context, cleaner func()) {
 }
 
 func (a *App) autoMigrate(_ context.Context) error {
-	return a.db.AutoMigrate(
-		new(models.Logger),
-		new(models.MenuRole),
-		new(models.UserRole),
-		new(models.Menu),
-		new(models.Role),
-		new(models.User),
-	)
+	return a.db.AutoMigrate(po.Models()...)
 }
 
 func (a *App) Init(ctx context.Context) error {
@@ -105,7 +98,7 @@ func (a *App) Init(ctx context.Context) error {
 		}
 
 		// 插入 super 账户
-		if err := services.NewUser(a).InitSuperUserIfNeed(ctx); err != nil {
+		if err := service.NewUser(a).InitSuperUserIfNeed(ctx); err != nil {
 			return err
 		}
 	}
@@ -115,7 +108,7 @@ func (a *App) Init(ctx context.Context) error {
 	}
 
 	// Init menu data
-	if err := services.NewMenu(a).InitIfNeed(ctx); err != nil {
+	if err := service.NewMenu(a).InitIfNeed(ctx); err != nil {
 		panic(err)
 	}
 
@@ -123,7 +116,7 @@ func (a *App) Init(ctx context.Context) error {
 }
 
 func (a *App) InitHttp(ctx context.Context) error {
-	if a.config.IsDebug() {
+	if a.cfg.IsDebug() {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
@@ -133,7 +126,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 		response.OK(c)
 	})
 	e.Use(middleware.RecoveryWithConfig(middleware.RecoveryConfig{
-		Skip: a.config.Middleware.Recovery.Skip,
+		Skip: a.cfg.Middleware.Recovery.Skip,
 	}))
 	e.NoMethod(func(c *gin.Context) {
 		response.Error(c, errorx.ErrMethodNotAllowed)
@@ -142,39 +135,39 @@ func (a *App) InitHttp(ctx context.Context) error {
 		response.Error(c, errorx.ErrNotFound.WithMsg(locales.Def.Str("Route not found")))
 	})
 
-	if err := apis.RegisterRouters(a, e); err != nil {
+	if err := api.RegisterRouters(a, e); err != nil {
 		return err
 	}
 
 	// Register swagger
-	if a.config.Swagger.Enable {
+	if a.cfg.Swagger.Enable {
 		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.RBAC())
-		g.StaticFile("/openapi.json", a.config.Swagger.StaticFile)
+		g.StaticFile("/openapi.json", a.cfg.Swagger.StaticFile)
 		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	if dir := a.config.Middleware.Static.Root; dir != "" {
+	if dir := a.cfg.Middleware.Static.Root; dir != "" {
 		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:                 dir,
-			ExcludedPathPrefixes: a.config.Middleware.Static.ExcludedPathPrefixes,
+			ExcludedPathPrefixes: a.cfg.Middleware.Static.ExcludedPathPrefixes,
 		}))
 	}
 
-	addr := a.config.HTTP.Addr
+	addr := a.cfg.HTTP.Addr
 	logger.Info(ctx, fmt.Sprintf("HTTP server is listening on %s", addr))
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      e,
-		ReadTimeout:  time.Second * time.Duration(a.config.HTTP.ReadTimeout),
-		WriteTimeout: time.Second * time.Duration(a.config.HTTP.WriteTimeout),
-		IdleTimeout:  time.Second * time.Duration(a.config.HTTP.IdleTimeout),
+		ReadTimeout:  time.Second * time.Duration(a.cfg.HTTP.ReadTimeout),
+		WriteTimeout: time.Second * time.Duration(a.cfg.HTTP.WriteTimeout),
+		IdleTimeout:  time.Second * time.Duration(a.cfg.HTTP.IdleTimeout),
 	}
 
 	go func() {
 		var err error
-		if a.config.HTTP.CertFile != "" && a.config.HTTP.KeyFile != "" {
+		if a.cfg.HTTP.CertFile != "" && a.cfg.HTTP.KeyFile != "" {
 			srv.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
-			err = srv.ListenAndServeTLS(a.config.HTTP.CertFile, a.config.HTTP.KeyFile)
+			err = srv.ListenAndServeTLS(a.cfg.HTTP.CertFile, a.cfg.HTTP.KeyFile)
 		} else {
 			err = srv.ListenAndServe()
 		}
@@ -185,7 +178,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 	}()
 
 	a.AddCleaner(ctx, func() {
-		ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(a.config.HTTP.ShutdownTimeout))
+		ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(a.cfg.HTTP.ShutdownTimeout))
 		defer cancel()
 
 		srv.SetKeepAlivesEnabled(false)

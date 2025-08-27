@@ -35,25 +35,24 @@
 ```
 .
 ├── cmd                 # 命令行工具
-├── configs             # 配置文件
+├── config              # 配置文件
+├── data                # 数据文件（运行时生成）
 ├── internal            # 核心业务逻辑
-│   ├── apis            # API控制器
+│   ├── api             # API控制器
 │   ├── app             # 应用初始化
-│   ├── configs         # 配置解析
-│   ├── defines         # 常量定义
-│   ├── dtos            # 数据传输对象
+│   ├── config          # 配置解析
 │   ├── errorx          # 错误处理
-│   ├── models          # 数据模型
-│   ├── repositories    # 数据访问层
-│   ├── services        # 业务逻辑层
+│   ├── model           # 数据模型
+│   │   ├── bo          # 业务对象，由 Gorm Gen 生成
+│   │   ├── dto         # 数据传输对象，用于接收前端参数
+│   │   └── po          # 持久化对象，对应数据库实体
+│   ├── service         # 业务逻辑层
 │   ├── swagger         # API文档
 │   └── types           # 接口定义
 ├── locales             # 多语言文件
 ├── pkg                 # 公共组件库
 ├── scripts             # 脚本文件
-├── test                # 测试文件
-├── data                # 数据文件（运行时生成）
-└── uploads             # 上传文件（运行时生成）
+└── test                # 测试文件
 ```
 
 ## 快速开始

@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/internal/dtos"
-	"gin-admin/internal/models"
+	"gin-admin/internal/model/dto"
+	"gin-admin/internal/model/po"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +18,7 @@ func TestRole(t *testing.T) {
 		os.RemoveAll("data")
 	})
 
-	menuFormItem := dtos.MenuCreateReq{
+	menuFormItem := dto.MenuCreateReq{
 		Name:  "role",
 		Type:  "menu",
 		Path:  "/system/role",
@@ -28,10 +28,10 @@ func TestRole(t *testing.T) {
 			"icon": "role",
 		},
 
-		Status: models.MenuStatus_ENABLED,
+		Status: po.MenuStatus_ENABLED,
 	}
 
-	var createMenu dtos.Result[*models.Menu]
+	var createMenu dto.Result[*po.Menu]
 	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
 		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
 
@@ -46,16 +46,16 @@ func TestRole(t *testing.T) {
 	assert.Equal(menuFormItem.Extra, menu.Extra)
 	assert.Equal(menuFormItem.Status, menu.Status)
 
-	roleFormItem := dtos.RoleCreateReq{
+	roleFormItem := dto.RoleCreateReq{
 		Code:        "admin",
 		Name:        "Administrator",
 		MenuIDs:     []string{menu.ID},
 		Description: "Administrator",
 		Rank:        9,
-		Status:      models.RoleStatus_Enabled,
+		Status:      po.RoleStatus_Enabled,
 	}
 
-	var createRole dtos.Result[*models.Role]
+	var createRole dto.Result[*po.Role]
 	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
 	role := createRole.Data
 	assert.NotEmpty(role.ID)
@@ -66,18 +66,18 @@ func TestRole(t *testing.T) {
 	assert.Equal(roleFormItem.Status, role.Status)
 	assert.Equal(len(roleFormItem.MenuIDs), len(role.Menus))
 
-	var listRoles dtos.ResultList[*models.Role]
+	var listRoles dto.ResultList[*po.Role]
 	e.GET(baseAPI + "/roles").Expect().Status(http.StatusOK).JSON().Decode(&listRoles)
 	roles := listRoles.Data.Items
 	assert.GreaterOrEqual(len(roles), 1)
 
 	newName := "Administrator 1"
-	newStatus := models.RoleStatus_Disabled
+	newStatus := po.RoleStatus_Disabled
 	role.Name = newName
 	role.Status = newStatus
 	e.PUT(baseAPI + "/roles/" + role.ID).WithJSON(role).Expect().Status(http.StatusOK)
 
-	var getRole dtos.Result[*models.Role]
+	var getRole dto.Result[*po.Role]
 	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK).JSON().Decode(&getRole)
 	assert.Equal(newName, getRole.Data.Name)
 	assert.Equal(newStatus, getRole.Data.Status)

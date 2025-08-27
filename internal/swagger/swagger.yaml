@@ -1,5 +1,5 @@
 definitions:
-  dtos.AuthUpdatePasswordReq:
+  dto.AuthUpdatePasswordReq:
     properties:
       newPassword:
         description: New password (md5 hash)
@@ -11,13 +11,13 @@ definitions:
     - newPassword
     - oldPassword
     type: object
-  dtos.AuthUpdateUserReq:
+  dto.AuthUpdateUserReq:
     properties:
       email:
         description: Email of user
         maxLength: 128
         type: string
-      name:
+      nickName:
         description: Name of user
         maxLength: 64
         type: string
@@ -25,26 +25,22 @@ definitions:
         description: Phone number of user
         maxLength: 32
         type: string
-      remark:
-        description: Remark of user
-        maxLength: 1024
-        type: string
       wechat:
         description: Wechat account
         maxLength: 64
         type: string
     type: object
-  dtos.Captcha:
+  dto.Captcha:
     properties:
       captchaId:
         description: Captcha ID
         type: string
     type: object
-  dtos.List-models_Logger:
+  dto.List-po_Logger:
     properties:
       items:
         items:
-          $ref: '#/definitions/models.Logger'
+          $ref: '#/definitions/po.Logger'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -57,11 +53,11 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dtos.List-models_Menu:
+  dto.List-po_Menu:
     properties:
       items:
         items:
-          $ref: '#/definitions/models.Menu'
+          $ref: '#/definitions/po.Menu'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -74,11 +70,11 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dtos.List-models_Role:
+  dto.List-po_Role:
     properties:
       items:
         items:
-          $ref: '#/definitions/models.Role'
+          $ref: '#/definitions/po.Role'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -91,11 +87,11 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dtos.List-models_User:
+  dto.List-po_User:
     properties:
       items:
         items:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/po.User'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -108,7 +104,7 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dtos.Login:
+  dto.Login:
     properties:
       password:
         description: Login password (md5 hash)
@@ -120,7 +116,7 @@ definitions:
     - password
     - username
     type: object
-  dtos.LoginToken:
+  dto.LoginToken:
     properties:
       accessToken:
         description: Access token (JWT)
@@ -135,7 +131,7 @@ definitions:
         description: 'Token type (Usage: Authorization=${token_type} ${access_token})'
         type: string
     type: object
-  dtos.MenuCreateReq:
+  dto.MenuCreateReq:
     properties:
       component:
         description: Component path of view
@@ -183,7 +179,7 @@ definitions:
     - status
     - type
     type: object
-  dtos.MenuUpdateReq:
+  dto.MenuUpdateReq:
     properties:
       component:
         description: Component path of view
@@ -225,7 +221,7 @@ definitions:
         - button
         type: string
     type: object
-  dtos.Result-any:
+  dto.Result-any:
     properties:
       code:
         type: integer
@@ -233,99 +229,99 @@ definitions:
       message:
         type: string
     type: object
-  dtos.Result-dtos_Captcha:
+  dto.Result-dto_Captcha:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dtos.Captcha'
+        $ref: '#/definitions/dto.Captcha'
       message:
         type: string
     type: object
-  dtos.Result-dtos_LoginToken:
+  dto.Result-dto_LoginToken:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dtos.LoginToken'
+        $ref: '#/definitions/dto.LoginToken'
       message:
         type: string
     type: object
-  dtos.Result-models_Menu:
+  dto.Result-po_Menu:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/models.Menu'
+        $ref: '#/definitions/po.Menu'
       message:
         type: string
     type: object
-  dtos.Result-models_Menus:
+  dto.Result-po_Menus:
     properties:
       code:
         type: integer
       data:
         items:
-          $ref: '#/definitions/models.Menu'
+          $ref: '#/definitions/po.Menu'
         type: array
       message:
         type: string
     type: object
-  dtos.Result-models_Role:
+  dto.Result-po_Role:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/models.Role'
+        $ref: '#/definitions/po.Role'
       message:
         type: string
     type: object
-  dtos.Result-models_User:
+  dto.Result-po_User:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/models.User'
+        $ref: '#/definitions/po.User'
       message:
         type: string
     type: object
-  dtos.ResultList-models_Logger:
+  dto.ResultList-po_Logger:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dtos.List-models_Logger'
+        $ref: '#/definitions/dto.List-po_Logger'
       message:
         type: string
     type: object
-  dtos.ResultList-models_Menu:
+  dto.ResultList-po_Menu:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dtos.List-models_Menu'
+        $ref: '#/definitions/dto.List-po_Menu'
       message:
         type: string
     type: object
-  dtos.ResultList-models_Role:
+  dto.ResultList-po_Role:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dtos.List-models_Role'
+        $ref: '#/definitions/dto.List-po_Role'
       message:
         type: string
     type: object
-  dtos.ResultList-models_User:
+  dto.ResultList-po_User:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dtos.List-models_User'
+        $ref: '#/definitions/dto.List-po_User'
       message:
         type: string
     type: object
-  dtos.RoleCreateReq:
+  dto.RoleCreateReq:
     properties:
       code:
         description: Code of role (unique)
@@ -357,7 +353,7 @@ definitions:
     - name
     - status
     type: object
-  dtos.RoleUpdateReq:
+  dto.RoleUpdateReq:
     properties:
       code:
         description: Code of role (unique)
@@ -385,7 +381,7 @@ definitions:
         - enabled
         type: string
     type: object
-  dtos.UserCreateReq:
+  dto.UserCreateReq:
     properties:
       description:
         description: Description of user
@@ -436,7 +432,7 @@ definitions:
     - status
     - username
     type: object
-  dtos.UserUpdateReq:
+  dto.UserUpdateReq:
     properties:
       description:
         description: Description of user
@@ -482,7 +478,7 @@ definitions:
         maxLength: 64
         type: string
     type: object
-  models.Logger:
+  po.Logger:
     properties:
       createdAt:
         description: Create time
@@ -519,11 +515,11 @@ definitions:
         description: From User.Name
         type: string
     type: object
-  models.Menu:
+  po.Menu:
     properties:
       children:
         allOf:
-        - $ref: '#/definitions/models.Menus'
+        - $ref: '#/definitions/po.Menus'
         description: Child menus
       component:
         description: Component path of view
@@ -557,7 +553,7 @@ definitions:
         description: Redirect path of menu
         type: string
       roles:
-        $ref: '#/definitions/models.Roles'
+        $ref: '#/definitions/po.Roles'
       status:
         description: Status of menu (enabled, disabled)
         type: string
@@ -571,11 +567,11 @@ definitions:
         description: Update time
         type: string
     type: object
-  models.Menus:
+  po.Menus:
     items:
-      $ref: '#/definitions/models.Menu'
+      $ref: '#/definitions/po.Menu'
     type: array
-  models.Role:
+  po.Role:
     properties:
       code:
         description: Code of role (unique)
@@ -591,7 +587,7 @@ definitions:
         type: string
       menus:
         items:
-          $ref: '#/definitions/models.Menu'
+          $ref: '#/definitions/po.Menu'
         type: array
       name:
         description: Display name of role
@@ -607,14 +603,14 @@ definitions:
         type: string
       users:
         items:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/po.User'
         type: array
     type: object
-  models.Roles:
+  po.Roles:
     items:
-      $ref: '#/definitions/models.Role'
+      $ref: '#/definitions/po.Role'
     type: array
-  models.User:
+  po.User:
     properties:
       avatar:
         description: Avatar URL
@@ -643,7 +639,7 @@ definitions:
       roles:
         description: Roles of user
         items:
-          $ref: '#/definitions/models.Role'
+          $ref: '#/definitions/po.Role'
         type: array
       status:
         description: Status of user (activated, freezed)
@@ -672,20 +668,20 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.Login'
+          $ref: '#/definitions/dto.Login'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-dtos_LoginToken'
+            $ref: '#/definitions/dto.Result-dto_LoginToken'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       summary: Login system with username and password
       tags:
       - AuthAPI
@@ -695,11 +691,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Logout system
@@ -711,15 +707,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_Menus'
+            $ref: '#/definitions/dto.Result-po_Menus'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Query current user menus based on the current user role
@@ -733,24 +729,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.AuthUpdatePasswordReq'
+          $ref: '#/definitions/dto.AuthUpdatePasswordReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Change current user password
@@ -762,15 +758,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-dtos_LoginToken'
+            $ref: '#/definitions/dto.Result-dto_LoginToken'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Refresh current access token
@@ -782,15 +778,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_User'
+            $ref: '#/definitions/dto.Result-po_User'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Get current user info
@@ -803,24 +799,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.AuthUpdateUserReq'
+          $ref: '#/definitions/dto.AuthUpdateUserReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Update current user info
@@ -832,7 +828,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-dtos_Captcha'
+            $ref: '#/definitions/dto.Result-dto_Captcha'
       summary: Get captcha ID
       tags:
       - CaptchaAPI
@@ -855,7 +851,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       summary: Response captcha image
       tags:
       - CaptchaAPI
@@ -907,15 +903,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.ResultList-models_Logger'
+            $ref: '#/definitions/dto.ResultList-po_Logger'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Query logger list
@@ -961,15 +957,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.ResultList-models_Menu'
+            $ref: '#/definitions/dto.ResultList-po_Menu'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Query menu tree data
@@ -982,24 +978,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.MenuCreateReq'
+          $ref: '#/definitions/dto.MenuCreateReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_Menu'
+            $ref: '#/definitions/dto.Result-po_Menu'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Create menu record
@@ -1017,15 +1013,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Delete menu record by ID
@@ -1042,15 +1038,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_Menu'
+            $ref: '#/definitions/dto.Result-po_Menu'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Get menu record by ID
@@ -1068,24 +1064,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.MenuUpdateReq'
+          $ref: '#/definitions/dto.MenuUpdateReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Update menu record by ID
@@ -1127,15 +1123,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.ResultList-models_Role'
+            $ref: '#/definitions/dto.ResultList-po_Role'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Query role list
@@ -1148,24 +1144,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.RoleCreateReq'
+          $ref: '#/definitions/dto.RoleCreateReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_Role'
+            $ref: '#/definitions/dto.Result-po_Role'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Create role record
@@ -1183,15 +1179,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Delete role record by ID
@@ -1208,15 +1204,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_Role'
+            $ref: '#/definitions/dto.Result-po_Role'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Get role record by ID
@@ -1234,24 +1230,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.RoleUpdateReq'
+          $ref: '#/definitions/dto.RoleUpdateReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Update role record by ID
@@ -1296,15 +1292,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.ResultList-models_User'
+            $ref: '#/definitions/dto.ResultList-po_User'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Query user list
@@ -1317,24 +1313,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.UserCreateReq'
+          $ref: '#/definitions/dto.UserCreateReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_User'
+            $ref: '#/definitions/dto.Result-po_User'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Create user record
@@ -1352,15 +1348,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Delete user record by ID
@@ -1377,15 +1373,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-models_User'
+            $ref: '#/definitions/dto.Result-po_User'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Get user record by ID
@@ -1403,24 +1399,24 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.UserUpdateReq'
+          $ref: '#/definitions/dto.UserUpdateReq'
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Update user record by ID
@@ -1438,15 +1434,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/dtos.Result-any'
+            $ref: '#/definitions/dto.Result-any'
       security:
       - ApiKeyAuth: []
       summary: Reset user password by ID

@@ -28,7 +28,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.Login"
+                            "$ref": "#/definitions/dto.Login"
                         }
                     }
                 ],
@@ -36,19 +36,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-dtos_LoginToken"
+                            "$ref": "#/definitions/dto.Result-dto_LoginToken"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -69,13 +69,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -96,19 +96,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Menus"
+                            "$ref": "#/definitions/dto.Result-po_Menus"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -132,7 +132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.AuthUpdatePasswordReq"
+                            "$ref": "#/definitions/dto.AuthUpdatePasswordReq"
                         }
                     }
                 ],
@@ -140,25 +140,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -179,19 +179,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-dtos_LoginToken"
+                            "$ref": "#/definitions/dto.Result-dto_LoginToken"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -212,19 +212,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -246,7 +246,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.AuthUpdateUserReq"
+                            "$ref": "#/definitions/dto.AuthUpdateUserReq"
                         }
                     }
                 ],
@@ -254,25 +254,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -288,7 +288,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-dtos_Captcha"
+                            "$ref": "#/definitions/dto.Result-dto_Captcha"
                         }
                     }
                 }
@@ -324,7 +324,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -407,19 +407,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_Logger"
+                            "$ref": "#/definitions/dto.ResultList-po_Logger"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -490,19 +490,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_Menu"
+                            "$ref": "#/definitions/dto.ResultList-po_Menu"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -524,7 +524,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.MenuCreateReq"
+                            "$ref": "#/definitions/dto.MenuCreateReq"
                         }
                     }
                 ],
@@ -532,25 +532,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Menu"
+                            "$ref": "#/definitions/dto.Result-po_Menu"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -580,19 +580,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Menu"
+                            "$ref": "#/definitions/dto.Result-po_Menu"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -621,7 +621,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.MenuUpdateReq"
+                            "$ref": "#/definitions/dto.MenuUpdateReq"
                         }
                     }
                 ],
@@ -629,25 +629,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -675,19 +675,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -751,19 +751,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_Role"
+                            "$ref": "#/definitions/dto.ResultList-po_Role"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -785,7 +785,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RoleCreateReq"
+                            "$ref": "#/definitions/dto.RoleCreateReq"
                         }
                     }
                 ],
@@ -793,25 +793,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Role"
+                            "$ref": "#/definitions/dto.Result-po_Role"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -841,19 +841,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_Role"
+                            "$ref": "#/definitions/dto.Result-po_Role"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -882,7 +882,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.RoleUpdateReq"
+                            "$ref": "#/definitions/dto.RoleUpdateReq"
                         }
                     }
                 ],
@@ -890,25 +890,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -936,19 +936,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1017,19 +1017,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.ResultList-models_User"
+                            "$ref": "#/definitions/dto.ResultList-po_User"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1051,7 +1051,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UserCreateReq"
+                            "$ref": "#/definitions/dto.UserCreateReq"
                         }
                     }
                 ],
@@ -1059,25 +1059,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1107,19 +1107,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-models_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1148,7 +1148,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.UserUpdateReq"
+                            "$ref": "#/definitions/dto.UserUpdateReq"
                         }
                     }
                 ],
@@ -1156,25 +1156,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1202,19 +1202,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1244,19 +1244,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dtos.Result-any"
+                            "$ref": "#/definitions/dto.Result-any"
                         }
                     }
                 }
@@ -1264,7 +1264,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dtos.AuthUpdatePasswordReq": {
+        "dto.AuthUpdatePasswordReq": {
             "type": "object",
             "required": [
                 "newPassword",
@@ -1281,7 +1281,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.AuthUpdateUserReq": {
+        "dto.AuthUpdateUserReq": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1289,7 +1289,7 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 128
                 },
-                "name": {
+                "nickName": {
                     "description": "Name of user",
                     "type": "string",
                     "maxLength": 64
@@ -1299,11 +1299,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 32
                 },
-                "remark": {
-                    "description": "Remark of user",
-                    "type": "string",
-                    "maxLength": 1024
-                },
                 "wechat": {
                     "description": "Wechat account",
                     "type": "string",
@@ -1311,7 +1306,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.Captcha": {
+        "dto.Captcha": {
             "type": "object",
             "properties": {
                 "captchaId": {
@@ -1320,13 +1315,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.List-models_Logger": {
+        "dto.List-po_Logger": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Logger"
+                        "$ref": "#/definitions/po.Logger"
                     }
                 },
                 "limit": {
@@ -1343,13 +1338,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.List-models_Menu": {
+        "dto.List-po_Menu": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "limit": {
@@ -1366,13 +1361,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.List-models_Role": {
+        "dto.List-po_Role": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Role"
+                        "$ref": "#/definitions/po.Role"
                     }
                 },
                 "limit": {
@@ -1389,13 +1384,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.List-models_User": {
+        "dto.List-po_User": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.User"
+                        "$ref": "#/definitions/po.User"
                     }
                 },
                 "limit": {
@@ -1412,7 +1407,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.Login": {
+        "dto.Login": {
             "type": "object",
             "required": [
                 "password",
@@ -1429,7 +1424,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.LoginToken": {
+        "dto.LoginToken": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -1450,7 +1445,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.MenuCreateReq": {
+        "dto.MenuCreateReq": {
             "type": "object",
             "required": [
                 "status",
@@ -1514,7 +1509,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.MenuUpdateReq": {
+        "dto.MenuUpdateReq": {
             "type": "object",
             "properties": {
                 "component": {
@@ -1570,7 +1565,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.Result-any": {
+        "dto.Result-any": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1582,49 +1577,49 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.Result-dtos_Captcha": {
+        "dto.Result-dto_Captcha": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.Captcha"
+                    "$ref": "#/definitions/dto.Captcha"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-dtos_LoginToken": {
+        "dto.Result-dto_LoginToken": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.LoginToken"
+                    "$ref": "#/definitions/dto.LoginToken"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-models_Menu": {
+        "dto.Result-po_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/models.Menu"
+                    "$ref": "#/definitions/po.Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-models_Menus": {
+        "dto.Result-po_Menus": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1633,7 +1628,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "message": {
@@ -1641,91 +1636,91 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.Result-models_Role": {
+        "dto.Result-po_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/models.Role"
+                    "$ref": "#/definitions/po.Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.Result-models_User": {
+        "dto.Result-po_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/models.User"
+                    "$ref": "#/definitions/po.User"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_Logger": {
+        "dto.ResultList-po_Logger": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_Logger"
+                    "$ref": "#/definitions/dto.List-po_Logger"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_Menu": {
+        "dto.ResultList-po_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_Menu"
+                    "$ref": "#/definitions/dto.List-po_Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_Role": {
+        "dto.ResultList-po_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_Role"
+                    "$ref": "#/definitions/dto.List-po_Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.ResultList-models_User": {
+        "dto.ResultList-po_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dtos.List-models_User"
+                    "$ref": "#/definitions/dto.List-po_User"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dtos.RoleCreateReq": {
+        "dto.RoleCreateReq": {
             "type": "object",
             "required": [
                 "code",
@@ -1768,7 +1763,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.RoleUpdateReq": {
+        "dto.RoleUpdateReq": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1806,7 +1801,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.UserCreateReq": {
+        "dto.UserCreateReq": {
             "type": "object",
             "required": [
                 "nickName",
@@ -1872,7 +1867,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.UserUpdateReq": {
+        "dto.UserUpdateReq": {
             "type": "object",
             "properties": {
                 "description": {
@@ -1932,7 +1927,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Logger": {
+        "po.Logger": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1982,14 +1977,14 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Menu": {
+        "po.Menu": {
             "type": "object",
             "properties": {
                 "children": {
                     "description": "Child menus",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Menus"
+                            "$ref": "#/definitions/po.Menus"
                         }
                     ]
                 },
@@ -2035,7 +2030,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "roles": {
-                    "$ref": "#/definitions/models.Roles"
+                    "$ref": "#/definitions/po.Roles"
                 },
                 "status": {
                     "description": "Status of menu (enabled, disabled)",
@@ -2055,13 +2050,13 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Menus": {
+        "po.Menus": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.Menu"
+                "$ref": "#/definitions/po.Menu"
             }
         },
-        "models.Role": {
+        "po.Role": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2083,7 +2078,7 @@ const docTemplate = `{
                 "menus": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "name": {
@@ -2105,18 +2100,18 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.User"
+                        "$ref": "#/definitions/po.User"
                     }
                 }
             }
         },
-        "models.Roles": {
+        "po.Roles": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.Role"
+                "$ref": "#/definitions/po.Role"
             }
         },
-        "models.User": {
+        "po.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -2155,7 +2150,7 @@ const docTemplate = `{
                     "description": "Roles of user",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Role"
+                        "$ref": "#/definitions/po.Role"
                     }
                 },
                 "status": {

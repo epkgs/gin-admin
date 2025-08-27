@@ -82,14 +82,14 @@ Prometheus:
 
 Swagger:
   Enable: false                      # Enable swagger UI (default: false)  
-  StaticFile: "configs/openapi.json" # Static file for openapi.json (default: "configs/openapi.json")
+  StaticFile: "config/openapi.json"  # Static file for openapi.json (default: "config/openapi.json")
 
 
 Pprof:
   Addr: ""                          # Pprof monitor address, "localhost:6060"
 
 Menu:
-  File: "configs/menus.json"         # Data to restore model.Menus (default: "configs/menus.json")
+  File: "config/menus.json"          # Data to restore model.Menus (default: "config/menus.json")
   DenyOperate: false                 # Deny menu operations (default: false)
 
 # Logger Configuration

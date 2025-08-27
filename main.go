@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gin-admin/cmd"
+	"gin-admin/cmd/app"
 
 	"github.com/spf13/cobra"
 )
@@ -26,9 +26,9 @@ func main() {
 		Version: VERSION,
 	}
 
-	rootCmd.AddCommand(cmd.StartCmd())
-	rootCmd.AddCommand(cmd.StopCmd())
-	rootCmd.AddCommand(cmd.VersionCmd())
+	rootCmd.AddCommand(app.StartCmd())
+	rootCmd.AddCommand(app.StopCmd())
+	rootCmd.AddCommand(app.VersionCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)

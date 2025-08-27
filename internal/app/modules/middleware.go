@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"gin-admin/internal/services"
+	"gin-admin/internal/service"
 	"gin-admin/internal/types"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/middleware"
@@ -106,7 +106,7 @@ func (m *Middlewares) Auth() gin.HandlerFunc {
 		cfg := m.app.Config()
 
 		m.auth = middleware.AuthWithConfig(middleware.AuthConfig{
-			ParseUserID: services.NewAuth(m.app).ParseUserID,
+			ParseUserID: service.NewAuth(m.app).ParseUserID,
 			RootID:      cfg.Super.ID,
 		})
 	}
@@ -155,7 +155,7 @@ func (m *Middlewares) RBAC() gin.HandlerFunc {
 			},
 			GetSubjects: func(c *gin.Context) []string {
 				ctx := c.Request.Context()
-				roleIDs, _ := services.NewUser(m.app).GetRoleIDsCache(ctx, helper.GetUserID(ctx))
+				roleIDs, _ := service.NewUser(m.app).GetRoleIDsCache(ctx, helper.GetUserID(ctx))
 				return roleIDs
 			},
 		})
