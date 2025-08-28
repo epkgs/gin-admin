@@ -359,9 +359,9 @@ func (a *Auth) QueryMenus(ctx context.Context) (po.Menus, error) {
 
 // Update current user info
 func (a *Auth) UpdateUser(ctx context.Context, req *dto.AuthUpdateUserReq) error {
-	// if util.GetIsRootUser(ctx) {
-	// 	return errors.BadRequest("Super user cannot update")
-	// }
+	if helper.GetIsRootUser(ctx) {
+		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify"))
+	}
 
 	userID := helper.GetUserID(ctx)
 
