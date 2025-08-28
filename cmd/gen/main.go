@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"gin-admin/internal/app"
 	"gin-admin/internal/config"
 	"gin-admin/internal/model/po"
-	"gin-admin/internal/types"
+	"gin-admin/pkg/gormx"
 
 	"github.com/spf13/cobra"
 	"gorm.io/gen"
+	"gorm.io/gorm"
 )
 
 type Querier interface {
@@ -17,37 +17,6 @@ type Querier interface {
 	//
 	// where("id=@id")
 	Get(id string) (*gen.T, error)
-}
-
-func executeGen(app types.AppContext) {
-	g := gen.NewGenerator(gen.Config{
-		OutPath:       "./internal/model/bo",                         //gen代码的输出目录
-		ModelPkgPath:  "./internal/model",                            //模型代码的输出目录
-		Mode:          gen.WithDefaultQuery | gen.WithQueryInterface, //启用默认查询和链式接口
-		FieldNullable: true,                                          //允许 Null 的字段生成指针类型
-	})
-
-	g.UseDB(app.DB())
-	//g.GenerateAllTable() //通过数据中的表生成对应的模型
-
-	fmt.Println("正在应用模型...")
-	genModels(g)
-	fmt.Println("模型应用完成!")
-
-	// 执行生成
-	fmt.Println("正在生成 GORM GEN 代码...")
-	g.Execute()
-	fmt.Println("GORM GEN 代码生成完成!")
-}
-
-func genModels(g *gen.Generator) {
-	g.ApplyInterface(
-		func(Querier) {},
-		po.Logger{},
-		po.Menu{},
-		po.Role{},
-		po.User{},
-	)
 }
 
 func main() {
@@ -60,10 +29,17 @@ func main() {
 			ctx := context.Background()
 
 			configFile, _ := cmd.Flags().GetString("config")
-			cfg := config.MustLoad(ctx, configFile)
-			app := app.New(ctx, cfg)
+			cfg, err := config.Load(ctx, configFile)
+			if err != nil {
+				return err
+			}
 
-			executeGen(app)
+			db, err := initDB(cfg.DB)
+			if err != nil {
+				return err
+			}
+
+			executeGen(db)
 
 			return nil
 		},
@@ -73,4 +49,50 @@ func main() {
 	if err := cmd.Execute(); err != nil {
 		panic(err)
 	}
+}
+
+func initDB(cfg config.DB) (*gorm.DB, error) {
+	resolver := make([]gormx.ResolverConfig, len(cfg.Resolver))
+	for i, v := range cfg.Resolver {
+		resolver[i] = gormx.ResolverConfig{
+			DBType:   v.DBType,
+			Sources:  v.Sources,
+			Replicas: v.Replicas,
+			Tables:   v.Tables,
+		}
+	}
+
+	return gormx.New(gormx.Config{
+		Debug:        cfg.Debug,
+		PrepareStmt:  cfg.PrepareStmt,
+		DBType:       cfg.Type,
+		DSN:          cfg.DSN,
+		MaxLifetime:  cfg.MaxLifetime,
+		MaxIdleTime:  cfg.MaxIdleTime,
+		MaxOpenConns: cfg.MaxOpenConns,
+		MaxIdleConns: cfg.MaxIdleConns,
+		Resolver:     resolver,
+	})
+}
+
+func executeGen(db *gorm.DB) {
+	g := gen.NewGenerator(gen.Config{
+		OutPath:       "./internal/model/bo",                         //gen代码的输出目录
+		ModelPkgPath:  "./internal/model",                            //模型代码的输出目录
+		Mode:          gen.WithDefaultQuery | gen.WithQueryInterface, //启用默认查询和链式接口
+		FieldNullable: true,                                          //允许 Null 的字段生成指针类型
+	})
+
+	g.UseDB(db)
+	//g.GenerateAllTable() //通过数据中的表生成对应的模型
+
+	g.ApplyInterface(
+		func(Querier) {},
+		po.Models()...,
+	)
+
+	// 执行生成
+	fmt.Println("正在生成 GORM GEN 代码...")
+	g.Execute()
+	fmt.Println("GORM GEN 代码生成完成!")
 }

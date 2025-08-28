@@ -7,6 +7,7 @@ package bo
 import (
 	"context"
 	"database/sql"
+	"gin-admin/internal/model/po"
 	"strings"
 
 	"gorm.io/gorm"
@@ -17,8 +18,6 @@ import (
 	"gorm.io/gen/field"
 
 	"gorm.io/plugin/dbresolver"
-
-	"gin-admin/internal/model/po"
 )
 
 func newMenu(db *gorm.DB, opts ...gen.DOOption) menu {
