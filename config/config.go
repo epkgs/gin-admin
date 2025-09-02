@@ -2,19 +2,22 @@ package config
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"gin-admin/pkg/encoding/json"
 	"gin-admin/pkg/logger"
+	"gin-admin/pkg/utils/util"
 )
 
 type Config struct {
 	AppName         string `default:"gin-starter"`
 	Version         string `default:"v1.0.0"`
-	AppEnv          string `default:"dev"` // dev/debug/test/prod
+	AppEnv          string `default:"prod"` // dev/debug/test/prod
 	ConfigFile      string
 	PrintConfig     bool
 	DefaultLoginPwd string `default:"6351623c8cef86fefabfa7da046fc619"` // MD5(abc-123)
+	RuntimePath     string `default:"runtime"`
 	Super           struct {
 		ID       string `default:"super"`
 		Username string `default:"super"`
@@ -61,12 +64,6 @@ func (c *Config) preLoad() {
 	if addr := c.Cache.Redis.Addr; addr != "" {
 		username := c.Cache.Redis.Username
 		password := c.Cache.Redis.Password
-		if c.Captcha.CacheType == "redis" &&
-			c.Captcha.Redis.Addr == "" {
-			c.Captcha.Redis.Addr = addr
-			c.Captcha.Redis.Username = username
-			c.Captcha.Redis.Password = password
-		}
 		if c.Middleware.RateLimiter.Store.Type == "redis" &&
 			c.Middleware.RateLimiter.Store.Redis.Addr == "" {
 			c.Middleware.RateLimiter.Store.Redis.Addr = addr
@@ -80,12 +77,30 @@ func (c *Config) preLoad() {
 			c.Middleware.Auth.Store.Redis.Password = password
 		}
 	}
+
+	c.RuntimePath = util.Must(filepath.Abs(c.RuntimePath))
+
+	c.Cache.Badger.Path = c.GetRuntimePath(c.Cache.Badger.Path)
+	c.Middleware.Auth.Store.Badger.Path = c.GetRuntimePath(c.Middleware.Auth.Store.Badger.Path)
+
+	c.Logger.File.Path = c.GetRuntimePath(c.Logger.File.Path)
+
+	c.Middleware.Casbin.GenPolicyFile = c.GetRuntimePath(c.Middleware.Casbin.GenPolicyFile)
 }
 
 func (c *Config) Print() {
 	fmt.Println("// ----------------------- Load configurations start ------------------------")
 	fmt.Println(c.String())
 	fmt.Println("// ----------------------- Load configurations end --------------------------")
+}
+
+func (c *Config) GetRuntimePath(path string) string {
+
+	if filepath.IsAbs(path) {
+		return path
+	}
+
+	return filepath.Join(c.RuntimePath, path)
 }
 
 func (c *Config) IsSuper(id string) bool {

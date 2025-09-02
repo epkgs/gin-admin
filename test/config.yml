@@ -4,6 +4,7 @@ Version: "v1.0.0"                      # Application version
 AppEnv: "dev"                          # dev/debug/test/prod (default: "dev")
 PrintConfig: false                      # Print config on startup
 DefaultLoginPwd: "6351623c8cef86fefabfa7da046fc619"  # MD5("abc-123") - Default login password
+RuntimePath: "runtime"                 # Runtime path (default: "runtime")
 Super:                                 # Super Administrator Account
   ID: "super"                          # Super admin ID (default: "super")
   Username: "super"                    # Super admin username (default: "super")
@@ -30,7 +31,7 @@ Cache:
     CleanupInterval: 60              # Cleanup interval in seconds (default: 60)
 
   Badger:
-    Path: "runtime/cache"            # Badger database path (default: "runtime/cache")
+    Path: "cache"                    # Badger database path (default: "cache")
 
   Redis:
     Addr: "127.0.0.1:6379"           # Redis address
@@ -46,7 +47,7 @@ DB:
   Debug: false                          # Database debug mode
   Type: "sqlite3"                       # Database type: sqlite3/mysql/postgres (default: "sqlite3")
   # SQLite3 DSN
-  DSN: "runtime/ginadmin.db"            # Database connection string (default: "runtime/app.db")
+  DSN: "ginadmin.db"                    # Database connection string (default: "app.db")
   # MySQL DSN
   # DSN: "root:123@tcp(127.0.0.1:3306)/ginadmin?charset=utf8mb4&parseTime=True&loc=Local"
   # PostgreSQL DSN
@@ -62,14 +63,7 @@ DB:
 Captcha:
   Length: 4                          # Captcha length (default: 4)
   Width: 400                         # Captcha width (default: 400)
-  Height: 160                        # Captcha height (default: 160)   
-  CatchType: "menory"                # Captcha storage type: memory/redis (default: "memory")
-  Redis:
-    Addr: ""                         # If empty, then use the same configuration as Cache.Redis
-    Username: ""
-    Password: ""
-    DB: 1
-    KeyPrefix: "captcha:"
+  Height: 160                        # Captcha height (default: 160)
 
 Prometheus:
   Enable: false
@@ -100,7 +94,7 @@ Logger:
 
   File:
     Enable: false                        # Enable file logger
-    Path: "runtime/log/ginadmin.log"     # Log file path
+    Path: "log/ginadmin.log"             # Log file path
     MaxBackups: 20                       # Maximum number of backup log files (default: 20)
     MaxSize: 64                          # Maximum size of each log file in MB (default: 64)
 
@@ -108,7 +102,7 @@ Logger:
     Enable: true                       # Enable log hook
     Level: "info"                      # Hook log level
     Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres
-    DSN: "runtime/ginadmin.db"         # Database connection string
+    DSN: "ginadmin.db"                 # Database connection string
     MaxBuffer: 1024                    # Maximum buffer size
     MaxThread: 2                       # Maximum number of threads
     MaxOpenConns: 16                   # Maximum open connections
@@ -169,7 +163,7 @@ Middleware:
         CleanupInterval: 60            # Cleanup interval in seconds (default: 60)
 
       Badger:
-        Path: "runtime/auth"           # Badger database path (default: "runtime/auth")
+        Path: "auth"                   # Badger database path (default: "auth")
 
       Redis:
         Addr: ""                       # Redis address (if empty, use the same configuration as Cache.Redis)
@@ -201,7 +195,7 @@ Middleware:
     LoadThread: 2                                 # Number of loading threads (default: 2)
     AutoLoadInterval: 3                           # Auto load interval in seconds (default: 3)
     ModelFile: "rbac_model.conf"                  # Casbin model file path (default: "rbac_model.conf")
-    GenPolicyFile: "runtime/gen_rbac_policy.csv"  # Generated policy file path (default: "runtime/gen_rbac_policy.csv")
+    GenPolicyFile: "gen_rbac_policy.csv"          # Generated policy file path (default: "gen_rbac_policy.csv")
 
   Static:
     Root: ""                           #  Static file root path (default: "")

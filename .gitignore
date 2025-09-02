@@ -27,6 +27,8 @@ tmp
 /test/runtime
 /swagger/v3/.openapi-generator
 /swagger/v3/.openapi-generator-ignore
+/*.db
+/test/*.db
 
 config.*.yml
 config.*.yaml

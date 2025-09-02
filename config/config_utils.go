@@ -1,17 +1,9 @@
 package config
 
 type Captcha struct {
-	Length    int    `default:"4"`
-	Width     int    `default:"400"`
-	Height    int    `default:"160"`
-	CacheType string `default:"memory"` // memory/redis
-	Redis     struct {
-		Addr      string
-		Username  string
-		Password  string
-		DB        int
-		KeyPrefix string `default:"captcha:"`
-	}
+	Length int `default:"4"`
+	Width  int `default:"400"`
+	Height int `default:"160"`
 }
 
 type Prometheus struct {

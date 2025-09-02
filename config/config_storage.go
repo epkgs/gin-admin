@@ -7,7 +7,7 @@ type Cache struct {
 		CleanupInterval int `default:"60"` // seconds
 	}
 	Badger struct {
-		Path string `default:"data/cache"`
+		Path string `default:"cache"`
 	}
 	Redis struct {
 		Addr     string
@@ -23,12 +23,12 @@ type Cache struct {
 
 type DB struct {
 	Debug        bool
-	Type         string `default:"sqlite3"`     // sqlite3/mysql/postgres
-	DSN          string `default:"data/app.db"` // database source name
-	MaxLifetime  int    `default:"86400"`       // seconds
-	MaxIdleTime  int    `default:"3600"`        // seconds
-	MaxOpenConns int    `default:"100"`         // connections
-	MaxIdleConns int    `default:"50"`          // connections
+	Type         string `default:"sqlite3"` // sqlite3/mysql/postgres
+	DSN          string `default:"app.db"`  // database source name
+	MaxLifetime  int    `default:"86400"`   // seconds
+	MaxIdleTime  int    `default:"3600"`    // seconds
+	MaxOpenConns int    `default:"100"`     // connections
+	MaxIdleConns int    `default:"50"`      // connections
 	AutoMigrate  bool
 	PrepareStmt  bool
 	Resolver     []struct {

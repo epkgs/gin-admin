@@ -43,7 +43,7 @@ type Middleware struct {
 				CleanupInterval int `default:"60"` // seconds
 			}
 			Badger struct {
-				Path string `default:"data/auth"`
+				Path string `default:"auth"`
 			}
 			Redis struct {
 				Addr     string
@@ -77,7 +77,7 @@ type Middleware struct {
 		LoadThread       int    `default:"2"`
 		AutoLoadInterval int    `default:"3"` // seconds
 		ModelFile        string `default:"rbac_model.conf"`
-		GenPolicyFile    string `default:"data/gen_rbac_policy.csv"`
+		GenPolicyFile    string `default:"gen_rbac_policy.csv"`
 	}
 	Static struct {
 		ExcludedPathPrefixes []string // excluded path prefixes

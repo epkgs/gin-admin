@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"gin-admin/app"
@@ -24,10 +26,20 @@ var (
 
 func init() {
 
-	cfg := config.MustLoad(context.Background(), "config.yml")
-
-	_ = os.RemoveAll(cfg.DB.DSN)
 	ctx := context.Background()
+
+	// 获取当前文件的绝对路径
+	_, filename, _, _ := runtime.Caller(0)
+
+	// 获取当前文件所在的目录
+	currentDir := filepath.Dir(filename)
+
+	cfg := config.MustLoad(ctx, filepath.Join(currentDir, "config.yml"))
+
+	_ = os.RemoveAll(cfg.RuntimePath)
+	if cfg.DB.Type == "sqlite3" {
+		_ = os.Remove(cfg.DB.DSN)
+	}
 	app := app.New(ctx, cfg)
 
 	if err := app.Init(ctx); err != nil {
