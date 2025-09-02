@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/internal/model/dto"
-	"gin-admin/internal/model/po"
+	"gin-admin/model/dto"
+	"gin-admin/model/po"
 
 	"github.com/stretchr/testify/assert"
 )

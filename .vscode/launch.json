@@ -15,8 +15,6 @@
             },
             "args": [
                 "start",
-                "-c",
-                "config.yml"
             ],
             "program": "${workspaceFolder}",
             "console": "integratedTerminal"

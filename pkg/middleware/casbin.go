@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"gin-admin/internal/errorx"
+	"gin-admin/errorx"
 	"gin-admin/pkg/response"
 
 	"github.com/casbin/casbin/v2"

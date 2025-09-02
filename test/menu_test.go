@@ -1,8 +1,8 @@
 package test
 
 import (
-	"gin-admin/internal/model/dto"
-	"gin-admin/internal/model/po"
+	"gin-admin/model/dto"
+	"gin-admin/model/po"
 	"net/http"
 	"os"
 	"testing"

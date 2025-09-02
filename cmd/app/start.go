@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gin-admin/internal/app"
-	"gin-admin/internal/config"
+	"gin-admin/app"
+	"gin-admin/config"
 
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ func StartCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if daemon, _ := cmd.Flags().GetBool("daemon"); daemon {
-				if err := runDaemon(cmd, args); err != nil {
+				if err := runDaemon(cmd); err != nil {
 					return err
 				}
 			}
@@ -43,7 +43,7 @@ func StartCmd() *cobra.Command {
 	return cmd
 }
 
-func runDaemon(cmd *cobra.Command, cliArgs []string) error {
+func runDaemon(cmd *cobra.Command) error {
 
 	configFile, _ := cmd.Flags().GetString("config")
 

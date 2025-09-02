@@ -2,7 +2,7 @@
 AppName: "ginadmin"                    # Application name
 Version: "v1.0.0"                      # Application version
 AppEnv: "dev"                          # dev/debug/test/prod (default: "dev")
-PrintConfig: false                      # Print config on startup
+PrintConfig: true                      # Print config on startup
 DefaultLoginPwd: "6351623c8cef86fefabfa7da046fc619"  # MD5("abc-123") - Default login password
 Super:                                 # Super Administrator Account
   ID: "super"                          # Super admin ID (default: "super")
@@ -30,7 +30,7 @@ Cache:
     CleanupInterval: 60              # Cleanup interval in seconds (default: 60)
 
   Badger:
-    Path: "runtime/cache"            # Badger database path (default: "runtime/cache")
+    Path: "runtime/cache"               # Badger database path (default: "runtime/cache")
 
   Redis:
     Addr: "127.0.0.1:6379"           # Redis address
@@ -43,8 +43,8 @@ Cache:
 
 # Database Configuration
 DB:
-  Debug: false                          # Database debug mode
-  Type: "sqlite3"                       # Database type: sqlite3/mysql/postgres (default: "sqlite3")
+  Debug: true                        # Database debug mode
+  Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres (default: "sqlite3")
   # SQLite3 DSN
   DSN: "runtime/ginadmin.db"            # Database connection string (default: "runtime/app.db")
   # MySQL DSN
@@ -81,7 +81,7 @@ Prometheus:
   DefaultCollect: true
 
 Swagger:
-  Enable: false                      # Enable swagger UI (default: false)  
+  Enable: true                        # Enable swagger UI (default: false)  
   StaticFile: "swagger/swagger.json"  # Static file for openapi.json (default: "swagger/swagger.json")
 
 
@@ -89,7 +89,7 @@ Pprof:
   Addr: ""                          # Pprof monitor address, "localhost:6060"
 
 Menu:
-  File: "menus.json"          # Data to restore model.Menus (default: "menus.json")
+  File: "menus.json"                 # Data to restore model.Menus (default: "menus.json")
   DenyOperate: false                 # Deny menu operations (default: false)
 
 # Logger Configuration
@@ -100,7 +100,7 @@ Logger:
 
   File:
     Enable: false                        # Enable file logger
-    Path: "runtime/log/ginadmin.log"     # Log file path
+    Path: "runtime/log/ginadmin.log"        # Log file path
     MaxBackups: 20                       # Maximum number of backup log files (default: 20)
     MaxSize: 64                          # Maximum size of each log file in MB (default: 64)
 
@@ -108,7 +108,7 @@ Logger:
     Enable: true                       # Enable log hook
     Level: "info"                      # Hook log level
     Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres
-    DSN: "runtime/ginadmin.db"         # Database connection string
+    DSN: "runtime/ginadmin.db"            # Database connection string
     MaxBuffer: 1024                    # Maximum buffer size
     MaxThread: 2                       # Maximum number of threads
     MaxOpenConns: 16                   # Maximum open connections
@@ -154,7 +154,7 @@ Middleware:
     MaxContentLen: 134217728           # Maximum content length (default 32MB = 33554432, here 128MB)
 
   Auth:
-    Disable: true                      # Disable auth middleware
+    Disable: false                     # Disable auth middleware
     SigningMethod: "HS512"             # JWT signing method: HS256/HS384/HS512 (default: "HS512")
     SigningKey: "XnEsT0S@"             # JWT secret key (default: "XnEsT0S@")
     OldSigningKey: ""                  # Old secret key (for migration)
@@ -169,7 +169,7 @@ Middleware:
         CleanupInterval: 60            # Cleanup interval in seconds (default: 60)
 
       Badger:
-        Path: "runtime/auth"           # Badger database path (default: "runtime/auth")
+        Path: "runtime/auth"              # Badger database path (default: "runtime/auth")
 
       Redis:
         Addr: ""                       # Redis address (if empty, use the same configuration as Cache.Redis)
@@ -197,7 +197,7 @@ Middleware:
         DB: 10                         # Redis database number
 
   Casbin:
-    Disable: true                                 # Disable Casbin middleware
+    Disable: false                                # Disable Casbin middleware
     LoadThread: 2                                 # Number of loading threads (default: 2)
     AutoLoadInterval: 3                           # Auto load interval in seconds (default: 3)
     ModelFile: "rbac_model.conf"                  # Casbin model file path (default: "rbac_model.conf")

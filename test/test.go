@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/internal/api"
-	"gin-admin/internal/app"
-	"gin-admin/internal/config"
+	"gin-admin/app"
+	"gin-admin/app/api"
+	"gin-admin/config"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gin-gonic/gin"

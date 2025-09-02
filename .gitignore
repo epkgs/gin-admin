@@ -15,8 +15,7 @@
 /ginadmin
 /*.lock
 /release
-/data
-/internal/test/data
+/runtime
 tmp
 /vendor
 /config/gen_rbac_policy.csv
@@ -25,9 +24,9 @@ tmp
 /test/config/gen_rbac_policy.csv
 /test/config/gen_rbac_policy.csv.bak
 /test/config/rbac_policy.csv.bak
-/test/data
-/internal/swagger/v3/.openapi-generator
-/internal/swagger/v3/.openapi-generator-ignore
+/test/runtime
+/swagger/v3/.openapi-generator
+/swagger/v3/.openapi-generator-ignore
 
 config.*.yml
 config.*.yaml

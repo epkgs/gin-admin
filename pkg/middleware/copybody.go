@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"gin-admin/internal/errorx"
+	"gin-admin/errorx"
 	"gin-admin/locales"
 	"gin-admin/pkg/helper"
 	"gin-admin/pkg/response"
