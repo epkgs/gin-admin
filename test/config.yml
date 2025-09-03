@@ -25,7 +25,6 @@ HTTP:
 # Cache Configuration
 Cache:
   Type: "memory"                     # Cache type: memory/badger/redis (default: "memory")
-  Delimiter: ":"                     # Delimiter for key (default: ":")
 
   Memory:
     CleanupInterval: 60              # Cleanup interval in seconds (default: 60)
@@ -157,7 +156,6 @@ Middleware:
 
     Store:
       Type: "badger"                   # Token store type: memory/badger/redis (default: "memory")
-      Delimiter: ":"                   # Delimiter for key (default: ":")
 
       Memory:
         CleanupInterval: 60            # Cleanup interval in seconds (default: 60)

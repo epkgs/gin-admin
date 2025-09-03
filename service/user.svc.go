@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"gin-admin/errorx"
@@ -290,28 +289,24 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 }
 
 func (a *User) SetRoleIDsCache(ctx context.Context, userID string, roleIDs []string, expiration ...time.Duration) error {
-	byt, err := json.Marshal(roleIDs)
-	if err != nil {
-		return errorx.ErrInternalServerError.Wrap(err)
+	if len(expiration) > 0 {
+		return a.Cacher.SetObject(ctx, cachex.BuildKey(gCacheNSForUserRoles, userID), roleIDs, expiration[0])
 	}
-	return a.Cacher.Set(ctx, gCacheNSForUserRoles, userID, string(byt), expiration...)
+
+	return a.Cacher.SetObject(ctx, gCacheNSForUserRoles+":"+userID, roleIDs, 0)
 }
 
 func (a *User) DeleteRoleIDsCache(ctx context.Context, userID string) error {
-	return a.Cacher.Delete(ctx, gCacheNSForUserRoles, userID)
+	return a.Cacher.Delete(ctx, gCacheNSForUserRoles+":"+userID)
 }
 
 func (a *User) GetRoleIDsCache(ctx context.Context, userID string) ([]string, error) {
-	val, err := a.Cacher.Get(ctx, gCacheNSForUserRoles, userID)
+	var roleIDs []string
+	err := a.Cacher.GetObject(ctx, gCacheNSForUserRoles+":"+userID, &roleIDs)
 	if err != nil {
 		if err == cachex.ErrNotFound {
 			return nil, errorx.ErrNotFound.WithMsg("record not found").Wrap(err)
 		}
-		return nil, errorx.ErrInternalServerError.Wrap(err)
-	}
-
-	var roleIDs []string
-	if err := json.Unmarshal([]byte(val), &roleIDs); err != nil {
 		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}
 

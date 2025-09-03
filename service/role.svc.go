@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -218,14 +217,14 @@ func (a *Role) Delete(ctx context.Context, id string) error {
 func (a *Role) RefreshUpdateTime(ctx context.Context) error {
 	return a.cacher.Set(
 		ctx,
-		gCacheNSForRole,
-		gCacheKeyForCasbin,
-		fmt.Sprintf("%d", time.Now().Unix()), // 使用时间戳存取更方便快捷
+		gCacheNSForRole+":"+gCacheKeyForCasbin,
+		[]byte(strconv.FormatInt(time.Now().Unix(), 10)), // 使用时间戳存取更方便快捷
+		0,
 	)
 }
 
 func (a *Role) GetUpdateTime(ctx context.Context) (int64, error) {
-	val, err := a.cacher.Get(ctx, gCacheNSForRole, gCacheKeyForCasbin)
+	val, err := a.cacher.Get(ctx, gCacheNSForRole+":"+gCacheKeyForCasbin)
 	if err != nil {
 		if err == cachex.ErrNotFound {
 			return 0, errorx.ErrNotFound.WithMsg(locales.DB.Str("record not found")).Wrap(err)
@@ -233,7 +232,7 @@ func (a *Role) GetUpdateTime(ctx context.Context) (int64, error) {
 		return 0, err
 	}
 
-	updated, err := strconv.ParseInt(val, 10, 64)
+	updated, err := strconv.ParseInt(string(val), 10, 64)
 	if err != nil {
 		return 0, errorx.ErrInternalServerError.Wrap(err)
 	}

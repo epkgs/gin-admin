@@ -2,6 +2,7 @@ package cachex
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -11,44 +12,51 @@ import (
 func TestRedisCache(t *testing.T) {
 	assert := assert.New(t)
 
-	cache := NewRedisCache(RedisConfig{
+	cache, err := NewRedisCache(&RedisConfig{
 		Addr: "localhost:6379",
 		DB:   1,
 	})
 
-	ctx := context.Background()
-	err := cache.Set(ctx, "tt", "foo", "bar")
 	assert.Nil(err)
 
-	val, err := cache.Get(ctx, "tt", "foo")
+	ctx := context.Background()
+	err = cache.SetObject(ctx, BuildKey("tt", "foo"), "bar", 0)
+	assert.Nil(err)
+
+	var val string
+	err = cache.GetObject(ctx, BuildKey("tt", "foo"), &val)
 	assert.Nil(err)
 	assert.Equal("bar", val)
 
-	err = cache.Delete(ctx, "tt", "foo")
+	err = cache.Delete(ctx, BuildKey("tt", "foo"))
 	assert.Nil(err)
 
-	val, err = cache.Get(ctx, "tt", "foo")
+	err = cache.GetObject(ctx, BuildKey("tt", "foo"), &val)
 	assert.Equal(ErrNotFound, err)
 	assert.Equal("", val)
 
 	tmap := make(map[string]bool)
 	for i := 0; i < 10; i++ {
 		key := fmt.Sprintf("foo%d", i)
-		err = cache.Set(ctx, "tt", key, "bar")
+		err = cache.SetObject(ctx, BuildKey("tt", key), "bar", 0)
 		assert.Nil(err)
 		tmap[key] = true
 
-		err = cache.Set(ctx, "ff", key, "bar")
+		err = cache.SetObject(ctx, BuildKey("ff", key), "bar", 0)
 		assert.Nil(err)
 	}
 
-	err = cache.Iterator(ctx, "tt", func(ctx context.Context, key, value string) bool {
+	err = cache.ForEach("tt", func(key string, raw []byte) bool {
 		assert.True(tmap[key])
+		var value string
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return false
+		}
 		assert.Equal("bar", value)
 		return true
 	})
 	assert.Nil(err)
 
-	err = cache.Close(ctx)
+	err = cache.Close()
 	assert.Nil(err)
 }

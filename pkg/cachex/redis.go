@@ -2,12 +2,18 @@ package cachex
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
+
+// Redis 缓存实现
+type redisCache struct {
+	client *redis.Client
+}
 
 type RedisConfig struct {
 	Addr     string
@@ -16,155 +22,106 @@ type RedisConfig struct {
 	DB       int
 }
 
-// Create redis-based cache
-func NewRedisCache(cfg RedisConfig, opts ...Option) Cacher {
-	cli := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Username: cfg.Username,
-		Password: cfg.Password,
-		DB:       cfg.DB,
+func NewRedisCache(config *RedisConfig) (Cacher, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     config.Addr,
+		Username: config.Username,
+		Password: config.Password,
+		DB:       config.DB,
 	})
 
-	return newRedisCache(cli, opts...)
-}
-
-// Use redis client create cache
-func NewRedisCacheWithClient(cli *redis.Client, opts ...Option) Cacher {
-	return newRedisCache(cli, opts...)
-}
-
-// Use redis cluster client create cache
-func NewRedisCacheWithClusterClient(cli *redis.ClusterClient, opts ...Option) Cacher {
-	return newRedisCache(cli, opts...)
-}
-
-func newRedisCache(cli redisClienter, opts ...Option) Cacher {
-	defaultOpts := &options{
-		Delimiter: defaultDelimiter,
+	// 测试连接
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Ping(ctx).Err(); err != nil {
+		return nil, fmt.Errorf("failed to connect to redis: %w", err)
 	}
 
-	for _, o := range opts {
-		o(defaultOpts)
-	}
-
-	return &redisCache{
-		opts: defaultOpts,
-		cli:  cli,
-	}
+	return &redisCache{client: client}, nil
 }
 
-type redisClienter interface {
-	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
-	Get(ctx context.Context, key string) *redis.StringCmd
-	Exists(ctx context.Context, keys ...string) *redis.IntCmd
-	Del(ctx context.Context, keys ...string) *redis.IntCmd
-	Scan(ctx context.Context, cursor uint64, match string, count int64) *redis.ScanCmd
-	Close() error
-}
-
-type redisCache struct {
-	opts *options
-	cli  redisClienter
-}
-
-func (a *redisCache) getKey(ns, key string) string {
-	return fmt.Sprintf("%s%s%s", ns, a.opts.Delimiter, key)
-}
-
-func (a *redisCache) Set(ctx context.Context, ns, key, value string, expiration ...time.Duration) error {
-	var exp time.Duration
-	if len(expiration) > 0 {
-		exp = expiration[0]
-	}
-
-	cmd := a.cli.Set(ctx, a.getKey(ns, key), value, exp)
-	return cmd.Err()
-}
-
-func (a *redisCache) Get(ctx context.Context, ns, key string) (string, error) {
-	cmd := a.cli.Get(ctx, a.getKey(ns, key))
-	if err := cmd.Err(); err != nil {
-		if err == redis.Nil {
-			return "", ErrNotFound
+func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
+	data, err := r.client.Get(ctx, key).Bytes()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, ErrNotFound
 		}
-		return "", err
+		return nil, err
 	}
-	return cmd.Val(), nil
+
+	return data, nil
 }
 
-func (a *redisCache) Exists(ctx context.Context, ns, key string) (bool, error) {
-	cmd := a.cli.Exists(ctx, a.getKey(ns, key))
-	if err := cmd.Err(); err != nil {
+func (r *redisCache) GetObject(ctx context.Context, key string, value interface{}) error {
+	data, err := r.Get(ctx, key)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, value)
+}
+
+func (r *redisCache) Set(ctx context.Context, key string, value []byte, expiration time.Duration) error {
+	return r.client.Set(ctx, key, value, expiration).Err()
+}
+
+func (r *redisCache) SetObject(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return r.Set(ctx, key, data, expiration)
+}
+
+func (r *redisCache) Delete(ctx context.Context, key string) error {
+	return r.client.Del(ctx, key).Err()
+}
+
+func (r *redisCache) Exists(ctx context.Context, key string) (bool, error) {
+	count, err := r.client.Exists(ctx, key).Result()
+	if err != nil {
 		return false, err
 	}
-	return cmd.Val() > 0, nil
+	return count > 0, nil
 }
 
-func (a *redisCache) Delete(ctx context.Context, ns, key string) error {
-	b, err := a.Exists(ctx, ns, key)
-	if err != nil {
-		return err
-	} else if !b {
-		return nil
-	}
+func (r *redisCache) ForEach(ns string, fn func(key string, raw []byte) bool) error {
+	var cursor uint64
+	var err error
 
-	cmd := a.cli.Del(ctx, a.getKey(ns, key))
-	if err := cmd.Err(); err != nil && err != redis.Nil {
-		return err
-	}
-	return nil
-}
+	ctx := context.Background()
+	pattern := ns + Delimiter + "*"
 
-func (a *redisCache) GetAndDelete(ctx context.Context, ns, key string) (string, error) {
-	value, err := a.Get(ctx, ns, key)
-	if err != nil {
-		return "", err
-	}
-
-	cmd := a.cli.Del(ctx, a.getKey(ns, key))
-	if err := cmd.Err(); err != nil && err != redis.Nil {
-		return "", err
-	}
-	return value, nil
-}
-
-func (a *redisCache) Iterator(ctx context.Context, ns string, fn func(ctx context.Context, key, value string) bool) error {
-	var cursor uint64 = 0
-
-LB_LOOP:
 	for {
-		cmd := a.cli.Scan(ctx, cursor, a.getKey(ns, "*"), 100)
-		if err := cmd.Err(); err != nil {
-			return err
-		}
-
-		keys, c, err := cmd.Result()
+		var keys []string
+		keys, cursor, err = r.client.Scan(ctx, cursor, pattern, 100).Result()
 		if err != nil {
 			return err
 		}
 
 		for _, key := range keys {
-			cmd := a.cli.Get(ctx, key)
-			if err := cmd.Err(); err != nil {
-				if err == redis.Nil {
-					continue
+			data, err := r.client.Get(ctx, key).Bytes()
+			if err != nil {
+				if errors.Is(err, redis.Nil) {
+					continue // 键可能已过期或被删除
 				}
 				return err
 			}
-			if next := fn(ctx, strings.TrimPrefix(key, a.getKey(ns, "")), cmd.Val()); !next {
-				break LB_LOOP
+
+			if !fn(key, data) {
+				return nil // 用户回调要求中断迭代
 			}
 		}
 
-		if c == 0 {
+		if cursor == 0 {
 			break
 		}
-		cursor = c
 	}
 
 	return nil
 }
 
-func (a *redisCache) Close(ctx context.Context) error {
-	return a.cli.Close()
+func (r *redisCache) Close() error {
+	return r.client.Close()
 }

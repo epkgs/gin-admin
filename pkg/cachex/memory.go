@@ -2,91 +2,91 @@ package cachex
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"strings"
 	"time"
 
 	"github.com/patrickmn/go-cache"
 )
 
+// 内存缓存实现
+type memoryCache struct {
+	store *cache.Cache
+}
+
 type MemoryConfig struct {
 	CleanupInterval time.Duration
 }
 
-func NewMemoryCache(cfg MemoryConfig, opts ...Option) Cacher {
-	defaultOpts := &options{
-		Delimiter: defaultDelimiter,
-	}
-
-	for _, o := range opts {
-		o(defaultOpts)
-	}
-
-	return &memCache{
-		opts:  defaultOpts,
-		cache: cache.New(0, cfg.CleanupInterval),
+func NewMemoryCache(config *MemoryConfig) Cacher {
+	c := cache.New(0, config.CleanupInterval)
+	return &memoryCache{
+		store: c,
 	}
 }
 
-type memCache struct {
-	opts  *options
-	cache *cache.Cache
-}
-
-func (a *memCache) getKey(ns, key string) string {
-	return fmt.Sprintf("%s%s%s", ns, a.opts.Delimiter, key)
-}
-
-func (a *memCache) Set(ctx context.Context, ns, key, value string, expiration ...time.Duration) error {
-	var exp time.Duration
-	if len(expiration) > 0 {
-		exp = expiration[0]
+func (m *memoryCache) Get(ctx context.Context, key string) (value []byte, err error) {
+	if val, found := m.store.Get(key); found {
+		if data, ok := val.([]byte); ok {
+			return data, nil
+		}
 	}
-
-	a.cache.Set(a.getKey(ns, key), value, exp)
-	return nil
+	return nil, ErrNotFound
 }
 
-func (a *memCache) Get(ctx context.Context, ns, key string) (string, error) {
-	val, ok := a.cache.Get(a.getKey(ns, key))
-	if !ok {
-		return "", ErrNotFound
-	}
-	return val.(string), nil
-}
-
-func (a *memCache) Exists(ctx context.Context, ns, key string) (bool, error) {
-	_, ok := a.cache.Get(a.getKey(ns, key))
-	return ok, nil
-}
-
-func (a *memCache) Delete(ctx context.Context, ns, key string) error {
-	a.cache.Delete(a.getKey(ns, key))
-	return nil
-}
-
-func (a *memCache) GetAndDelete(ctx context.Context, ns, key string) (string, error) {
-	value, err := a.Get(ctx, ns, key)
+func (m *memoryCache) GetObject(ctx context.Context, key string, value interface{}) error {
+	raw, err := m.Get(ctx, key)
 	if err != nil {
-		return "", err
+		return err
 	}
-
-	a.cache.Delete(a.getKey(ns, key))
-	return value, nil
+	return json.Unmarshal(raw, value)
 }
 
-func (a *memCache) Iterator(ctx context.Context, ns string, fn func(ctx context.Context, key, value string) bool) error {
-	for k, v := range a.cache.Items() {
-		if strings.HasPrefix(k, a.getKey(ns, "")) {
-			if !fn(ctx, strings.TrimPrefix(k, a.getKey(ns, "")), v.Object.(string)) {
-				break
+func (m *memoryCache) Set(ctx context.Context, key string, value []byte, expiration time.Duration) error {
+	m.store.Set(key, value, expiration)
+	return nil
+}
+
+func (m *memoryCache) SetObject(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return m.Set(ctx, key, data, expiration)
+}
+
+func (m *memoryCache) Delete(ctx context.Context, key string) error {
+	m.store.Delete(key)
+	return nil
+}
+
+func (m *memoryCache) Exists(ctx context.Context, key string) (bool, error) {
+	_, found := m.store.Get(key)
+	return found, nil
+}
+
+func (m *memoryCache) ForEach(namespace string, fn func(key string, raw []byte) bool) error {
+	items := m.store.Items()
+	for key, item := range items {
+		if namespace != "" && strings.HasPrefix(key, namespace+Delimiter) {
+			if data, ok := item.Object.([]byte); ok {
+				subKey := key[len(namespace)+len(Delimiter):]
+				if ok := fn(subKey, data); !ok {
+					return nil
+				}
+			}
+		} else if namespace == "" {
+			if data, ok := item.Object.([]byte); ok {
+				if ok := fn(key, data); !ok {
+					return nil
+				}
 			}
 		}
 	}
 	return nil
 }
 
-func (a *memCache) Close(ctx context.Context) error {
-	a.cache.Flush()
+func (m *memoryCache) Close() error {
+	// go-cache 会自动清理过期项目，这里不需要手动清理
 	return nil
 }

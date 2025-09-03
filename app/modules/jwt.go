@@ -30,22 +30,29 @@ func InitJWT(ctx context.Context, app types.AppContext) (jwtx.Auther, error) {
 	opts = append(opts, jwtx.SetSigningMethod(method))
 
 	var cache cachex.Cacher
+	var err error
 	switch cfg.Store.Type {
 	case "redis":
-		cache = cachex.NewRedisCache(cachex.RedisConfig{
+		cache, err = cachex.NewRedisCache(&cachex.RedisConfig{
 			Addr:     cfg.Store.Redis.Addr,
 			DB:       cfg.Store.Redis.DB,
 			Username: cfg.Store.Redis.Username,
 			Password: cfg.Store.Redis.Password,
-		}, cachex.WithDelimiter(cfg.Store.Delimiter))
+		})
+		if err != nil {
+			return nil, err
+		}
 	case "badger":
-		cache = cachex.NewBadgerCache(cachex.BadgerConfig{
+		cache, err = cachex.NewBadgerCache(&cachex.BadgerConfig{
 			Path: cfg.Store.Badger.Path,
-		}, cachex.WithDelimiter(cfg.Store.Delimiter))
+		})
+		if err != nil {
+			return nil, err
+		}
 	default:
-		cache = cachex.NewMemoryCache(cachex.MemoryConfig{
+		cache = cachex.NewMemoryCache(&cachex.MemoryConfig{
 			CleanupInterval: time.Second * time.Duration(cfg.Store.Memory.CleanupInterval),
-		}, cachex.WithDelimiter(cfg.Store.Delimiter))
+		})
 	}
 
 	auth := jwtx.New(jwtx.NewStoreWithCache(cache), opts...)

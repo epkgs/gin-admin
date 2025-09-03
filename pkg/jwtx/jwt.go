@@ -260,6 +260,6 @@ func (a *JWTAuth) ParseRefreshToken(ctx context.Context, tokenStr string) (Token
 
 func (a *JWTAuth) Release(ctx context.Context) error {
 	return a.callStore(func(store Storer) error {
-		return store.Close(ctx)
+		return store.Close()
 	})
 }

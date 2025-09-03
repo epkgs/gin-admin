@@ -13,26 +13,33 @@ func InitCacher(ctx context.Context, app types.AppContext) (cachex.Cacher, error
 	cfg := app.Config().Cache
 
 	var cache cachex.Cacher
+	var err error
 	switch cfg.Type {
 	case "redis":
-		cache = cachex.NewRedisCache(cachex.RedisConfig{
+		cache, err = cachex.NewRedisCache(&cachex.RedisConfig{
 			Addr:     cfg.Redis.Addr,
 			DB:       cfg.Redis.DB,
 			Username: cfg.Redis.Username,
 			Password: cfg.Redis.Password,
-		}, cachex.WithDelimiter(cfg.Delimiter))
+		})
+		if err != nil {
+			return nil, err
+		}
 	case "badger":
-		cache = cachex.NewBadgerCache(cachex.BadgerConfig{
+		cache, err = cachex.NewBadgerCache(&cachex.BadgerConfig{
 			Path: cfg.Badger.Path,
-		}, cachex.WithDelimiter(cfg.Delimiter))
+		})
+		if err != nil {
+			return nil, err
+		}
 	default:
-		cache = cachex.NewMemoryCache(cachex.MemoryConfig{
+		cache = cachex.NewMemoryCache(&cachex.MemoryConfig{
 			CleanupInterval: time.Second * time.Duration(cfg.Memory.CleanupInterval),
-		}, cachex.WithDelimiter(cfg.Delimiter))
+		})
 	}
 
 	app.AddCleaner(ctx, func() {
-		_ = cache.Close(ctx)
+		_ = cache.Close()
 	})
 
 	return cache, nil

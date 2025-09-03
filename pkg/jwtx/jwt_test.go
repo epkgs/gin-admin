@@ -10,7 +10,7 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	cache := cachex.NewMemoryCache(cachex.MemoryConfig{CleanupInterval: time.Second})
+	cache := cachex.NewMemoryCache(&cachex.MemoryConfig{CleanupInterval: time.Second})
 
 	store := NewStoreWithCache(cache)
 	ctx := context.Background()

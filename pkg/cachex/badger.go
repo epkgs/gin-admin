@@ -2,102 +2,97 @@ package cachex
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"strings"
 	"time"
-	"unsafe"
 
 	"github.com/dgraph-io/badger/v3"
 )
 
-type BadgerConfig struct {
-	Path string
-}
-
-// Create badger-based cache
-func NewBadgerCache(cfg BadgerConfig, opts ...Option) Cacher {
-	defaultOpts := &options{
-		Delimiter: defaultDelimiter,
-	}
-
-	for _, o := range opts {
-		o(defaultOpts)
-	}
-
-	badgerOpts := badger.DefaultOptions(cfg.Path)
-	badgerOpts = badgerOpts.WithLoggingLevel(badger.ERROR)
-	db, err := badger.Open(badgerOpts)
-	if err != nil {
-		panic(err)
-	}
-
-	return &badgerCache{
-		opts: defaultOpts,
-		db:   db,
-	}
-}
-
+// BadgerDB 缓存实现
 type badgerCache struct {
-	opts *options
-	db   *badger.DB
+	db *badger.DB
 }
 
-func (a *badgerCache) getKey(ns, key string) string {
-	return fmt.Sprintf("%s%s%s", ns, a.opts.Delimiter, key)
+type BadgerConfig struct {
+	Path string // 数据库存储路径
 }
 
-func (a *badgerCache) strToBytes(s string) []byte {
-	return *(*[]byte)(unsafe.Pointer(
-		&struct {
-			string
-			Cap int
-		}{s, len(s)},
-	))
+func NewBadgerCache(config *BadgerConfig) (Cacher, error) {
+	// 设置 BadgerDB 选项
+	opts := badger.DefaultOptions(config.Path)
+	opts.Logger = nil // 禁用日志，可根据需要启用
+
+	// 打开数据库
+	db, err := badger.Open(opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open badger db: %w", err)
+	}
+
+	return &badgerCache{db: db}, nil
 }
 
-func (a *badgerCache) bytesToStr(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
-}
-
-func (a *badgerCache) Set(ctx context.Context, ns, key, value string, expiration ...time.Duration) error {
-	return a.db.Update(func(txn *badger.Txn) error {
-		entry := badger.NewEntry(a.strToBytes(a.getKey(ns, key)), a.strToBytes(value))
-		if len(expiration) > 0 {
-			entry = entry.WithTTL(expiration[0])
-		}
-		return txn.SetEntry(entry)
-	})
-}
-
-func (a *badgerCache) Get(ctx context.Context, ns, key string) (string, error) {
-	value := ""
-	err := a.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get(a.strToBytes(a.getKey(ns, key)))
+func (b *badgerCache) Get(ctx context.Context, key string) (value []byte, err error) {
+	err = b.db.View(func(txn *badger.Txn) error {
+		var item *badger.Item
+		item, err = txn.Get([]byte(key))
 		if err != nil {
-			// if err == badger.ErrKeyNotFound {
-			// 	return nil
-			// }
+			if errors.Is(err, badger.ErrKeyNotFound) {
+				return ErrNotFound
+			}
 			return err
 		}
-		val, err := item.ValueCopy(nil)
-		value = a.bytesToStr(val)
-		return err
+
+		return item.Value(func(val []byte) error {
+			value = val
+			return nil
+		})
 	})
-	if err != nil {
-		if err == badger.ErrKeyNotFound {
-			return "", ErrNotFound
-		}
-		return "", err
-	}
-	return value, nil
+
+	return
 }
 
-func (a *badgerCache) Exists(ctx context.Context, ns, key string) (bool, error) {
+func (b *badgerCache) GetObject(ctx context.Context, key string, value interface{}) error {
+	raw, err := b.Get(ctx, key)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(raw, value)
+}
+
+func (b *badgerCache) Set(ctx context.Context, key string, value []byte, expiration time.Duration) error {
+	return b.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry([]byte(key), value)
+		if expiration > 0 {
+			e = e.WithTTL(expiration)
+		}
+		return txn.SetEntry(e)
+	})
+}
+
+func (b *badgerCache) SetObject(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return b.Set(ctx, key, data, expiration)
+}
+
+func (b *badgerCache) Delete(ctx context.Context, key string) error {
+	return b.db.Update(func(txn *badger.Txn) error {
+		return txn.Delete([]byte(key))
+	})
+}
+
+func (b *badgerCache) Exists(ctx context.Context, key string) (bool, error) {
 	exists := false
-	err := a.db.View(func(txn *badger.Txn) error {
-		_, err := txn.Get(a.strToBytes(a.getKey(ns, key)))
+	err := b.db.View(func(txn *badger.Txn) error {
+		_, err := txn.Get([]byte(key))
 		if err != nil {
-			if err == badger.ErrKeyNotFound {
+			if errors.Is(err, badger.ErrKeyNotFound) {
 				return nil
 			}
 			return err
@@ -108,59 +103,65 @@ func (a *badgerCache) Exists(ctx context.Context, ns, key string) (bool, error) 
 	return exists, err
 }
 
-func (a *badgerCache) Delete(ctx context.Context, ns, key string) error {
-	b, err := a.Exists(ctx, ns, key)
-	if err != nil {
-		return err
-	} else if !b {
-		return nil
-	}
+func (b *badgerCache) ForEach(namespace string, fn func(key string, raw []byte) bool) error {
 
-	return a.db.Update(func(txn *badger.Txn) error {
-		return txn.Delete(a.strToBytes(a.getKey(ns, key)))
-	})
-}
+	errCallbackInterrupted := errors.New("badger: iteration interrupted")
 
-func (a *badgerCache) GetAndDelete(ctx context.Context, ns, key string) (string, error) {
-	value, err := a.Get(ctx, ns, key)
-	if err != nil {
-		return "", err
-	}
+	return b.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = true
 
-	err = a.db.Update(func(txn *badger.Txn) error {
-		return txn.Delete(a.strToBytes(a.getKey(ns, key)))
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return value, nil
-}
-
-func (a *badgerCache) Iterator(ctx context.Context, ns string, fn func(ctx context.Context, key, value string) bool) error {
-	return a.db.View(func(txn *badger.Txn) error {
-		iterOpts := badger.DefaultIteratorOptions
-		iterOpts.Prefix = a.strToBytes(a.getKey(ns, ""))
-		it := txn.NewIterator(iterOpts)
+		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		it.Rewind()
-		for it.Valid() {
+		// 构建前缀
+		var prefix []byte
+		if namespace != "" {
+			prefix = []byte(namespace + Delimiter)
+		}
+
+		// 遍历所有匹配的键值对
+		for it.Seek(prefix); ; it.Next() {
+			// 检查是否还有有效数据
+			if len(prefix) > 0 && !it.ValidForPrefix(prefix) {
+				break
+			} else if !it.Valid() {
+				break
+			}
+
 			item := it.Item()
-			val, err := item.ValueCopy(nil)
+			key := item.Key()
+
+			// 提取子键（去掉命名空间前缀）
+			var subKey string
+			if namespace == "" {
+				subKey = string(key)
+			} else {
+				subKey = string(key[len(prefix):])
+			}
+
+			// 处理值并调用回调函数
+			err := item.Value(func(val []byte) error {
+				if !fn(subKey, val) {
+					return errCallbackInterrupted // 明确表示迭代被中断
+				}
+				return nil
+			})
+
+			// 如果迭代被中断，直接返回nil而不是错误
+			if errors.Is(err, errCallbackInterrupted) {
+				return nil
+			}
+
 			if err != nil {
 				return err
 			}
-			key := a.bytesToStr(item.Key())
-			if !fn(ctx, strings.TrimPrefix(key, a.getKey(ns, "")), a.bytesToStr(val)) {
-				break
-			}
-			it.Next()
 		}
+
 		return nil
 	})
 }
 
-func (a *badgerCache) Close(ctx context.Context) error {
-	return a.db.Close()
+func (b *badgerCache) Close() error {
+	return b.db.Close()
 }

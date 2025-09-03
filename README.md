@@ -87,7 +87,7 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
      -H "Content-Type: application/json" \
      -d '{"username": "test", "password": "wrong"}'
 
-# {"code":2005,"message":"incorrect username or password","data":null}
+# {"code":401,"message":"incorrect username or password","data":null}
 
 # 中文测试
 curl -X POST "http://localhost:8080/api/v1/auth/login" \
@@ -95,7 +95,7 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
      -H "Content-Type: application/json" \
      -d '{"username": "test", "password": "wrong"}'
 
-# {"code":2005,"message":"用户名或密码错误","data":null}
+# {"code":401,"message":"用户名或密码错误","data":null}
 ```
 
 ## 许可证
