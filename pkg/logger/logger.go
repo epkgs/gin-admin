@@ -2,12 +2,17 @@ package logger
 
 import (
 	"context"
+	"gin-admin/pkg/helper"
 
 	"go.uber.org/zap"
 )
 
 func logger(ctx context.Context) *zap.Logger {
-	var fields []zap.Field
+	fields := []zap.Field{
+		zap.String(key_userID, helper.GetUserID(ctx)),
+		zap.String(key_traceID, helper.GetTraceID(ctx)),
+	}
+
 	values := GetValues(ctx)
 	for k, v := range values {
 		fields = append(fields, zap.Any(k, v))

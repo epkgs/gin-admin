@@ -10,7 +10,7 @@ import (
 )
 
 // It creates a new database connection, and returns a function that closes the connection
-func InitDB(ctx context.Context, app types.AppContext) (*gorm.DB, error) {
+func NewDB(ctx context.Context, app types.AppContext) (*gorm.DB, error) {
 	cfg := app.Config().DB
 
 	resolver := make([]gormx.ResolverConfig, len(cfg.Resolver))

@@ -5,24 +5,16 @@ import (
 	"time"
 )
 
-// Storer is the interface that storage the token.
-type Storer interface {
-	Set(ctx context.Context, tokenStr string, expiration time.Duration) error
-	Delete(ctx context.Context, tokenStr string) error
-	Check(ctx context.Context, tokenStr string) (bool, error)
+// storer is the interface that storage the token.
+type storer interface {
+	Set(ctx context.Context, tokenID string, expiration time.Duration) error
+	Delete(ctx context.Context, tokenID string) error
+	Check(ctx context.Context, tokenID string) (bool, error)
 	Close() error
 }
 
 type storeOptions struct {
 	CacheNS string // default "jwt"
-}
-
-type StoreOption func(*storeOptions)
-
-func WithCacheNS(ns string) StoreOption {
-	return func(o *storeOptions) {
-		o.CacheNS = ns
-	}
 }
 
 type Cacher interface {
@@ -33,36 +25,34 @@ type Cacher interface {
 	Close() error
 }
 
-func NewStoreWithCache(cache Cacher, opts ...StoreOption) Storer {
+func newStore(cache Cacher) storer {
 	s := &storeImpl{
-		c: cache,
+		cacher: cache,
 		opts: &storeOptions{
 			CacheNS: "jwt",
 		},
 	}
-	for _, opt := range opts {
-		opt(s.opts)
-	}
+
 	return s
 }
 
 type storeImpl struct {
-	opts *storeOptions
-	c    Cacher
+	opts   *storeOptions
+	cacher Cacher
 }
 
-func (s *storeImpl) Set(ctx context.Context, tokenStr string, expiration time.Duration) error {
-	return s.c.Set(ctx, s.opts.CacheNS+":"+tokenStr, nil, expiration)
+func (a *storeImpl) Set(ctx context.Context, tokenID string, expiration time.Duration) error {
+	return a.cacher.Set(ctx, a.opts.CacheNS+":"+tokenID, nil, expiration)
 }
 
-func (s *storeImpl) Delete(ctx context.Context, tokenStr string) error {
-	return s.c.Delete(ctx, s.opts.CacheNS+":"+tokenStr)
+func (a *storeImpl) Delete(ctx context.Context, tokenID string) error {
+	return a.cacher.Delete(ctx, a.opts.CacheNS+":"+tokenID)
 }
 
-func (s *storeImpl) Check(ctx context.Context, tokenStr string) (bool, error) {
-	return s.c.Exists(ctx, s.opts.CacheNS+":"+tokenStr)
+func (a *storeImpl) Check(ctx context.Context, tokenID string) (bool, error) {
+	return a.cacher.Exists(ctx, a.opts.CacheNS+":"+tokenID)
 }
 
-func (s *storeImpl) Close() error {
-	return s.c.Close()
+func (a *storeImpl) Close() error {
+	return a.cacher.Close()
 }

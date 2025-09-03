@@ -11,7 +11,6 @@ import (
 )
 
 type Config struct {
-	Enable         bool
 	App            string
 	ListenPort     int
 	BasicUserName  string
@@ -34,7 +33,6 @@ func (c *Config) fix() *configF {
 	}
 
 	return &configF{
-		Enable:         c.Enable,
 		App:            c.App,
 		ListenPort:     c.ListenPort,
 		BasicUserName:  c.BasicUserName,
@@ -48,7 +46,6 @@ func (c *Config) fix() *configF {
 }
 
 type configF struct {
-	Enable         bool
 	App            string
 	ListenPort     int
 	BasicUserName  string
@@ -60,7 +57,7 @@ type configF struct {
 	DefaultCollect bool
 }
 
-type PrometheusWrapper struct {
+type prometheusWrapper struct {
 	c                                  configF
 	reg                                *prometheus.Registry
 	gaugeState                         *prometheus.GaugeVec
@@ -71,7 +68,7 @@ type PrometheusWrapper struct {
 	counterEvent, counterSiteEvent     *prometheus.CounterVec
 }
 
-func (p *PrometheusWrapper) init() {
+func (p *prometheusWrapper) init() {
 	p.counterRequests = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "counter_requests",
@@ -161,7 +158,7 @@ func (p *PrometheusWrapper) init() {
 	}
 }
 
-func (p *PrometheusWrapper) run() {
+func (p *prometheusWrapper) run() {
 	if p.c.ListenPort == 0 {
 		return
 	}
@@ -185,10 +182,7 @@ func (p *PrometheusWrapper) run() {
 	}()
 }
 
-func (p *PrometheusWrapper) Log(api, method, code string, sendBytes, rcvdBytes, latency float64) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) Log(api, method, code string, sendBytes, rcvdBytes, latency float64) {
 	if len(p.c.LogMethod) > 0 {
 		if _, ok := p.c.LogMethod[method]; !ok {
 			return
@@ -215,73 +209,43 @@ func (p *PrometheusWrapper) Log(api, method, code string, sendBytes, rcvdBytes, 
 	}
 }
 
-func (p *PrometheusWrapper) RequestLog(module, api, method, code string) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) RequestLog(module, api, method, code string) {
 	p.counterRequests.WithLabelValues(p.c.App, module, api, method, code).Inc()
 }
 
-func (p *PrometheusWrapper) SendBytesLog(module, api, method, code string, byte float64) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) SendBytesLog(module, api, method, code string, byte float64) {
 	p.counterSendBytes.WithLabelValues(p.c.App, module, api, method, code).Add(byte)
 }
 
-func (p *PrometheusWrapper) RcvdBytesLog(module, api, method, code string, byte float64) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) RcvdBytesLog(module, api, method, code string, byte float64) {
 	p.counterRcvdBytes.WithLabelValues(p.c.App, module, api, method, code).Add(byte)
 }
 
-func (p *PrometheusWrapper) HistogramLatencyLog(module, api, method string, latency float64) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) HistogramLatencyLog(module, api, method string, latency float64) {
 	p.histogramLatency.WithLabelValues(p.c.App, module, api, method).Observe(latency)
 }
 
-func (p *PrometheusWrapper) SummaryLatencyLog(module, api, method string, latency float64) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) SummaryLatencyLog(module, api, method string, latency float64) {
 	p.summaryLatency.WithLabelValues(p.c.App, module, api, method).Observe(latency)
 }
 
-func (p *PrometheusWrapper) ExceptionLog(module, exception string) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) ExceptionLog(module, exception string) {
 	p.counterException.WithLabelValues(p.c.App, module, exception).Inc()
 }
 
-func (p *PrometheusWrapper) EventLog(module, event string) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) EventLog(module, event string) {
 	p.counterEvent.WithLabelValues(p.c.App, module, event).Inc()
 }
 
-func (p *PrometheusWrapper) SiteEventLog(module, event, site string) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) SiteEventLog(module, event, site string) {
 	p.counterSiteEvent.WithLabelValues(p.c.App, module, event, site).Inc()
 }
 
-func (p *PrometheusWrapper) StateLog(module, state string, value float64) {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) StateLog(module, state string, value float64) {
 	p.gaugeState.WithLabelValues(p.c.App, module, state).Set(value)
 }
 
-func (p *PrometheusWrapper) ResetCounter() {
-	if !p.c.Enable {
-		return
-	}
+func (p *prometheusWrapper) ResetCounter() {
 	p.counterSiteEvent.Reset()
 	p.counterEvent.Reset()
 	p.counterException.Reset()
@@ -289,27 +253,25 @@ func (p *PrometheusWrapper) ResetCounter() {
 	p.counterSendBytes.Reset()
 }
 
-func (p *PrometheusWrapper) RegCustomCollector(c prometheus.Collector) {
+func (p *prometheusWrapper) RegCustomCollector(c prometheus.Collector) {
 	p.reg.MustRegister(c)
 }
 
-func NewPrometheusWrapper(conf *Config) *PrometheusWrapper {
+func newPrometheusWrapper(conf *Config) *prometheusWrapper {
 	if conf.App == "" {
 		conf.App = "app"
 	}
-	if conf.Enable && conf.ListenPort == 0 {
+	if conf.ListenPort == 0 {
 		conf.ListenPort = 9100
 	}
 
-	w := &PrometheusWrapper{
+	w := &prometheusWrapper{
 		c:   *conf.fix(),
 		reg: prometheus.NewRegistry(),
 	}
 
-	if conf.Enable {
-		w.init()
-		w.run()
-	}
+	w.init()
+	w.run()
 
 	return w
 }

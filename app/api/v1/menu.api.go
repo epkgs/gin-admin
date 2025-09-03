@@ -27,7 +27,7 @@ func (a *Menu) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
 	g := group.Group("menus")
 	g.Use(
 		a.app.Middlewares().Auth(),
-		a.app.Middlewares().RBAC(),
+		a.app.Middlewares().RoutePermission(),
 	)
 
 	g.GET("", a.Query)

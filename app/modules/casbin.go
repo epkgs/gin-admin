@@ -38,7 +38,7 @@ type Casbinx struct {
 
 var _ types.Casbinx = (*Casbinx)(nil)
 
-func InitCasbinx(ctx context.Context, app types.AppContext) (types.Casbinx, error) {
+func NewCasbinx(ctx context.Context, app types.AppContext) (types.Casbinx, error) {
 	cb := &Casbinx{
 		app:      app,
 		enforcer: new(atomic.Value),
@@ -49,7 +49,7 @@ func InitCasbinx(ctx context.Context, app types.AppContext) (types.Casbinx, erro
 	}
 
 	app.AddCleaner(ctx, func() {
-		cb.Release(context.Background())
+		cb.Release()
 	})
 
 	return cb, nil
@@ -68,7 +68,7 @@ type policyQueueItem struct {
 }
 
 func (a *Casbinx) Load(ctx context.Context) error {
-	if a.app.Config().Middleware.Casbin.Disable {
+	if a.app.Config().Casbin.Disable {
 		return nil
 	}
 
@@ -96,7 +96,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 
 	var resCount int32
 	queue := make(chan *policyQueueItem, len(roles))
-	threadNum := a.app.Config().Middleware.Casbin.LoadThread
+	threadNum := a.app.Config().Casbin.LoadThread
 	lock := new(sync.Mutex)
 	buf := new(bytes.Buffer)
 
@@ -139,7 +139,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 	wg.Wait()
 
 	if buf.Len() > 0 {
-		policyFile := a.app.Config().Middleware.Casbin.GenPolicyFile
+		policyFile := a.app.Config().Casbin.GenPolicyFile
 		_ = os.Rename(policyFile, policyFile+".bak")
 		_ = os.MkdirAll(filepath.Dir(policyFile), 0755)
 		if err := os.WriteFile(policyFile, buf.Bytes(), 0666); err != nil {
@@ -149,7 +149,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 		// set readonly
 		_ = os.Chmod(policyFile, 0444)
 
-		modelFile := a.app.Config().Middleware.Casbin.ModelFile
+		modelFile := a.app.Config().Casbin.ModelFile
 		e, err := casbin.NewEnforcer(modelFile, policyFile)
 		if err != nil {
 			logger.Error(ctx, "Failed to create casbin enforcer", err)
@@ -172,7 +172,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 
 func (a *Casbinx) autoLoad(ctx context.Context) {
 	var lastUpdated int64
-	a.ticker = time.NewTicker(time.Duration(a.app.Config().Middleware.Casbin.AutoLoadInterval) * time.Second)
+	a.ticker = time.NewTicker(time.Duration(a.app.Config().Casbin.AutoLoadInterval) * time.Second)
 	for range a.ticker.C {
 		updated, err := a.roleSVC.GetUpdateTime(ctx)
 		if err != nil {
@@ -194,7 +194,7 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 	}
 }
 
-func (a *Casbinx) Release(ctx context.Context) error {
+func (a *Casbinx) Release() error {
 	if a.ticker != nil {
 		a.ticker.Stop()
 	}

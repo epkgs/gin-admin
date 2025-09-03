@@ -13,10 +13,12 @@ import (
 )
 
 type Config struct {
-	Debug      bool
-	Level      string // debug/info/warn/error/dpanic/panic/fatal
-	CallerSkip int
-	File       struct {
+	Debug          bool
+	Level          string // debug/info/warn/error/dpanic/panic/fatal
+	CallerSkip     int
+	MaxRequestLen  int `default:"4096"`
+	MaxResponseLen int `default:"1024"`
+	File           struct {
 		Enable     bool
 		Path       string
 		MaxSize    int

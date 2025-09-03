@@ -7,7 +7,6 @@ type Captcha struct {
 }
 
 type Prometheus struct {
-	Enable         bool
 	Port           int    `default:"9100"`
 	BasicUsername  string `default:"admin"`
 	BasicPassword  string `default:"admin"`
@@ -28,4 +27,24 @@ type Pprof struct {
 type Menu struct {
 	File        string // Data to restore model.Menus (JSON/YAML)
 	DenyOperate bool   // Deny operate menu
+}
+
+type RateLimiter struct {
+	Period             int `default:"10"` // seconds
+	MaxRequestsPerIP   int `default:"1000"`
+	MaxRequestsPerUser int `default:"500"`
+}
+
+type Jwt struct {
+	SigningMethod string `default:"HS512"`    // HS256/HS384/HS512
+	SigningKey    string `default:"XnEsT0S@"` // secret key
+	Expired       int    `default:"86400"`    // seconds
+}
+
+type Casbin struct {
+	Disable          bool
+	LoadThread       int    `default:"2"`
+	AutoLoadInterval int    `default:"3"` // seconds
+	ModelFile        string `default:"rbac_model.conf"`
+	GenPolicyFile    string `default:"gen_rbac_policy.csv"`
 }

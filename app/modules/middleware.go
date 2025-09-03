@@ -1,31 +1,44 @@
 package modules
 
 import (
+	"fmt"
+	"gin-admin/errorx"
+	"gin-admin/locales"
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/middleware"
-	"gin-admin/pkg/promx"
+	"gin-admin/pkg/jwtx"
+	"gin-admin/pkg/logger"
+	"gin-admin/pkg/middleware/promx"
+	"gin-admin/pkg/middleware/ratelimiter"
+	"gin-admin/pkg/response"
 	"gin-admin/service"
 	"gin-admin/types"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/epkgs/i18n"
+	"github.com/gin-contrib/cors"
+	"github.com/rs/xid"
 
-	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
+
+type mdw struct {
+	once    sync.Once
+	handler gin.HandlerFunc
+}
 
 type Middlewares struct {
 	app types.AppContext
 
-	i18n        gin.HandlerFunc
-	cors        gin.HandlerFunc
-	trace       gin.HandlerFunc
-	logger      gin.HandlerFunc
-	copyBody    gin.HandlerFunc
-	auth        gin.HandlerFunc
-	rateLimiter gin.HandlerFunc
-	casbin      gin.HandlerFunc
-	prometheus  gin.HandlerFunc
+	i18n        mdw
+	cors        mdw
+	trace       mdw
+	logger      mdw
+	auth        mdw
+	rateLimiter mdw
+	casbin      mdw
+	prometheus  mdw
 }
 
 func NewMiddlewares(app types.AppContext) *Middlewares {
@@ -35,153 +48,202 @@ func NewMiddlewares(app types.AppContext) *Middlewares {
 }
 
 func (m *Middlewares) I18n() gin.HandlerFunc {
-	if m.i18n == nil {
-		m.i18n = i18n.GinMiddleware("zh")
-	}
-	return m.i18n
+	m.i18n.once.Do(func() {
+		m.i18n.handler = i18n.GinMiddleware("zh")
+	})
+	return m.i18n.handler
 }
 
 func (m *Middlewares) Cors() gin.HandlerFunc {
-	if m.cors == nil {
-		cfg := m.app.Config()
+	m.cors.once.Do(func() {
+		m.cors.handler = cors.New(cors.Config{
+			AllowOrigins:           []string{"*"},
+			AllowMethods:           []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+			AllowHeaders:           []string{"*"},
+			AllowCredentials:       true,
+			ExposeHeaders:          []string{"Content-Disposition"},
+			MaxAge:                 86400 * time.Second,
+			AllowWildcard:          true,
+			AllowBrowserExtensions: false,
+			AllowWebSockets:        true,
+			AllowFiles:             true,
+		})
 
-		if cfg.Middleware.CORS.Enable {
-			m.cors = middleware.CORSWithConfig(middleware.CORSConfig{
-				AllowAllOrigins:        cfg.Middleware.CORS.AllowAllOrigins,
-				AllowOrigins:           cfg.Middleware.CORS.AllowOrigins,
-				AllowMethods:           cfg.Middleware.CORS.AllowMethods,
-				AllowHeaders:           cfg.Middleware.CORS.AllowHeaders,
-				AllowCredentials:       cfg.Middleware.CORS.AllowCredentials,
-				ExposeHeaders:          cfg.Middleware.CORS.ExposeHeaders,
-				MaxAge:                 cfg.Middleware.CORS.MaxAge,
-				AllowWildcard:          cfg.Middleware.CORS.AllowWildcard,
-				AllowBrowserExtensions: cfg.Middleware.CORS.AllowBrowserExtensions,
-				AllowWebSockets:        cfg.Middleware.CORS.AllowWebSockets,
-				AllowFiles:             cfg.Middleware.CORS.AllowFiles,
-			})
-		} else {
-			m.cors = middleware.Empty()
-		}
-	}
-	return m.cors
+	})
+
+	return m.cors.handler
 }
 
 func (m *Middlewares) Trace() gin.HandlerFunc {
-	if m.trace == nil {
-		cfg := m.app.Config()
+	m.trace.once.Do(func() {
 
-		m.trace = middleware.TraceWithConfig(middleware.TraceConfig{
-			RequestHeaderKey: cfg.Middleware.Trace.RequestHeaderKey,
-			ResponseTraceKey: cfg.Middleware.Trace.ResponseTraceKey,
-		})
-	}
-	return m.trace
+		requestHeaderKey := "X-Request-Id"
+
+		m.trace.handler = func(c *gin.Context) {
+
+			traceID := c.GetHeader(requestHeaderKey)
+			if traceID == "" {
+				traceID = fmt.Sprintf("TRACE-%s", strings.ToUpper(xid.New().String()))
+			}
+
+			ctx := helper.WithTraceID(c.Request.Context(), traceID)
+			c.Request = c.Request.WithContext(ctx)
+			c.Writer.Header().Set(requestHeaderKey, traceID)
+			c.Next()
+		}
+	})
+
+	return m.trace.handler
 }
 
 func (m *Middlewares) Logger() gin.HandlerFunc {
-	if m.logger == nil {
-		cfg := m.app.Config()
+	m.logger.once.Do(func() {
+		cfg := m.app.Config().Logger
 
-		m.logger = middleware.LoggerWithConfig(middleware.LoggerConfig{
-			MaxOutputRequestBodyLen:  cfg.Middleware.Logger.MaxOutputRequestBodyLen,
-			MaxOutputResponseBodyLen: cfg.Middleware.Logger.MaxOutputResponseBodyLen,
-		})
-	}
-	return m.logger
-}
+		m.logger.handler = logger.GinMiddleware(cfg)
+	})
 
-func (m *Middlewares) CopyBody() gin.HandlerFunc {
-	if m.copyBody == nil {
-		cfg := m.app.Config()
-
-		m.copyBody = middleware.CopyBodyWithConfig(middleware.CopyBodyConfig{
-			MaxContentLen: cfg.Middleware.CopyBody.MaxContentLen,
-		})
-	}
-	return m.copyBody
+	return m.logger.handler
 }
 
 func (m *Middlewares) Auth() gin.HandlerFunc {
-	if m.auth == nil {
+
+	m.auth.once.Do(func() {
+		m.auth.handler = func(c *gin.Context) {
+
+			ctx := c.Request.Context()
+
+			var token string
+			{
+
+				auth := c.GetHeader("Authorization")
+				prefix := "Bearer "
+
+				if auth != "" && strings.HasPrefix(auth, prefix) {
+					token = auth[len(prefix):]
+				} else {
+					token = auth
+				}
+
+				if token == "" {
+					token = c.Query("token")
+				}
+			}
+
+			if token == "" {
+				response.Error(c, errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token")))
+				return
+			}
+
+			ctx = helper.WithToken(ctx, token)
+
+			claims, err := m.app.Jwt().ParseToken(ctx, token)
+			if err != nil {
+				if err == jwtx.ErrInvalidToken {
+					response.Error(c, errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token")))
+					return
+				}
+				response.Error(c, errorx.ErrInternalServerError.Wrap(err))
+				return
+			}
+
+			userID := claims.UserID
+
+			ctx = helper.WithUserID(c.Request.Context(), userID)
+			c.Request = c.Request.WithContext(ctx)
+			c.Next()
+		}
+	})
+
+	return m.auth.handler
+}
+
+func (m *Middlewares) RoutePermission() gin.HandlerFunc {
+	m.casbin.once.Do(func() {
 		cfg := m.app.Config()
 
-		m.auth = middleware.AuthWithConfig(middleware.AuthConfig{
-			ParseUserID: service.NewAuth(m.app).ParseUserID,
-			RootID:      cfg.Super.ID,
-		})
-	}
-	return m.auth
+		m.casbin.handler = func(c *gin.Context) {
+			ctx := c.Request.Context()
+
+			userID := helper.GetUserID(ctx)
+			if cfg.IsSuper(userID) {
+				c.Next()
+				return
+			}
+
+			enforcer := m.app.Casbin().GetEnforcer()
+			if enforcer == nil {
+				response.Error(c, errorx.ErrForbidden)
+				return
+			}
+
+			userSVC := service.NewUser(m.app)
+
+			roleIDs, err := userSVC.GetRoleIDsCache(ctx, userID)
+			if err != nil {
+				response.Error(c, errorx.ErrForbidden.Wrap(err))
+				return
+			}
+
+			for _, roleID := range roleIDs {
+				if ok, err := enforcer.Enforce(roleID, c.Request.URL.Path, c.Request.Method); err != nil {
+					response.Error(c, errorx.ErrInternalServerError.Wrap(err))
+					return
+				} else if ok {
+					c.Next()
+					return
+				}
+			}
+			response.Error(c, errorx.ErrForbidden)
+		}
+
+	})
+
+	return m.casbin.handler
 }
 
 func (m *Middlewares) RateLimiter() gin.HandlerFunc {
-	if m.rateLimiter == nil {
+
+	m.rateLimiter.once.Do(func() {
 		cfg := m.app.Config()
 
-		m.rateLimiter = middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
-			Enable:             cfg.Middleware.RateLimiter.Enable,
-			Period:             cfg.Middleware.RateLimiter.Period,
-			MaxRequestsPerIP:   cfg.Middleware.RateLimiter.MaxRequestsPerIP,
-			MaxRequestsPerUser: cfg.Middleware.RateLimiter.MaxRequestsPerUser,
-			StoreType:          cfg.Middleware.RateLimiter.Store.Type,
-			MemoryStoreConfig: middleware.RateLimiterMemoryConfig{
-				Expiration:      time.Second * time.Duration(cfg.Middleware.RateLimiter.Store.Memory.Expiration),
-				CleanupInterval: time.Second * time.Duration(cfg.Middleware.RateLimiter.Store.Memory.CleanupInterval),
-			},
-			RedisStoreConfig: middleware.RateLimiterRedisConfig{
-				Addr:     cfg.Middleware.RateLimiter.Store.Redis.Addr,
-				Password: cfg.Middleware.RateLimiter.Store.Redis.Password,
-				DB:       cfg.Middleware.RateLimiter.Store.Redis.DB,
-				Username: cfg.Middleware.RateLimiter.Store.Redis.Username,
-			},
-		})
-	}
-	return m.rateLimiter
-}
+		lmcfg := ratelimiter.Config{
+			Period:             cfg.RateLimiter.Period,
+			MaxRequestsPerIP:   cfg.RateLimiter.MaxRequestsPerIP,
+			MaxRequestsPerUser: cfg.RateLimiter.MaxRequestsPerUser,
+		}
 
-func (m *Middlewares) RBAC() gin.HandlerFunc {
-	if m.casbin == nil {
-		cfg := m.app.Config()
+		if cfg.Cache.Type == "redis" {
+			lmcfg.RedisConfig = &ratelimiter.RedisConfig{
+				Addr:     cfg.Cache.Redis.Addr,
+				DB:       cfg.Cache.Redis.DB,
+				Username: cfg.Cache.Redis.Username,
+				Password: cfg.Cache.Redis.Password,
+			}
+		}
 
-		m.casbin = middleware.CasbinWithConfig(middleware.CasbinConfig{
-			Skipper: func(c *gin.Context) bool {
-				if cfg.Middleware.Casbin.Disable ||
-					helper.GetIsRootUser(c.Request.Context()) {
-					return true
-				}
-				return false
-			},
-			GetEnforcer: func(c *gin.Context) *casbin.Enforcer {
-				return m.app.Casbin().GetEnforcer()
-			},
-			GetSubjects: func(c *gin.Context) []string {
-				ctx := c.Request.Context()
-				roleIDs, _ := service.NewUser(m.app).GetRoleIDsCache(ctx, helper.GetUserID(ctx))
-				return roleIDs
-			},
-		})
-	}
-	return m.casbin
+		m.rateLimiter.handler = ratelimiter.New(lmcfg)
+	})
+
+	return m.rateLimiter.handler
 }
 
 func (m *Middlewares) Prometheus() gin.HandlerFunc {
-	if m.prometheus == nil {
+	m.prometheus.once.Do(func() {
 		cfg := m.app.Config()
 
-		if cfg.Prometheus.Enable {
-			m.prometheus = promx.GinMiddleware(&promx.Config{
-				Enable:         cfg.Prometheus.Enable,
-				App:            cfg.AppName,
-				ListenPort:     cfg.Prometheus.Port,
-				BasicUserName:  cfg.Prometheus.BasicUsername,
-				BasicPassword:  cfg.Prometheus.BasicPassword,
-				LogApi:         cfg.Prometheus.LogApis,
-				LogMethod:      cfg.Prometheus.LogMethods,
-				Objectives:     map[float64]float64{0.9: 0.01, 0.95: 0.005, 0.99: 0.001},
-				DefaultCollect: cfg.Prometheus.DefaultCollect,
-			}, helper.GetRequestBody)
-		} else {
-			m.prometheus = middleware.Empty()
-		}
-	}
-	return m.prometheus
+		m.prometheus.handler = promx.New(func(c *promx.Config) {
+			c.App = cfg.AppName
+			c.ListenPort = cfg.Prometheus.Port
+			c.BasicUserName = cfg.Prometheus.BasicUsername
+			c.BasicPassword = cfg.Prometheus.BasicPassword
+			c.LogApi = cfg.Prometheus.LogApis
+			c.LogMethod = cfg.Prometheus.LogMethods
+			c.DefaultCollect = cfg.Prometheus.DefaultCollect
+			c.Objectives = map[float64]float64{0.9: 0.01, 0.95: 0.005, 0.99: 0.001}
+		})
+
+	})
+
+	return m.prometheus.handler
 }

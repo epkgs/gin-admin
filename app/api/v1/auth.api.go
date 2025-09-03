@@ -86,7 +86,7 @@ func (a *Auth) Logout(c *gin.Context) {
 func (a *Auth) RefreshToken(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	refreshToken := helper.GetToken(c)
+	refreshToken := helper.GetToken(ctx)
 	if refreshToken == "" {
 		response.Error(c, errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token")))
 		return

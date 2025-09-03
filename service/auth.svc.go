@@ -19,7 +19,6 @@ import (
 
 	"github.com/epkgs/i18n/errors"
 
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -44,72 +43,6 @@ func NewAuth(app types.AppContext) *Auth {
 		menuSvc: NewMenu(app),
 		q:       bo.Use(app.DB()),
 	}
-}
-
-func (a *Auth) ParseUserID(c *gin.Context) (string, error) {
-	ctx := c.Request.Context()
-
-	rootID := a.app.Config().Super.ID
-	if a.app.Config().Middleware.Auth.Disable {
-		return rootID, nil
-	}
-
-	token := helper.GetToken(c)
-	if token == "" {
-		return "", ErrInvalidToken
-	}
-
-	ctx = helper.WithUserToken(ctx, token)
-
-	claims, err := a.jwt.ParseToken(ctx, token)
-	if err != nil {
-		if err == jwtx.ErrInvalidToken {
-			return "", ErrInvalidToken
-		}
-		return "", errorx.ErrInternalServerError.Wrap(err)
-	}
-
-	userID, _ := claims.GetSubject()
-
-	if userID == rootID {
-		c.Request = c.Request.WithContext(helper.WithIsRootUser(ctx))
-		return userID, nil
-	}
-
-	_, err = a.userSvc.GetRoleIDsCache(ctx, userID)
-	if err != nil {
-		if errors.Is(err, cachex.ErrNotFound) {
-
-			u := a.q.User
-
-			// Check user status, if not activated, force to logout
-			user, err := u.WithContext(ctx).Select(u.Status).First()
-			if err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					return "", ErrInvalidToken
-				}
-				return "", errorx.WrapGormError(err)
-			}
-
-			if user == nil || user.Status != po.UserStatus_Activated {
-				return "", ErrInvalidToken
-			}
-
-			roleIDs, err := a.userSvc.GetRoleIDs(ctx, userID)
-			if err != nil {
-				return "", err
-			}
-
-			err = a.userSvc.SetRoleIDsCache(ctx, userID, roleIDs)
-			if err != nil {
-				return "", err
-			}
-			return userID, nil
-		}
-		return "", err
-	}
-
-	return userID, nil
 }
 
 func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, error) {
@@ -141,7 +74,7 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 	}
 
 	userID := user.ID
-	ctx = logger.WithUserID(ctx, userID)
+	ctx = helper.WithUserID(ctx, userID)
 
 	// set user cache with role ids
 	roleIDs, err := a.userSvc.GetRoleIDs(ctx, userID)
@@ -161,10 +94,10 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 	}
 
 	loginToken := &dto.LoginToken{
-		AccessToken:  token.GetAccessToken(),
-		RefreshToken: token.GetRefreshToken(),
-		TokenType:    token.GetTokenType(),
-		Expires:      token.GetExpires(),
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+		TokenType:    token.TokenType,
+		Expires:      token.Expires,
 	}
 
 	logger.Info(ctx, "Login success",
@@ -185,7 +118,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.Logi
 
 	ctx = logger.WithTag(ctx, logger.Tag_Login)
 
-	claims, err := a.jwt.ParseRefreshToken(ctx, refreshToken)
+	claims, err := a.jwt.ParseToken(ctx, refreshToken)
 	if err != nil {
 		if err == jwtx.ErrInvalidToken {
 			return nil, ErrInvalidToken.Wrap(err)
@@ -209,7 +142,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.Logi
 		return nil, errorx.ErrForbidden.WithMsg(locales.User.Str("User %s is disabled", user.NickName))
 	}
 
-	ctx = logger.WithUserID(ctx, userID)
+	ctx = helper.WithUserID(ctx, userID)
 
 	token, err := a.jwt.GenerateToken(ctx, userID)
 	if err != nil {
@@ -217,10 +150,10 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.Logi
 	}
 
 	loginToken := &dto.LoginToken{
-		AccessToken:  token.GetAccessToken(),
-		RefreshToken: token.GetRefreshToken(),
-		TokenType:    token.GetTokenType(),
-		Expires:      token.GetExpires(),
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+		TokenType:    token.TokenType,
+		Expires:      token.Expires,
 	}
 
 	logger.Info(ctx, "Login success",
@@ -237,7 +170,7 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.Logi
 }
 
 func (a *Auth) Logout(ctx context.Context) error {
-	userToken := helper.GetUserToken(ctx)
+	userToken := helper.GetToken(ctx)
 	if userToken == "" {
 		return nil
 	}
@@ -276,7 +209,7 @@ func (a *Auth) GetUserInfo(ctx context.Context) (*po.User, error) {
 
 // Change login password
 func (a *Auth) UpdatePassword(ctx context.Context, req *dto.AuthUpdatePasswordReq) error {
-	if helper.GetIsRootUser(ctx) {
+	if a.app.Config().IsSuper(helper.GetUserID(ctx)) {
 		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify"))
 	}
 
@@ -315,7 +248,7 @@ func (a *Auth) QueryMenus(ctx context.Context) (po.Menus, error) {
 		},
 	}
 
-	isRoot := helper.GetIsRootUser(ctx)
+	isRoot := a.app.Config().IsSuper(helper.GetUserID(ctx))
 	if !isRoot {
 		req.UserID = helper.GetUserID(ctx)
 	}
@@ -359,7 +292,7 @@ func (a *Auth) QueryMenus(ctx context.Context) (po.Menus, error) {
 
 // Update current user info
 func (a *Auth) UpdateUser(ctx context.Context, req *dto.AuthUpdateUserReq) error {
-	if helper.GetIsRootUser(ctx) {
+	if a.app.Config().IsSuper(helper.GetUserID(ctx)) {
 		return errorx.ErrForbidden.WithMsg(locales.User.Str("Super user can not modify"))
 	}
 

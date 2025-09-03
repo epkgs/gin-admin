@@ -35,16 +35,18 @@ type Config struct {
 		KeyFile         string
 	}
 
-	Cache      Cache
-	DB         DB
-	Captcha    Captcha
-	Prometheus Prometheus
-	Swagger    Swagger
-	Pprof      Pprof
-	Menu       Menu
+	Cache       Cache
+	DB          DB
+	Captcha     Captcha
+	Prometheus  Prometheus
+	Swagger     Swagger
+	RateLimiter RateLimiter
+	Pprof       Pprof
+	Menu        Menu
+	Jwt         Jwt
+	Casbin      Casbin
 
-	Logger     logger.Config
-	Middleware Middleware
+	Logger logger.Config
 }
 
 func (c *Config) IsDebug() bool {
@@ -61,31 +63,12 @@ func (c *Config) String() string {
 }
 
 func (c *Config) preLoad() {
-	if addr := c.Cache.Redis.Addr; addr != "" {
-		username := c.Cache.Redis.Username
-		password := c.Cache.Redis.Password
-		if c.Middleware.RateLimiter.Store.Type == "redis" &&
-			c.Middleware.RateLimiter.Store.Redis.Addr == "" {
-			c.Middleware.RateLimiter.Store.Redis.Addr = addr
-			c.Middleware.RateLimiter.Store.Redis.Username = username
-			c.Middleware.RateLimiter.Store.Redis.Password = password
-		}
-		if c.Middleware.Auth.Store.Type == "redis" &&
-			c.Middleware.Auth.Store.Redis.Addr == "" {
-			c.Middleware.Auth.Store.Redis.Addr = addr
-			c.Middleware.Auth.Store.Redis.Username = username
-			c.Middleware.Auth.Store.Redis.Password = password
-		}
-	}
 
 	c.RuntimePath = util.Must(filepath.Abs(c.RuntimePath))
 
 	c.Cache.Badger.Path = c.GetRuntimePath(c.Cache.Badger.Path)
-	c.Middleware.Auth.Store.Badger.Path = c.GetRuntimePath(c.Middleware.Auth.Store.Badger.Path)
-
 	c.Logger.File.Path = c.GetRuntimePath(c.Logger.File.Path)
-
-	c.Middleware.Casbin.GenPolicyFile = c.GetRuntimePath(c.Middleware.Casbin.GenPolicyFile)
+	c.Casbin.GenPolicyFile = c.GetRuntimePath(c.Casbin.GenPolicyFile)
 }
 
 func (c *Config) Print() {

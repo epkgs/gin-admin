@@ -1,4 +1,4 @@
-package middleware
+package ratelimiter
 
 import (
 	"context"
@@ -16,27 +16,22 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type RateLimiterConfig struct {
-	Enable             bool
+type Config struct {
 	Period             int
 	MaxRequestsPerIP   int
 	MaxRequestsPerUser int
-	StoreType          string // memory/redis
-	MemoryStoreConfig  RateLimiterMemoryConfig
-	RedisStoreConfig   RateLimiterRedisConfig
+	RedisConfig        *RedisConfig
 }
 
-func RateLimiterWithConfig(config RateLimiterConfig) gin.HandlerFunc {
-	if !config.Enable {
-		return Empty()
-	}
+const prefix = "gin-admin-ratelimiter:"
 
-	var store RateLimiterStorer
-	switch config.StoreType {
-	case "redis":
-		store = NewRateLimiterRedisStore(config.RedisStoreConfig)
-	default:
-		store = NewRateLimiterMemoryStore(config.MemoryStoreConfig)
+func New(config Config) gin.HandlerFunc {
+
+	var store Storer
+	if config.RedisConfig != nil {
+		store = newRedisStore(*config.RedisConfig)
+	} else {
+		store = newMemoryStore(time.Second*3600, time.Second*30)
 	}
 
 	return func(c *gin.Context) {
@@ -64,26 +59,21 @@ func RateLimiterWithConfig(config RateLimiterConfig) gin.HandlerFunc {
 	}
 }
 
-type RateLimiterStorer interface {
+type Storer interface {
 	Allow(ctx context.Context, identifier string, period time.Duration, maxRequests int) (bool, error)
 }
 
-func NewRateLimiterMemoryStore(config RateLimiterMemoryConfig) RateLimiterStorer {
-	return &RateLimiterMemoryStore{
-		cache: cache.New(config.Expiration, config.CleanupInterval),
+func newMemoryStore(expiration, cleanupInterval time.Duration) Storer {
+	return &memoryStore{
+		cache: cache.New(expiration, cleanupInterval),
 	}
 }
 
-type RateLimiterMemoryConfig struct {
-	Expiration      time.Duration
-	CleanupInterval time.Duration
-}
-
-type RateLimiterMemoryStore struct {
+type memoryStore struct {
 	cache *cache.Cache
 }
 
-func (s *RateLimiterMemoryStore) Allow(ctx context.Context, identifier string, period time.Duration, maxRequests int) (bool, error) {
+func (s *memoryStore) Allow(ctx context.Context, identifier string, period time.Duration, maxRequests int) (bool, error) {
 	if period.Seconds() <= 0 || maxRequests <= 0 {
 		return true, nil
 	}
@@ -101,14 +91,14 @@ func (s *RateLimiterMemoryStore) Allow(ctx context.Context, identifier string, p
 	return true, nil
 }
 
-type RateLimiterRedisConfig struct {
+type RedisConfig struct {
 	Addr     string
 	Username string
 	Password string
 	DB       int
 }
 
-func NewRateLimiterRedisStore(config RateLimiterRedisConfig) RateLimiterStorer {
+func newRedisStore(config RedisConfig) Storer {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.Addr,
 		Username: config.Username,
@@ -116,21 +106,21 @@ func NewRateLimiterRedisStore(config RateLimiterRedisConfig) RateLimiterStorer {
 		DB:       config.DB,
 	})
 
-	return &RateLimiterRedisStore{
+	return &redisStore{
 		limiter: redis_rate.NewLimiter(rdb),
 	}
 }
 
-type RateLimiterRedisStore struct {
+type redisStore struct {
 	limiter *redis_rate.Limiter
 }
 
-func (s *RateLimiterRedisStore) Allow(ctx context.Context, identifier string, period time.Duration, maxRequests int) (bool, error) {
+func (s *redisStore) Allow(ctx context.Context, identifier string, period time.Duration, maxRequests int) (bool, error) {
 	if period.Seconds() <= 0 || maxRequests <= 0 {
 		return true, nil
 	}
 
-	result, err := s.limiter.Allow(ctx, identifier, redis_rate.PerSecond(maxRequests/int(period.Seconds())))
+	result, err := s.limiter.Allow(ctx, prefix+identifier, redis_rate.PerSecond(maxRequests/int(period.Seconds())))
 	if err != nil {
 		return false, err
 	}

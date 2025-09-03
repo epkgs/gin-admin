@@ -1,4 +1,4 @@
-package middleware
+package recovery
 
 import (
 	"context"
@@ -16,20 +16,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type RecoveryConfig struct {
-	Skip int // default: 3
+type Config struct {
+	Skip int
 }
 
-var DefaultRecoveryConfig = RecoveryConfig{
-	Skip: 3,
-}
-
-// Recovery from any panics and writes a 500 if there was one.
-func Recovery() gin.HandlerFunc {
-	return RecoveryWithConfig(DefaultRecoveryConfig)
-}
-
-func RecoveryWithConfig(config RecoveryConfig) gin.HandlerFunc {
+func New(config Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {

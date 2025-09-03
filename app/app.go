@@ -16,7 +16,7 @@ import (
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
 	"gin-admin/pkg/logger"
-	"gin-admin/pkg/middleware"
+	"gin-admin/pkg/middleware/recovery"
 	"gin-admin/pkg/response"
 	"gin-admin/pkg/utils/util"
 	"gin-admin/service"
@@ -49,10 +49,10 @@ func New(ctx context.Context, c *config.Config) *App {
 		cleaners: []func(){},
 	}
 
-	app.cacher = util.Must(modules.InitCacher(ctx, app))
-	app.db = util.Must(modules.InitDB(ctx, app))
-	app.jwt = util.Must(modules.InitJWT(ctx, app))
-	app.casbin = util.Must(modules.InitCasbinx(ctx, app))
+	app.cacher = util.Must(modules.NewCacher(ctx, app))
+	app.db = util.Must(modules.NewDB(ctx, app))
+	app.jwt = util.Must(modules.NewJWT(ctx, app))
+	app.casbin = util.Must(modules.NewCasbinx(ctx, app))
 
 	app.middlewares = modules.NewMiddlewares(app)
 
@@ -125,9 +125,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 	e.GET("/health", func(c *gin.Context) {
 		response.OK(c)
 	})
-	e.Use(middleware.RecoveryWithConfig(middleware.RecoveryConfig{
-		Skip: a.cfg.Middleware.Recovery.Skip,
-	}))
+	e.Use(recovery.New(recovery.Config{Skip: 3}))
 	e.NoMethod(func(c *gin.Context) {
 		response.Error(c, errorx.ErrMethodNotAllowed)
 	})
@@ -141,16 +139,9 @@ func (a *App) InitHttp(ctx context.Context) error {
 
 	// Register swagger
 	if a.cfg.Swagger.Enable {
-		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.RBAC())
+		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.RoutePermission())
 		g.StaticFile("/openapi.json", a.cfg.Swagger.StaticFile)
 		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	}
-
-	if dir := a.cfg.Middleware.Static.Root; dir != "" {
-		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-			Root:                 dir,
-			ExcludedPathPrefixes: a.cfg.Middleware.Static.ExcludedPathPrefixes,
-		}))
 	}
 
 	addr := a.cfg.HTTP.Addr

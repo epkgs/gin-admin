@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"gin-admin/model/dto"
-	"gin-admin/pkg/helper"
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/validatorx"
 
@@ -40,7 +39,6 @@ func response[T any](c *gin.Context, res *dto.Result[T]) {
 		panic(err)
 	}
 
-	helper.SetResponseBody(c, buf)
 	c.Data(httpStatus, "application/json; charset=utf-8", buf)
 	c.Abort()
 }

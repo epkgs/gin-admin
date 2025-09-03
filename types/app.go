@@ -27,7 +27,7 @@ type AppContext interface {
 type Casbinx interface {
 	GetEnforcer() *casbin.Enforcer
 	Load(ctx context.Context) error
-	Release(ctx context.Context) error
+	Release() error
 }
 
 type Middlewares interface {
@@ -35,9 +35,8 @@ type Middlewares interface {
 	Cors() gin.HandlerFunc
 	Trace() gin.HandlerFunc
 	Logger() gin.HandlerFunc
-	CopyBody() gin.HandlerFunc
 	Auth() gin.HandlerFunc
+	RoutePermission() gin.HandlerFunc
 	RateLimiter() gin.HandlerFunc
-	RBAC() gin.HandlerFunc
 	Prometheus() gin.HandlerFunc
 }

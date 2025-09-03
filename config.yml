@@ -58,6 +58,20 @@ DB:
   AutoMigrate: true                  # Auto migrate database tables
   PrepareStmt: false                 # Prepare SQL statements
 
+# JWT Configuration
+Jwt:
+  SigningMethod: "HS512"             # JWT signing method: HS256/HS384/HS512 (default: "HS512")
+  SigningKey: "XnEsT0S@"             # JWT secret key (default: "XnEsT0S@")
+  Expired: 86400                     # Token expiration time in seconds (default: 86400)
+
+# Casbin Configuration
+Casbin:
+  Disable: false                                # Disable Casbin middleware
+  LoadThread: 2                                 # Number of loading threads (default: 2)
+  AutoLoadInterval: 3                           # Auto load interval in seconds (default: 3)
+  ModelFile: "rbac_model.conf"                  # Casbin model file path (default: "rbac_model.conf")
+  GenPolicyFile: "gen_rbac_policy.csv"          # Generated policy file path (default: "gen_rbac_policy.csv")
+
 # Util Configuration
 Captcha:
   Length: 4                          # Captcha length (default: 4)
@@ -77,6 +91,10 @@ Swagger:
   Enable: true                        # Enable swagger UI (default: false)  
   StaticFile: "swagger/swagger.json"  # Static file for openapi.json (default: "swagger/swagger.json")
 
+RateLimiter:
+  Period: 10                         # Time period in seconds (default: 10)
+  MaxRequestsPerIP: 1000             # Maximum requests per IP (default: 1000)
+  MaxRequestsPerUser: 500            # Maximum requests per user (default: 500)
 
 Pprof:
   Addr: ""                          # Pprof monitor address, "localhost:6060"
@@ -109,92 +127,3 @@ Logger:
     MaxLifetime: 86400                 # Maximum connection lifetime in seconds
     MaxIdleTime: 7200                  # Maximum connection idle time in seconds
 
-# Middleware Configuration
-Middleware:
-  Recovery:
-    Skip: 3                            # Skip the first n stack frames (default: 3)
-
-  CORS:
-    Enable: true                       # Enable CORS middleware
-    AllowOrigins:
-      - "*"                            # Allowed origins
-    AllowMethods:                      # Allowed HTTP methods
-      - "GET"
-      - "POST"
-      - "PUT"
-      - "PATCH"
-      - "DELETE"
-      - "HEAD"
-      - "OPTIONS"
-    AllowHeaders:                      # Allowed headers
-      - "*"
-    ExposeHeaders:
-      - "Content-Disposition"          # Exposed headers
-    MaxAge: 86400                      # Access-Control-Max-Age in seconds
-    AllowWildcard: true                # Allow wildcard matching
-    AllowWebSockets: true              # Allow WebSocket connections
-    AllowFiles: true                   # Allow file access
-
-  Trace:
-    RequestHeaderKey: "X-Request-Id"   # Request header key for trace ID (default: "X-Request-Id")
-    ResponseTraceKey: "X-Trace-Id"     # Response header key for trace ID (default: "X-Trace-Id")
-
-  Logger:
-    MaxOutputRequestBodyLen: 4096      # Maximum request body length to output in logs (default: 4096)
-    MaxOutputResponseBodyLen: 4096     # Maximum response body length to output in logs (default: 1024)
-
-  CopyBody:
-    MaxContentLen: 134217728           # Maximum content length (default 32MB = 33554432, here 128MB)
-
-  Auth:
-    Disable: false                     # Disable auth middleware
-    SigningMethod: "HS512"             # JWT signing method: HS256/HS384/HS512 (default: "HS512")
-    SigningKey: "XnEsT0S@"             # JWT secret key (default: "XnEsT0S@")
-    OldSigningKey: ""                  # Old secret key (for migration)
-    RefreshKey: "TfYOj6Tf"             # Secret key for refresh token (default: "TfYOj6Tf")
-    Expired: 86400                     # Token expiration time in seconds (default: 86400)
-
-    Store:
-      Type: "badger"                   # Token store type: memory/badger/redis (default: "memory")
-
-      Memory:
-        CleanupInterval: 60            # Cleanup interval in seconds (default: 60)
-
-      Badger:
-        Path: "auth"                   # Badger database path (default: "auth")
-
-      Redis:
-        Addr: ""                       # Redis address (if empty, use the same configuration as Cache.Redis)
-        Username: ""                   # Redis username
-        Password: ""                   # Redis password
-        DB: 2                          # Redis database number
-
-  RateLimiter:
-    Enable: false                      # Enable rate limiter
-    Period: 10                         # Time period in seconds
-    MaxRequestsPerIP: 1000             # Maximum requests per IP
-    MaxRequestsPerUser: 500            # Maximum requests per user
-
-    Store:
-      Type: "memory"                   # Store type: memory/redis
-
-      Memory:
-        Expiration: 3600               # Expiration time in seconds (default: 3600)
-        CleanupInterval: 60            # Cleanup interval in seconds (default: 60)
-
-      Redis:
-        Addr: ""                       # Redis address (if empty, use the same configuration as Cache.Redis)
-        Username: ""                   # Redis username
-        Password: ""                   # Redis password
-        DB: 10                         # Redis database number
-
-  Casbin:
-    Disable: false                                # Disable Casbin middleware
-    LoadThread: 2                                 # Number of loading threads (default: 2)
-    AutoLoadInterval: 3                           # Auto load interval in seconds (default: 3)
-    ModelFile: "rbac_model.conf"                  # Casbin model file path (default: "rbac_model.conf")
-    GenPolicyFile: "gen_rbac_policy.csv"          # Generated policy file path (default: "gen_rbac_policy.csv")
-
-  Static:
-    Root: ""                           #  Static file root path (default: "")
-    ExcludedPathPrefixes: []           #  Excluded path prefixes (default: [])

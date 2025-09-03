@@ -68,34 +68,6 @@ func WithValues(ctx context.Context, values map[string]any) context.Context {
 	return context.WithValue(ctx, ctxValuesKey{}, m)
 }
 
-func WithTraceID(ctx context.Context, traceID string) context.Context {
-	return With(ctx, key_traceID, traceID)
-}
-
-func GetTraceID(ctx context.Context) string {
-	v := GetValues(ctx)
-	if v != nil {
-		if s, ok := v[key_traceID].(string); ok {
-			return s
-		}
-	}
-	return ""
-}
-
-func WithUserID(ctx context.Context, userID string) context.Context {
-	return With(ctx, key_userID, userID)
-}
-
-func GetUserID(ctx context.Context) string {
-	v := GetValues(ctx)
-	if v != nil {
-		if s, ok := v[key_userID].(string); ok {
-			return s
-		}
-	}
-	return ""
-}
-
 func WithTag(ctx context.Context, tag string) context.Context {
 	return With(ctx, key_tag, tag)
 }

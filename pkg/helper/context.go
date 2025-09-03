@@ -7,12 +7,11 @@ import (
 )
 
 type (
-	traceIDCtx    struct{}
-	transCtx      struct{}
-	rowLockCtx    struct{}
-	userIDCtx     struct{}
-	userTokenCtx  struct{}
-	isRootUserCtx struct{}
+	traceIDCtx struct{}
+	transCtx   struct{}
+	rowLockCtx struct{}
+	userIDCtx  struct{}
+	tokenCtx   struct{}
 )
 
 func WithTraceID(ctx context.Context, traceID string) context.Context {
@@ -60,23 +59,14 @@ func GetUserID(ctx context.Context) string {
 	return ""
 }
 
-func WithUserToken(ctx context.Context, userToken string) context.Context {
-	return context.WithValue(ctx, userTokenCtx{}, userToken)
+func WithToken(ctx context.Context, userToken string) context.Context {
+	return context.WithValue(ctx, tokenCtx{}, userToken)
 }
 
-func GetUserToken(ctx context.Context) string {
-	v := ctx.Value(userTokenCtx{})
+func GetToken(ctx context.Context) string {
+	v := ctx.Value(tokenCtx{})
 	if v != nil {
 		return v.(string)
 	}
 	return ""
-}
-
-func WithIsRootUser(ctx context.Context) context.Context {
-	return context.WithValue(ctx, isRootUserCtx{}, true)
-}
-
-func GetIsRootUser(ctx context.Context) bool {
-	v := ctx.Value(isRootUserCtx{})
-	return v != nil && v.(bool)
 }

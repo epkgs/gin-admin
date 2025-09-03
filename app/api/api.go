@@ -15,10 +15,9 @@ func RegisterRouters(app types.AppContext, e *gin.Engine) error {
 		app.Middlewares().Cors(),
 		app.Middlewares().Trace(),
 		app.Middlewares().Logger(),
-		app.Middlewares().CopyBody(),
 		// app.Middlewares().Auth(),
+		// app.Middlewares().RoutePermission(),
 		app.Middlewares().RateLimiter(),
-		// app.Middlewares().Casbin(),
 		app.Middlewares().Prometheus(),
 	)
 

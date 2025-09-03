@@ -2,21 +2,18 @@ package modules
 
 import (
 	"context"
-	"time"
 
-	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
 	"gin-admin/types"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func InitJWT(ctx context.Context, app types.AppContext) (jwtx.Auther, error) {
-	cfg := app.Config().Middleware.Auth
+func NewJWT(ctx context.Context, app types.AppContext) (jwtx.Auther, error) {
+	cfg := app.Config().Jwt
 	var opts []jwtx.Option
-	opts = append(opts, jwtx.SetExpired(cfg.Expired))
-	opts = append(opts, jwtx.SetSigningKey(cfg.SigningKey, cfg.OldSigningKey))
-	opts = append(opts, jwtx.SetRefreshKey(cfg.RefreshKey))
+	opts = append(opts, jwtx.WithExpired(cfg.Expired))
+	opts = append(opts, jwtx.WithSigningKey(cfg.SigningKey))
 
 	var method jwt.SigningMethod
 	switch cfg.SigningMethod {
@@ -27,35 +24,9 @@ func InitJWT(ctx context.Context, app types.AppContext) (jwtx.Auther, error) {
 	default:
 		method = jwt.SigningMethodHS512
 	}
-	opts = append(opts, jwtx.SetSigningMethod(method))
+	opts = append(opts, jwtx.WithSigningMethod(method))
 
-	var cache cachex.Cacher
-	var err error
-	switch cfg.Store.Type {
-	case "redis":
-		cache, err = cachex.NewRedisCache(&cachex.RedisConfig{
-			Addr:     cfg.Store.Redis.Addr,
-			DB:       cfg.Store.Redis.DB,
-			Username: cfg.Store.Redis.Username,
-			Password: cfg.Store.Redis.Password,
-		})
-		if err != nil {
-			return nil, err
-		}
-	case "badger":
-		cache, err = cachex.NewBadgerCache(&cachex.BadgerConfig{
-			Path: cfg.Store.Badger.Path,
-		})
-		if err != nil {
-			return nil, err
-		}
-	default:
-		cache = cachex.NewMemoryCache(&cachex.MemoryConfig{
-			CleanupInterval: time.Second * time.Duration(cfg.Store.Memory.CleanupInterval),
-		})
-	}
-
-	auth := jwtx.New(jwtx.NewStoreWithCache(cache), opts...)
+	auth := jwtx.New(app.Cacher(), opts...)
 
 	app.AddCleaner(ctx, func() {
 		_ = auth.Release(ctx)

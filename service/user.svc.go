@@ -277,6 +277,9 @@ func (a *User) GetRoleIDs(ctx context.Context, id string) ([]string, error) {
 		Find(&roles)
 
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, errorx.WrapGormError(err)
 	}
 
@@ -305,7 +308,11 @@ func (a *User) GetRoleIDsCache(ctx context.Context, userID string) ([]string, er
 	err := a.Cacher.GetObject(ctx, gCacheNSForUserRoles+":"+userID, &roleIDs)
 	if err != nil {
 		if err == cachex.ErrNotFound {
-			return nil, errorx.ErrNotFound.WithMsg("record not found").Wrap(err)
+			roleIDs, err = a.GetRoleIDs(ctx, userID)
+			if err == nil {
+				a.SetRoleIDsCache(ctx, userID, roleIDs)
+			}
+			return roleIDs, err
 		}
 		return nil, errorx.ErrInternalServerError.Wrap(err)
 	}

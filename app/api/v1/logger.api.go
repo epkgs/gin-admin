@@ -26,7 +26,7 @@ func (a *Logger) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
 	g := group.Group("loggers")
 	g.Use(
 		a.app.Middlewares().Auth(),
-		a.app.Middlewares().RBAC(),
+		a.app.Middlewares().RoutePermission(),
 	)
 
 	g.GET("", a.Query)

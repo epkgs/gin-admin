@@ -9,7 +9,7 @@ import (
 )
 
 // It returns a cachex.Cacher instance, a function to close the cache, and an error
-func InitCacher(ctx context.Context, app types.AppContext) (cachex.Cacher, error) {
+func NewCacher(ctx context.Context, app types.AppContext) (cachex.Cacher, error) {
 	cfg := app.Config().Cache
 
 	var cache cachex.Cacher
