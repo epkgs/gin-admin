@@ -149,7 +149,7 @@ func (m *Middlewares) Auth() gin.HandlerFunc {
 
 			userID := claims.UserID
 
-			ctx = helper.WithUserID(c.Request.Context(), userID)
+			ctx = helper.WithUserID(ctx, userID)
 			c.Request = c.Request.WithContext(ctx)
 			c.Next()
 		}

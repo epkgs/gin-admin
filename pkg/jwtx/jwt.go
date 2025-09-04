@@ -3,6 +3,7 @@ package jwtx
 import (
 	"context"
 	"errors"
+	"gin-admin/pkg/cachex"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -51,6 +52,7 @@ type options struct {
 	signingKey    []byte
 	expires       time.Duration // second
 	tokenType     string
+	cachePath     string
 }
 
 type Option func(*options)
@@ -73,12 +75,19 @@ func WithExpired(expires int) Option {
 	}
 }
 
-func New(cacher Cacher, opts ...Option) Auther {
+func WithCachePath(path string) Option {
+	return func(o *options) {
+		o.cachePath = path
+	}
+}
+
+func New(opts ...Option) Auther {
 	o := options{
 		tokenType:     "Bearer",
 		expires:       2 * 24 * time.Hour,
 		signingMethod: jwt.SigningMethodHS512,
 		signingKey:    []byte(DefaultSigningKey),
+		cachePath:     "jwt",
 	}
 
 	for _, opt := range opts {
@@ -86,8 +95,10 @@ func New(cacher Cacher, opts ...Option) Auther {
 	}
 
 	var store storer = nil
-	if cacher != nil {
-		store = newStore(cacher)
+	if o.cachePath != "" {
+		if cache, err := cachex.NewBadgerCache(&cachex.BadgerConfig{Path: o.cachePath}); err == nil {
+			store = newStore(cache)
+		}
 	}
 
 	return &JWTAuth{

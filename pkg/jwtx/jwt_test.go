@@ -2,18 +2,15 @@ package jwtx
 
 import (
 	"context"
-	"gin-admin/pkg/cachex"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuth(t *testing.T) {
-	cache := cachex.NewMemoryCache(&cachex.MemoryConfig{CleanupInterval: time.Second})
 
 	ctx := context.Background()
-	jwtAuth := New(cache)
+	jwtAuth := New()
 
 	userID := "test"
 	token, err := jwtAuth.GenerateToken(ctx, userID)
