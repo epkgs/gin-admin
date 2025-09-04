@@ -20,9 +20,9 @@ type Config struct {
 	MaxResponseLen int `default:"1024"`
 	File           struct {
 		Enable     bool
-		Path       string
-		MaxSize    int
-		MaxBackups int
+		Path       string `default:"log/ginadmin.log"`
+		MaxSize    int    `default:"20"` // Maximum number of backup log files
+		MaxBackups int    `default:"64"` // Maximum size of each log file in MB
 	}
 	Database struct {
 		Enable       bool
