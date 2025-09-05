@@ -28,7 +28,7 @@ func Run(ctx context.Context, configFile string) error {
 	cfg := config.MustLoad(ctx, configFile)
 
 	// Initialize logger.
-	cleanLoggerFn, err := logger.InitWithConfig(ctx, &cfg.Logger)
+	cleanLoggerFn, err := logger.Init(ctx, cfg.Logger)
 	if err != nil {
 		return err
 	}

@@ -38,9 +38,7 @@ type Config struct {
 	}
 }
 
-type HookHandlerFunc func(ctx context.Context, cfg *Config) (*Hook, error)
-
-func InitWithConfig(ctx context.Context, cfg *Config, hooks ...HookHandlerFunc) (func(), error) {
+func Init(ctx context.Context, cfg Config) (clearFN func(), err error) {
 	var zconfig zap.Config
 	if cfg.Debug {
 		cfg.Level = "debug"
@@ -146,21 +144,12 @@ func InitWithConfig(ctx context.Context, cfg *Config, hooks ...HookHandlerFunc) 
 		logger = handleHook(hook)
 	}
 
-	for _, hook := range hooks {
-		writer, err := hook(ctx, cfg)
-		if err != nil {
-			return nil, err
-		} else if writer == nil {
-			continue
-		}
-
-		logger = handleHook(writer)
-	}
-
 	zap.ReplaceGlobals(logger)
-	return func() {
+
+	clearFN = func() {
 		for _, fn := range cleanFns {
 			fn()
 		}
-	}, nil
+	}
+	return clearFN, nil
 }
