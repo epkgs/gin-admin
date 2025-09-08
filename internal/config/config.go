@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"gin-admin/pkg/encoding/json"
-	"gin-admin/pkg/logger"
 	"gin-admin/pkg/utils/util"
 )
 
@@ -45,8 +44,7 @@ type Config struct {
 	Menu        Menu
 	Jwt         Jwt
 	Casbin      Casbin
-
-	Logger logger.Config
+	Logger      Logger
 }
 
 func (c *Config) IsDebug() bool {

@@ -1,5 +1,7 @@
 package config
 
+import "gin-admin/pkg/logger"
+
 type Captcha struct {
 	Length int `default:"4"`
 	Width  int `default:"400"`
@@ -47,4 +49,10 @@ type Casbin struct {
 	AutoLoadInterval int    `default:"3"` // seconds
 	ModelFile        string `default:"rbac_model.conf"`
 	GenPolicyFile    string `default:"gen_rbac_policy.csv"`
+}
+
+type Logger struct {
+	logger.Config
+	MaxRequestLen  int `default:"4096"`
+	MaxResponseLen int `default:"1024"`
 }

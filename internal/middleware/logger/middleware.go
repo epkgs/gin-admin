@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gin-admin/pkg/geo"
+	"gin-admin/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/user_agent"
@@ -33,8 +34,13 @@ func (w responseWriter) WriteString(s string) (int, error) {
 	return w.ginWriter.WriteString(s)
 }
 
+type Config struct {
+	MaxRequestLen  int `default:"4096"`
+	MaxResponseLen int `default:"1024"`
+}
+
 // 记录请求和响应内容的中间件
-func GinMiddleware(cfg Config) gin.HandlerFunc {
+func New(cfg Config) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		// 保存原始的 ResponseWriter
@@ -123,8 +129,8 @@ func GinMiddleware(cfg Config) gin.HandlerFunc {
 
 		// 记录日志
 		ctx := c.Request.Context()
-		ctx = WithTag(ctx, Tag_Request)
-		Info(
+		ctx = logger.WithTag(ctx, logger.Tag_Request)
+		logger.Info(
 			ctx,
 			fmt.Sprintf("[HTTP] %s-%s-%d (%s)", c.Request.URL.Path, c.Request.Method, c.Writer.Status(), duration.String()),
 			fields,

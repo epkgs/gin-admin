@@ -2,12 +2,12 @@ package modules
 
 import (
 	"fmt"
-	"gin-admin/internal/app/middleware/auth"
-	"gin-admin/internal/app/middleware/promx"
-	"gin-admin/internal/app/middleware/ratelimiter"
+	"gin-admin/internal/middleware/auth"
+	"gin-admin/internal/middleware/logger"
+	"gin-admin/internal/middleware/promx"
+	"gin-admin/internal/middleware/ratelimiter"
 	"gin-admin/internal/types"
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/logger"
 	"strings"
 	"sync"
 	"time"
@@ -95,7 +95,10 @@ func (m *Middlewares) Logger() gin.HandlerFunc {
 	m.logger.once.Do(func() {
 		cfg := m.app.Config().Logger
 
-		m.logger.handler = logger.GinMiddleware(cfg)
+		m.logger.handler = logger.New(logger.Config{
+			MaxRequestLen:  cfg.MaxRequestLen,
+			MaxResponseLen: cfg.MaxResponseLen,
+		})
 	})
 
 	return m.logger.handler

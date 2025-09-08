@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"gin-admin/internal/api"
-	"gin-admin/internal/app/middleware/recovery"
 	"gin-admin/internal/app/modules"
 	"gin-admin/internal/config"
 	"gin-admin/internal/errorx"
+	"gin-admin/internal/middleware/recovery"
 	"gin-admin/internal/model"
 	"gin-admin/internal/service"
 	"gin-admin/internal/types"
