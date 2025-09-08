@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/model/dto"
-	"gin-admin/model/po"
+	"gin-admin/internal/dto"
+	"gin-admin/internal/model"
 	"gin-admin/pkg/crypto/hash"
 
 	"github.com/stretchr/testify/assert"
@@ -29,10 +29,10 @@ func TestUser(t *testing.T) {
 			"icon": "user",
 		},
 
-		Status: po.MenuStatus_ENABLED,
+		Status: model.MenuStatus_ENABLED,
 	}
 
-	var createMenu dto.Result[*po.Menu]
+	var createMenu dto.Result[*model.Menu]
 	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
 		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
 
@@ -53,10 +53,10 @@ func TestUser(t *testing.T) {
 		MenuIDs:     []string{menu.ID},
 		Description: "Normal",
 		Rank:        8,
-		Status:      po.RoleStatus_Enabled,
+		Status:      model.RoleStatus_Enabled,
 	}
 
-	var createRole dto.Result[*po.Role]
+	var createRole dto.Result[*model.Role]
 	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
 
 	role := createRole.Data
@@ -75,11 +75,11 @@ func TestUser(t *testing.T) {
 		Phone:       "0720",
 		Email:       "test@gmail.com",
 		Description: "test user",
-		Status:      po.UserStatus_Activated,
+		Status:      model.UserStatus_Activated,
 		RoleIDs:     []string{role.ID},
 	}
 
-	var createUser dto.Result[*po.User]
+	var createUser dto.Result[*model.User]
 	e.POST(baseAPI + "/users").WithJSON(userFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createUser)
 	user := createUser.Data
 	assert.NotEmpty(user.ID)
@@ -91,18 +91,18 @@ func TestUser(t *testing.T) {
 	assert.Equal(userFormItem.Status, user.Status)
 	assert.Equal(len(userFormItem.RoleIDs), len(user.Roles))
 
-	var listUsers dto.ResultList[*po.User]
+	var listUsers dto.ResultList[*model.User]
 	e.GET(baseAPI+"/users").WithQuery("username", userFormItem.Username).Expect().Status(http.StatusOK).JSON().Decode(&listUsers)
 	users := listUsers.Data.Items
 	assert.GreaterOrEqual(len(users), 1)
 
 	newName := "Test 1"
-	newStatus := po.UserStatus_Freezed
+	newStatus := model.UserStatus_Freezed
 	user.NickName = newName
 	user.Status = newStatus
 	e.PUT(baseAPI + "/users/" + user.ID).WithJSON(user).Expect().Status(http.StatusOK)
 
-	var getUser dto.Result[*po.User]
+	var getUser dto.Result[*model.User]
 	e.GET(baseAPI + "/users/" + user.ID).Expect().Status(http.StatusOK).JSON().Decode(&getUser)
 	assert.Equal(newName, getUser.Data.NickName)
 	assert.Equal(newStatus, getUser.Data.Status)

@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"gin-admin/model/dto"
-	"gin-admin/model/po"
+	"gin-admin/internal/dto"
+	"gin-admin/internal/model"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,10 +28,10 @@ func TestRole(t *testing.T) {
 			"icon": "role",
 		},
 
-		Status: po.MenuStatus_ENABLED,
+		Status: model.MenuStatus_ENABLED,
 	}
 
-	var createMenu dto.Result[*po.Menu]
+	var createMenu dto.Result[*model.Menu]
 	e.POST(baseAPI + "/menus").WithJSON(menuFormItem).
 		Expect().Status(http.StatusOK).JSON().Decode(&createMenu)
 
@@ -52,10 +52,10 @@ func TestRole(t *testing.T) {
 		MenuIDs:     []string{menu.ID},
 		Description: "Administrator",
 		Rank:        9,
-		Status:      po.RoleStatus_Enabled,
+		Status:      model.RoleStatus_Enabled,
 	}
 
-	var createRole dto.Result[*po.Role]
+	var createRole dto.Result[*model.Role]
 	e.POST(baseAPI + "/roles").WithJSON(roleFormItem).Expect().Status(http.StatusOK).JSON().Decode(&createRole)
 	role := createRole.Data
 	assert.NotEmpty(role.ID)
@@ -66,18 +66,18 @@ func TestRole(t *testing.T) {
 	assert.Equal(roleFormItem.Status, role.Status)
 	assert.Equal(len(roleFormItem.MenuIDs), len(role.Menus))
 
-	var listRoles dto.ResultList[*po.Role]
+	var listRoles dto.ResultList[*model.Role]
 	e.GET(baseAPI + "/roles").Expect().Status(http.StatusOK).JSON().Decode(&listRoles)
 	roles := listRoles.Data.Items
 	assert.GreaterOrEqual(len(roles), 1)
 
 	newName := "Administrator 1"
-	newStatus := po.RoleStatus_Disabled
+	newStatus := model.RoleStatus_Disabled
 	role.Name = newName
 	role.Status = newStatus
 	e.PUT(baseAPI + "/roles/" + role.ID).WithJSON(role).Expect().Status(http.StatusOK)
 
-	var getRole dto.Result[*po.Role]
+	var getRole dto.Result[*model.Role]
 	e.GET(baseAPI + "/roles/" + role.ID).Expect().Status(http.StatusOK).JSON().Decode(&getRole)
 	assert.Equal(newName, getRole.Data.Name)
 	assert.Equal(newStatus, getRole.Data.Status)

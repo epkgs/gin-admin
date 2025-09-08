@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gin-admin/app"
-	"gin-admin/config"
+	"gin-admin/internal/app"
+	"gin-admin/internal/config"
 
 	"github.com/spf13/cobra"
 )

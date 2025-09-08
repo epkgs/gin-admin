@@ -8,9 +8,9 @@ import (
 	"runtime"
 	"testing"
 
-	"gin-admin/app"
-	"gin-admin/app/api"
-	"gin-admin/config"
+	"gin-admin/internal/api"
+	"gin-admin/internal/app"
+	"gin-admin/internal/config"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gin-gonic/gin"

@@ -88,7 +88,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_Menus"
+                            "$ref": "#/definitions/dto.Result-model_Menus"
                         }
                     },
                     "401": {
@@ -204,7 +204,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_User"
+                            "$ref": "#/definitions/dto.Result-model_User"
                         }
                     },
                     "401": {
@@ -399,7 +399,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-po_Logger"
+                            "$ref": "#/definitions/dto.ResultList-model_Logger"
                         }
                     },
                     "401": {
@@ -482,7 +482,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-po_Menu"
+                            "$ref": "#/definitions/dto.ResultList-model_Menu"
                         }
                     },
                     "401": {
@@ -524,7 +524,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_Menu"
+                            "$ref": "#/definitions/dto.Result-model_Menu"
                         }
                     },
                     "400": {
@@ -572,7 +572,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_Menu"
+                            "$ref": "#/definitions/dto.Result-model_Menu"
                         }
                     },
                     "401": {
@@ -743,7 +743,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-po_Role"
+                            "$ref": "#/definitions/dto.ResultList-model_Role"
                         }
                     },
                     "401": {
@@ -785,7 +785,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_Role"
+                            "$ref": "#/definitions/dto.Result-model_Role"
                         }
                     },
                     "400": {
@@ -833,7 +833,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_Role"
+                            "$ref": "#/definitions/dto.Result-model_Role"
                         }
                     },
                     "401": {
@@ -1009,7 +1009,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-po_User"
+                            "$ref": "#/definitions/dto.ResultList-model_User"
                         }
                     },
                     "401": {
@@ -1051,7 +1051,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_User"
+                            "$ref": "#/definitions/dto.Result-model_User"
                         }
                     },
                     "400": {
@@ -1099,7 +1099,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-po_User"
+                            "$ref": "#/definitions/dto.Result-model_User"
                         }
                     },
                     "401": {
@@ -1307,13 +1307,13 @@
                 }
             }
         },
-        "dto.List-po_Logger": {
+        "dto.List-model_Logger": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.Logger"
+                        "$ref": "#/definitions/model.Logger"
                     }
                 },
                 "limit": {
@@ -1330,13 +1330,13 @@
                 }
             }
         },
-        "dto.List-po_Menu": {
+        "dto.List-model_Menu": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.Menu"
+                        "$ref": "#/definitions/model.Menu"
                     }
                 },
                 "limit": {
@@ -1353,13 +1353,13 @@
                 }
             }
         },
-        "dto.List-po_Role": {
+        "dto.List-model_Role": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.Role"
+                        "$ref": "#/definitions/model.Role"
                     }
                 },
                 "limit": {
@@ -1376,13 +1376,13 @@
                 }
             }
         },
-        "dto.List-po_User": {
+        "dto.List-model_User": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.User"
+                        "$ref": "#/definitions/model.User"
                     }
                 },
                 "limit": {
@@ -1597,21 +1597,21 @@
                 }
             }
         },
-        "dto.Result-po_Menu": {
+        "dto.Result-model_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/po.Menu"
+                    "$ref": "#/definitions/model.Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.Result-po_Menus": {
+        "dto.Result-model_Menus": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1620,7 +1620,7 @@
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.Menu"
+                        "$ref": "#/definitions/model.Menu"
                     }
                 },
                 "message": {
@@ -1628,84 +1628,84 @@
                 }
             }
         },
-        "dto.Result-po_Role": {
+        "dto.Result-model_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/po.Role"
+                    "$ref": "#/definitions/model.Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.Result-po_User": {
+        "dto.Result-model_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/po.User"
+                    "$ref": "#/definitions/model.User"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-po_Logger": {
+        "dto.ResultList-model_Logger": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-po_Logger"
+                    "$ref": "#/definitions/dto.List-model_Logger"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-po_Menu": {
+        "dto.ResultList-model_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-po_Menu"
+                    "$ref": "#/definitions/dto.List-model_Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-po_Role": {
+        "dto.ResultList-model_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-po_Role"
+                    "$ref": "#/definitions/dto.List-model_Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-po_User": {
+        "dto.ResultList-model_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-po_User"
+                    "$ref": "#/definitions/dto.List-model_User"
                 },
                 "message": {
                     "type": "string"
@@ -1919,7 +1919,7 @@
                 }
             }
         },
-        "po.Logger": {
+        "model.Logger": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1969,14 +1969,14 @@
                 }
             }
         },
-        "po.Menu": {
+        "model.Menu": {
             "type": "object",
             "properties": {
                 "children": {
                     "description": "Child menus",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/po.Menus"
+                            "$ref": "#/definitions/model.Menus"
                         }
                     ]
                 },
@@ -2022,7 +2022,7 @@
                     "type": "string"
                 },
                 "roles": {
-                    "$ref": "#/definitions/po.Roles"
+                    "$ref": "#/definitions/model.Roles"
                 },
                 "status": {
                     "description": "Status of menu (enabled, disabled)",
@@ -2042,13 +2042,13 @@
                 }
             }
         },
-        "po.Menus": {
+        "model.Menus": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/po.Menu"
+                "$ref": "#/definitions/model.Menu"
             }
         },
-        "po.Role": {
+        "model.Role": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2070,7 +2070,7 @@
                 "menus": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.Menu"
+                        "$ref": "#/definitions/model.Menu"
                     }
                 },
                 "name": {
@@ -2092,18 +2092,18 @@
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.User"
+                        "$ref": "#/definitions/model.User"
                     }
                 }
             }
         },
-        "po.Roles": {
+        "model.Roles": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/po.Role"
+                "$ref": "#/definitions/model.Role"
             }
         },
-        "po.User": {
+        "model.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -2142,7 +2142,7 @@
                     "description": "Roles of user",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/po.Role"
+                        "$ref": "#/definitions/model.Role"
                     }
                 },
                 "status": {

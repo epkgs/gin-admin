@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"gin-admin/config"
-	"gin-admin/model/po"
+	"gin-admin/internal/config"
+	"gin-admin/internal/model"
 	"gin-admin/pkg/gormx"
 
 	"github.com/spf13/cobra"
@@ -77,10 +77,9 @@ func initDB(cfg config.DB) (*gorm.DB, error) {
 
 func executeGen(db *gorm.DB) {
 	g := gen.NewGenerator(gen.Config{
-		OutPath:       "./model/bo",                                  //gen代码的输出目录
-		ModelPkgPath:  "./model",                                     //模型代码的输出目录
-		Mode:          gen.WithDefaultQuery | gen.WithQueryInterface, //启用默认查询和链式接口
-		FieldNullable: true,                                          //允许 Null 的字段生成指针类型
+		OutPath:       "./internal/dao",                              // gen代码的输出目录
+		Mode:          gen.WithDefaultQuery | gen.WithQueryInterface, // 启用默认查询和链式接口
+		FieldNullable: true,                                          // 允许 Null 的字段生成指针类型
 	})
 
 	g.UseDB(db)
@@ -88,7 +87,7 @@ func executeGen(db *gorm.DB) {
 
 	g.ApplyInterface(
 		func(Querier) {},
-		po.Models()...,
+		model.Models()...,
 	)
 
 	// 执行生成

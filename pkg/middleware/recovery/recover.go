@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"gin-admin/errorx"
+	"gin-admin/internal/errorx"
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 

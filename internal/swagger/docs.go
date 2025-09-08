@@ -96,7 +96,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_Menus"
+                            "$ref": "#/definitions/dto.Result-po_Menus"
                         }
                     },
                     "401": {
@@ -212,7 +212,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "401": {
@@ -407,7 +407,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-model_Logger"
+                            "$ref": "#/definitions/dto.ResultList-po_Logger"
                         }
                     },
                     "401": {
@@ -490,7 +490,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-model_Menu"
+                            "$ref": "#/definitions/dto.ResultList-po_Menu"
                         }
                     },
                     "401": {
@@ -532,7 +532,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_Menu"
+                            "$ref": "#/definitions/dto.Result-po_Menu"
                         }
                     },
                     "400": {
@@ -580,7 +580,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_Menu"
+                            "$ref": "#/definitions/dto.Result-po_Menu"
                         }
                     },
                     "401": {
@@ -751,7 +751,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-model_Role"
+                            "$ref": "#/definitions/dto.ResultList-po_Role"
                         }
                     },
                     "401": {
@@ -793,7 +793,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_Role"
+                            "$ref": "#/definitions/dto.Result-po_Role"
                         }
                     },
                     "400": {
@@ -841,7 +841,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_Role"
+                            "$ref": "#/definitions/dto.Result-po_Role"
                         }
                     },
                     "401": {
@@ -1017,7 +1017,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ResultList-model_User"
+                            "$ref": "#/definitions/dto.ResultList-po_User"
                         }
                     },
                     "401": {
@@ -1059,7 +1059,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "400": {
@@ -1107,7 +1107,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Result-model_User"
+                            "$ref": "#/definitions/dto.Result-po_User"
                         }
                     },
                     "401": {
@@ -1315,13 +1315,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.List-model_Logger": {
+        "dto.List-po_Logger": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Logger"
+                        "$ref": "#/definitions/po.Logger"
                     }
                 },
                 "limit": {
@@ -1338,13 +1338,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.List-model_Menu": {
+        "dto.List-po_Menu": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "limit": {
@@ -1361,13 +1361,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.List-model_Role": {
+        "dto.List-po_Role": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Role"
+                        "$ref": "#/definitions/po.Role"
                     }
                 },
                 "limit": {
@@ -1384,13 +1384,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.List-model_User": {
+        "dto.List-po_User": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.User"
+                        "$ref": "#/definitions/po.User"
                     }
                 },
                 "limit": {
@@ -1605,21 +1605,21 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.Result-model_Menu": {
+        "dto.Result-po_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/model.Menu"
+                    "$ref": "#/definitions/po.Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.Result-model_Menus": {
+        "dto.Result-po_Menus": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1628,7 +1628,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "message": {
@@ -1636,84 +1636,84 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.Result-model_Role": {
+        "dto.Result-po_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/model.Role"
+                    "$ref": "#/definitions/po.Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.Result-model_User": {
+        "dto.Result-po_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/model.User"
+                    "$ref": "#/definitions/po.User"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-model_Logger": {
+        "dto.ResultList-po_Logger": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-model_Logger"
+                    "$ref": "#/definitions/dto.List-po_Logger"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-model_Menu": {
+        "dto.ResultList-po_Menu": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-model_Menu"
+                    "$ref": "#/definitions/dto.List-po_Menu"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-model_Role": {
+        "dto.ResultList-po_Role": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-model_Role"
+                    "$ref": "#/definitions/dto.List-po_Role"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "dto.ResultList-model_User": {
+        "dto.ResultList-po_User": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/dto.List-model_User"
+                    "$ref": "#/definitions/dto.List-po_User"
                 },
                 "message": {
                     "type": "string"
@@ -1927,7 +1927,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Logger": {
+        "po.Logger": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -1977,14 +1977,14 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Menu": {
+        "po.Menu": {
             "type": "object",
             "properties": {
                 "children": {
                     "description": "Child menus",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Menus"
+                            "$ref": "#/definitions/po.Menus"
                         }
                     ]
                 },
@@ -2030,7 +2030,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "roles": {
-                    "$ref": "#/definitions/model.Roles"
+                    "$ref": "#/definitions/po.Roles"
                 },
                 "status": {
                     "description": "Status of menu (enabled, disabled)",
@@ -2050,13 +2050,13 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Menus": {
+        "po.Menus": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/model.Menu"
+                "$ref": "#/definitions/po.Menu"
             }
         },
-        "model.Role": {
+        "po.Role": {
             "type": "object",
             "properties": {
                 "code": {
@@ -2078,7 +2078,7 @@ const docTemplate = `{
                 "menus": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Menu"
+                        "$ref": "#/definitions/po.Menu"
                     }
                 },
                 "name": {
@@ -2100,18 +2100,18 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.User"
+                        "$ref": "#/definitions/po.User"
                     }
                 }
             }
         },
-        "model.Roles": {
+        "po.Roles": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/model.Role"
+                "$ref": "#/definitions/po.Role"
             }
         },
-        "model.User": {
+        "po.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -2150,7 +2150,7 @@ const docTemplate = `{
                     "description": "Roles of user",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Role"
+                        "$ref": "#/definitions/po.Role"
                     }
                 },
                 "status": {

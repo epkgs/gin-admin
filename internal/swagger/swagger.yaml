@@ -36,11 +36,11 @@ definitions:
         description: Captcha ID
         type: string
     type: object
-  dto.List-model_Logger:
+  dto.List-po_Logger:
     properties:
       items:
         items:
-          $ref: '#/definitions/model.Logger'
+          $ref: '#/definitions/po.Logger'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -53,11 +53,11 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dto.List-model_Menu:
+  dto.List-po_Menu:
     properties:
       items:
         items:
-          $ref: '#/definitions/model.Menu'
+          $ref: '#/definitions/po.Menu'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -70,11 +70,11 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dto.List-model_Role:
+  dto.List-po_Role:
     properties:
       items:
         items:
-          $ref: '#/definitions/model.Role'
+          $ref: '#/definitions/po.Role'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -87,11 +87,11 @@ definitions:
         description: total number of items
         type: integer
     type: object
-  dto.List-model_User:
+  dto.List-po_User:
     properties:
       items:
         items:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/po.User'
         type: array
       limit:
         description: pagination size, less than 0 is considered as unlimited quantity.
@@ -247,77 +247,77 @@ definitions:
       message:
         type: string
     type: object
-  dto.Result-model_Menu:
+  dto.Result-po_Menu:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/model.Menu'
+        $ref: '#/definitions/po.Menu'
       message:
         type: string
     type: object
-  dto.Result-model_Menus:
+  dto.Result-po_Menus:
     properties:
       code:
         type: integer
       data:
         items:
-          $ref: '#/definitions/model.Menu'
+          $ref: '#/definitions/po.Menu'
         type: array
       message:
         type: string
     type: object
-  dto.Result-model_Role:
+  dto.Result-po_Role:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/model.Role'
+        $ref: '#/definitions/po.Role'
       message:
         type: string
     type: object
-  dto.Result-model_User:
+  dto.Result-po_User:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/model.User'
+        $ref: '#/definitions/po.User'
       message:
         type: string
     type: object
-  dto.ResultList-model_Logger:
+  dto.ResultList-po_Logger:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dto.List-model_Logger'
+        $ref: '#/definitions/dto.List-po_Logger'
       message:
         type: string
     type: object
-  dto.ResultList-model_Menu:
+  dto.ResultList-po_Menu:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dto.List-model_Menu'
+        $ref: '#/definitions/dto.List-po_Menu'
       message:
         type: string
     type: object
-  dto.ResultList-model_Role:
+  dto.ResultList-po_Role:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dto.List-model_Role'
+        $ref: '#/definitions/dto.List-po_Role'
       message:
         type: string
     type: object
-  dto.ResultList-model_User:
+  dto.ResultList-po_User:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/dto.List-model_User'
+        $ref: '#/definitions/dto.List-po_User'
       message:
         type: string
     type: object
@@ -478,7 +478,7 @@ definitions:
         maxLength: 64
         type: string
     type: object
-  model.Logger:
+  po.Logger:
     properties:
       createdAt:
         description: Create time
@@ -515,11 +515,11 @@ definitions:
         description: From User.Name
         type: string
     type: object
-  model.Menu:
+  po.Menu:
     properties:
       children:
         allOf:
-        - $ref: '#/definitions/model.Menus'
+        - $ref: '#/definitions/po.Menus'
         description: Child menus
       component:
         description: Component path of view
@@ -553,7 +553,7 @@ definitions:
         description: Redirect path of menu
         type: string
       roles:
-        $ref: '#/definitions/model.Roles'
+        $ref: '#/definitions/po.Roles'
       status:
         description: Status of menu (enabled, disabled)
         type: string
@@ -567,11 +567,11 @@ definitions:
         description: Update time
         type: string
     type: object
-  model.Menus:
+  po.Menus:
     items:
-      $ref: '#/definitions/model.Menu'
+      $ref: '#/definitions/po.Menu'
     type: array
-  model.Role:
+  po.Role:
     properties:
       code:
         description: Code of role (unique)
@@ -587,7 +587,7 @@ definitions:
         type: string
       menus:
         items:
-          $ref: '#/definitions/model.Menu'
+          $ref: '#/definitions/po.Menu'
         type: array
       name:
         description: Display name of role
@@ -603,14 +603,14 @@ definitions:
         type: string
       users:
         items:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/po.User'
         type: array
     type: object
-  model.Roles:
+  po.Roles:
     items:
-      $ref: '#/definitions/model.Role'
+      $ref: '#/definitions/po.Role'
     type: array
-  model.User:
+  po.User:
     properties:
       avatar:
         description: Avatar URL
@@ -639,7 +639,7 @@ definitions:
       roles:
         description: Roles of user
         items:
-          $ref: '#/definitions/model.Role'
+          $ref: '#/definitions/po.Role'
         type: array
       status:
         description: Status of user (activated, freezed)
@@ -707,7 +707,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_Menus'
+            $ref: '#/definitions/dto.Result-po_Menus'
         "401":
           description: Unauthorized
           schema:
@@ -778,7 +778,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_User'
+            $ref: '#/definitions/dto.Result-po_User'
         "401":
           description: Unauthorized
           schema:
@@ -903,7 +903,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ResultList-model_Logger'
+            $ref: '#/definitions/dto.ResultList-po_Logger'
         "401":
           description: Unauthorized
           schema:
@@ -957,7 +957,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ResultList-model_Menu'
+            $ref: '#/definitions/dto.ResultList-po_Menu'
         "401":
           description: Unauthorized
           schema:
@@ -983,7 +983,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_Menu'
+            $ref: '#/definitions/dto.Result-po_Menu'
         "400":
           description: Bad Request
           schema:
@@ -1038,7 +1038,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_Menu'
+            $ref: '#/definitions/dto.Result-po_Menu'
         "401":
           description: Unauthorized
           schema:
@@ -1123,7 +1123,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ResultList-model_Role'
+            $ref: '#/definitions/dto.ResultList-po_Role'
         "401":
           description: Unauthorized
           schema:
@@ -1149,7 +1149,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_Role'
+            $ref: '#/definitions/dto.Result-po_Role'
         "400":
           description: Bad Request
           schema:
@@ -1204,7 +1204,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_Role'
+            $ref: '#/definitions/dto.Result-po_Role'
         "401":
           description: Unauthorized
           schema:
@@ -1292,7 +1292,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ResultList-model_User'
+            $ref: '#/definitions/dto.ResultList-po_User'
         "401":
           description: Unauthorized
           schema:
@@ -1318,7 +1318,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_User'
+            $ref: '#/definitions/dto.Result-po_User'
         "400":
           description: Bad Request
           schema:
@@ -1373,7 +1373,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Result-model_User'
+            $ref: '#/definitions/dto.Result-po_User'
         "401":
           description: Unauthorized
           schema:

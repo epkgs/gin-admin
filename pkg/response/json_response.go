@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gin-admin/model/dto"
+	"gin-admin/internal/dto"
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/validatorx"
 
