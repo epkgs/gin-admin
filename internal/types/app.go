@@ -36,7 +36,6 @@ type Middlewares interface {
 	Trace() gin.HandlerFunc
 	Logger() gin.HandlerFunc
 	Auth() gin.HandlerFunc
-	RoutePermission() gin.HandlerFunc
 	RateLimiter() gin.HandlerFunc
 	Prometheus() gin.HandlerFunc
 }

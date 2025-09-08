@@ -2,16 +2,12 @@ package modules
 
 import (
 	"fmt"
-	"gin-admin/internal/errorx"
-	"gin-admin/internal/service"
+	"gin-admin/internal/app/middleware/auth"
+	"gin-admin/internal/app/middleware/promx"
+	"gin-admin/internal/app/middleware/ratelimiter"
 	"gin-admin/internal/types"
-	"gin-admin/locales"
 	"gin-admin/pkg/helper"
-	"gin-admin/pkg/jwtx"
 	"gin-admin/pkg/logger"
-	"gin-admin/pkg/middleware/promx"
-	"gin-admin/pkg/middleware/ratelimiter"
-	"gin-admin/pkg/response"
 	"strings"
 	"sync"
 	"time"
@@ -37,7 +33,6 @@ type Middlewares struct {
 	logger      mdw
 	auth        mdw
 	rateLimiter mdw
-	casbin      mdw
 	prometheus  mdw
 }
 
@@ -109,97 +104,10 @@ func (m *Middlewares) Logger() gin.HandlerFunc {
 func (m *Middlewares) Auth() gin.HandlerFunc {
 
 	m.auth.once.Do(func() {
-		m.auth.handler = func(c *gin.Context) {
-
-			ctx := c.Request.Context()
-
-			var token string
-			{
-
-				auth := c.GetHeader("Authorization")
-				prefix := "Bearer "
-
-				if auth != "" && strings.HasPrefix(auth, prefix) {
-					token = auth[len(prefix):]
-				} else {
-					token = auth
-				}
-
-				if token == "" {
-					token = c.Query("token")
-				}
-			}
-
-			if token == "" {
-				response.Error(c, errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token")))
-				return
-			}
-
-			ctx = helper.WithToken(ctx, token)
-
-			claims, err := m.app.Jwt().ParseToken(ctx, token)
-			if err != nil {
-				if err == jwtx.ErrInvalidToken {
-					response.Error(c, errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token")))
-					return
-				}
-				response.Error(c, errorx.ErrInternalServerError.Wrap(err))
-				return
-			}
-
-			userID := claims.UserID
-
-			ctx = helper.WithUserID(ctx, userID)
-			c.Request = c.Request.WithContext(ctx)
-			c.Next()
-		}
+		m.auth.handler = auth.New(m.app)
 	})
 
 	return m.auth.handler
-}
-
-func (m *Middlewares) RoutePermission() gin.HandlerFunc {
-	m.casbin.once.Do(func() {
-		cfg := m.app.Config()
-
-		m.casbin.handler = func(c *gin.Context) {
-			ctx := c.Request.Context()
-
-			userID := helper.GetUserID(ctx)
-			if cfg.IsSuper(userID) {
-				c.Next()
-				return
-			}
-
-			enforcer := m.app.Casbin().GetEnforcer()
-			if enforcer == nil {
-				response.Error(c, errorx.ErrForbidden)
-				return
-			}
-
-			userSVC := service.NewUser(m.app)
-
-			roleIDs, err := userSVC.GetRoleIDsCache(ctx, userID)
-			if err != nil {
-				response.Error(c, errorx.ErrForbidden.Wrap(err))
-				return
-			}
-
-			for _, roleID := range roleIDs {
-				if ok, err := enforcer.Enforce(roleID, c.Request.URL.Path, c.Request.Method); err != nil {
-					response.Error(c, errorx.ErrInternalServerError.Wrap(err))
-					return
-				} else if ok {
-					c.Next()
-					return
-				}
-			}
-			response.Error(c, errorx.ErrForbidden)
-		}
-
-	})
-
-	return m.casbin.handler
 }
 
 func (m *Middlewares) RateLimiter() gin.HandlerFunc {

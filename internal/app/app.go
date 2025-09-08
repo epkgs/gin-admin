@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gin-admin/internal/api"
+	"gin-admin/internal/app/middleware/recovery"
 	"gin-admin/internal/app/modules"
 	"gin-admin/internal/config"
 	"gin-admin/internal/errorx"
@@ -18,7 +19,6 @@ import (
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
 	"gin-admin/pkg/logger"
-	"gin-admin/pkg/middleware/recovery"
 	"gin-admin/pkg/response"
 	"gin-admin/pkg/utils/util"
 
@@ -139,7 +139,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 
 	// Register swagger
 	if a.cfg.Swagger.Enable {
-		g := e.Group("").Use(a.middlewares.Auth()).Use(a.middlewares.RoutePermission())
+		g := e.Group("").Use(a.middlewares.Auth())
 		g.StaticFile("/openapi.json", a.cfg.Swagger.StaticFile)
 		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
