@@ -88,8 +88,8 @@ Prometheus:
   DefaultCollect: true
 
 Swagger:
-  Enable: true                        # Enable swagger UI (default: false)  
-  StaticFile: "swagger/swagger.json"  # Static file for openapi.json (default: "swagger/swagger.json")
+  Enable: true                                 # Enable swagger UI (default: false)  
+  StaticFile: "internal/swagger/swagger.json"  # Static file for openapi.json (default: "internal/swagger/swagger.json")
 
 RateLimiter:
   Period: 10                         # Time period in seconds (default: 10)
