@@ -10,7 +10,7 @@
   "Nothing to update": "Nothing to update",
   "Password encrypt failed": "Password encrypt failed",
   "User not found": "User not found",
-  "invalid token": "invalid token",
   "User is not logged in": "User is not logged in",
-  "Super user can not modify": "Super user can not modify"
+  "Super user can not modify": "Super user can not modify",
+  "Invalid token": "Invalid token"
 }

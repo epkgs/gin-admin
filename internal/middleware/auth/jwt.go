@@ -32,7 +32,7 @@ func checkJWT(c *gin.Context, app types.AppContext) error {
 	}
 
 	if token == "" {
-		return errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token"))
+		return errorx.ErrUnauthorized.WithMsg(locales.User.Str("Invalid token"))
 	}
 
 	ctx = helper.WithToken(ctx, token)
@@ -40,7 +40,7 @@ func checkJWT(c *gin.Context, app types.AppContext) error {
 	claims, err := app.Jwt().ParseToken(ctx, token)
 	if err != nil {
 		if err == jwtx.ErrInvalidToken {
-			return errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token"))
+			return errorx.ErrUnauthorized.WithMsg(locales.User.Str("Invalid token"))
 		}
 		return errorx.ErrInternalServerError.Wrap(err)
 	}

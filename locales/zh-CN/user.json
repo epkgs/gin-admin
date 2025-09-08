@@ -10,7 +10,7 @@
   "Nothing to update": "没有需要更新的内容",
   "Password encrypt failed": "密码加密失败",
   "User not found": "用户未找到",
-  "invalid token": "无效令牌",
   "User is not logged in": "用户未登录",
-  "Super user can not modify": "超级用户不能被修改"
+  "Super user can not modify": "超级用户不能被修改",
+  "Invalid token": "无效令牌"
 }
