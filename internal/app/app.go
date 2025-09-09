@@ -21,6 +21,7 @@ import (
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 	"gin-admin/pkg/utils/util"
+	_ "gin-admin/swagger"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -139,7 +140,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 
 	// Register swagger
 	if a.cfg.Swagger.Enable {
-		g := e.Group("").Use(a.middlewares.Auth())
+		g := e.Group("") // .Use(a.middlewares.Auth())
 		g.StaticFile("/openapi.json", a.cfg.Swagger.StaticFile)
 		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}

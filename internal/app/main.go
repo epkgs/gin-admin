@@ -12,7 +12,6 @@ import (
 
 	"gin-admin/internal/config"
 	"gin-admin/pkg/logger"
-	_ "gin-admin/swagger"
 )
 
 // The Run function initializes and starts a service with configuration and logger, and handles
