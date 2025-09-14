@@ -1,4 +1,4 @@
-.PHONY: start build
+.PHONY: start build swagger
 
 NOW = $(shell date -u '+%Y%m%d%I%M%S')
 
@@ -32,6 +32,7 @@ build-win:
 
 # go install github.com/swaggo/swag/cmd/swag@latest
 swagger:
+	@go install github.com/swaggo/swag/cmd/swag@latest
 	@swag init --parseDependency --generalInfo ./main.go --output ./swagger
 
 # https://github.com/OpenAPITools/openapi-generator

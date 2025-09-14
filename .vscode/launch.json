@@ -17,6 +17,7 @@
                 "start",
             ],
             "program": "${workspaceFolder}",
+            "preLaunchTask": "make swagger",
             "console": "integratedTerminal"
         },
         {
