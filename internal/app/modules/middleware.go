@@ -143,16 +143,23 @@ func (m *Middlewares) Prometheus() gin.HandlerFunc {
 	m.prometheus.once.Do(func() {
 		cfg := m.app.Config()
 
-		m.prometheus.handler = promx.New(func(c *promx.Config) {
-			c.App = cfg.AppName
-			c.ListenPort = cfg.Prometheus.Port
-			c.BasicUserName = cfg.Prometheus.BasicUsername
-			c.BasicPassword = cfg.Prometheus.BasicPassword
-			c.LogApi = cfg.Prometheus.LogApis
-			c.LogMethod = cfg.Prometheus.LogMethods
-			c.DefaultCollect = cfg.Prometheus.DefaultCollect
-			c.Objectives = map[float64]float64{0.9: 0.01, 0.95: 0.005, 0.99: 0.001}
-		})
+		if !cfg.Prometheus.Enable {
+
+			m.prometheus.handler = func(c *gin.Context) { c.Next() }
+
+		} else {
+
+			m.prometheus.handler = promx.New(func(c *promx.Config) {
+				c.App = cfg.AppName
+				c.ListenPort = cfg.Prometheus.Port
+				c.BasicUserName = cfg.Prometheus.BasicUsername
+				c.BasicPassword = cfg.Prometheus.BasicPassword
+				c.LogApi = cfg.Prometheus.LogApis
+				c.LogMethod = cfg.Prometheus.LogMethods
+				c.DefaultCollect = cfg.Prometheus.DefaultCollect
+				c.Objectives = map[float64]float64{0.9: 0.01, 0.95: 0.005, 0.99: 0.001}
+			})
+		}
 
 	})
 

@@ -9,6 +9,7 @@ type Captcha struct {
 }
 
 type Prometheus struct {
+	Enable         bool
 	Port           int    `default:"9100"`
 	BasicUsername  string `default:"admin"`
 	BasicPassword  string `default:"admin"`
