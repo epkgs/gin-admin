@@ -18,8 +18,7 @@ type Prometheus struct {
 }
 
 type Swagger struct {
-	Enable     bool   `default:"false"`                // disable swagger
-	StaticFile string `default:"swagger/swagger.json"` // static file for openapi.json
+	Enable bool `default:"false"` // disable swagger
 }
 
 type Pprof struct {
