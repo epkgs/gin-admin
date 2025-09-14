@@ -1,4 +1,4 @@
-.PHONY: start build swagger
+.PHONY: start build
 
 NOW = $(shell date -u '+%Y%m%d%I%M%S')
 
@@ -33,11 +33,11 @@ build-win:
 # go install github.com/swaggo/swag/cmd/swag@latest
 swagger:
 	@go install github.com/swaggo/swag/cmd/swag@latest
-	@swag init --parseDependency --generalInfo ./main.go --output ./swagger
+	@swag init --parseDependency --generalInfo ./main.go --output ./internal/swagger
 
 # https://github.com/OpenAPITools/openapi-generator
 openapi:
-	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/swagger/swagger.yaml -g openapi -o /local/swagger/v3
+	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/internal/swagger/swagger.yaml -g openapi -o /local/internal/swagger/v3
 
 clean:
 	rm -rf runtime $(SERVER_BIN)

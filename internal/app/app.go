@@ -14,6 +14,7 @@ import (
 	"gin-admin/internal/middleware/recovery"
 	"gin-admin/internal/model"
 	"gin-admin/internal/service"
+	_ "gin-admin/internal/swagger"
 	"gin-admin/internal/types"
 	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
@@ -21,7 +22,6 @@ import (
 	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 	"gin-admin/pkg/utils/util"
-	_ "gin-admin/swagger"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
