@@ -35,7 +35,6 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
-	github.com/swaggo/swag v1.16.4
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.41.0
 	golang.org/x/text v0.29.0
@@ -49,6 +48,7 @@ require (
 	gorm.io/gen v0.3.27
 	gorm.io/gorm v1.30.1
 	gorm.io/plugin/dbresolver v1.6.2
+	gorm.io/plugin/soft_delete v1.2.1
 )
 
 require (
@@ -128,6 +128,7 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.7 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/swaggo/swag v1.16.4 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect

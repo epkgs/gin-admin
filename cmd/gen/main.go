@@ -87,7 +87,7 @@ func executeGen(db *gorm.DB) {
 
 	g.ApplyInterface(
 		func(Querier) {},
-		model.Models()...,
+		model.Models...,
 	)
 
 	// 执行生成

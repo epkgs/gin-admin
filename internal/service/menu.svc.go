@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"gin-admin/internal/dao"
 	"gin-admin/internal/dto"
@@ -322,10 +321,7 @@ func (a *Menu) Create(ctx context.Context, req *dto.MenuCreateReq) (*model.Menu,
 		return nil, errorx.ErrBadRequest
 	}
 
-	menu := &model.Menu{
-		ID:        randx.NewXID(),
-		CreatedAt: time.Now(),
-	}
+	menu := &model.Menu{}
 
 	m := a.q.Menu
 

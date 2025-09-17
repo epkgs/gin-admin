@@ -22,7 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrInvalidToken = errorx.ErrUnauthorized.WithMsg(locales.User.Str("invalid token"))
+var ErrInvalidToken = errorx.ErrUnauthorized.WithMsg(locales.User.Str("Invalid token"))
 
 // Auth management for SYS
 type Auth struct {

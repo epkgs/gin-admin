@@ -89,7 +89,7 @@ func (a *App) AddCleaner(ctx context.Context, cleaner func()) {
 }
 
 func (a *App) autoMigrate(_ context.Context) error {
-	return a.db.AutoMigrate(model.Models()...)
+	return a.db.AutoMigrate(model.Models...)
 }
 
 func (a *App) Init(ctx context.Context) error {
