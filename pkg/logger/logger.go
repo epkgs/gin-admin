@@ -1,71 +1,108 @@
 package logger
 
 import (
-	"context"
-	"gin-admin/pkg/helper"
+	"io"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"strings"
 
-	"go.uber.org/zap"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"gorm.io/gorm"
 )
 
-func logger(ctx context.Context) *zap.Logger {
-	fields := []zap.Field{
-		zap.String(key_userID, helper.GetUserID(ctx)),
-		zap.String(key_traceID, helper.GetTraceID(ctx)),
-	}
+type Config struct {
+	Level      string // debug/info/warn/error
+	CallerSkip int
+	// Console
+	ConsoleEnable bool
+	// File
+	FileName       string // if file name not empty, will write log to file
+	FileMaxSize    int    // Maximum number of backup log files
+	FileMaxBackups int    // Maximum size of each log file in MB
 
-	values := GetValues(ctx)
-	for k, v := range values {
-		fields = append(fields, zap.Any(k, v))
-	}
-	return GetLogger(ctx).With(fields...)
+	Database *gorm.DB // if database not nil, will write log to database
 }
 
-func toFields(fields []map[string]any) []zap.Field {
-	var zfields []zap.Field
-	for _, m := range fields {
-		for k, v := range m {
+func New(configs ...func(o *Config)) (logger *slog.Logger, clear func(), err error) {
 
-			if f, ok := v.(zap.Field); ok {
-				zfields = append(zfields, f)
-			} else {
-				zfields = append(zfields, zap.Any(k, v))
-			}
+	cfg := Config{
+		Level:          "info",
+		CallerSkip:     1,
+		ConsoleEnable:  true,
+		FileMaxSize:    64,
+		FileMaxBackups: 20,
+	}
+
+	for _, fn := range configs {
+		fn(&cfg)
+	}
+
+	var fileWriter *lumberjack.Logger
+	writers := []io.Writer{}
+
+	clear = func() {
+		if fileWriter != nil {
+			fileWriter.Close()
+			fileWriter = nil
 		}
 	}
-	return zfields
+
+	// add console output
+	if cfg.ConsoleEnable {
+		writers = append(writers, os.Stdout)
+	}
+
+	// add file output
+	if cfg.FileName != "" {
+		// create directory with permission 0750
+		err = os.MkdirAll(filepath.Dir(cfg.FileName), 0750)
+		if err != nil {
+			// handle error without panic
+			slog.Error("Failed to create log folder", "error", err, "dir", filepath.Dir(cfg.FileName))
+		} else {
+
+			fileWriter = &lumberjack.Logger{
+				Filename:   cfg.FileName,
+				MaxSize:    cfg.FileMaxSize,
+				MaxBackups: cfg.FileMaxBackups,
+				Compress:   false,
+				LocalTime:  true,
+			}
+
+			writers = append(writers, fileWriter)
+		}
+	}
+
+	// add database output
+	if cfg.Database != nil {
+		writers = append(writers, newDBWriter(cfg.Database))
+	}
+
+	level := getLevelFromString(cfg.Level)
+
+	handler := slog.NewJSONHandler(
+		io.MultiWriter(writers...),
+		&slog.HandlerOptions{Level: level},
+	)
+
+	logger = slog.New(newSourceHandler(handler, cfg.CallerSkip))
+
+	return
 }
 
-func Info(ctx context.Context, msg string, fields ...map[string]any) {
-	logger(ctx).Info(msg, toFields(fields)...)
-}
-
-func Debug(ctx context.Context, msg string, fields ...map[string]any) {
-	logger(ctx).Debug(msg, toFields(fields)...)
-}
-
-func Warn(ctx context.Context, msg string, fields ...map[string]any) {
-	logger(ctx).Warn(msg, toFields(fields)...)
-}
-
-func Error(ctx context.Context, msg string, err error, fields ...map[string]any) {
-	zfields := []zap.Field{zap.Error(err)}
-	zfields = append(zfields, toFields(fields)...)
-	logger(ctx).Error(msg, zfields...)
-}
-
-func DPanic(ctx context.Context, msg string, fields ...map[string]any) {
-	logger(ctx).DPanic(msg, toFields(fields)...)
-}
-
-func Panic(ctx context.Context, msg string, fields ...map[string]any) {
-	logger(ctx).Panic(msg, toFields(fields)...)
-}
-
-func Fatal(ctx context.Context, msg string, fields ...map[string]any) {
-	logger(ctx).Fatal(msg, toFields(fields)...)
-}
-
-// Sync calls the underlying Core's Sync method, flushing any buffered log entries. Applications should take care to call Sync before exiting.
-func Sync(ctx context.Context) error {
-	return GetLogger(ctx).Sync()
+// getLevelFromString change string to slog.Level
+func getLevelFromString(level string) slog.Level {
+	switch strings.ToLower(level) {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
 }

@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	_ "net/http/pprof" //nolint:gosec
 	"os"
@@ -11,35 +10,55 @@ import (
 	"time"
 
 	"gin-admin/internal/config"
+	"gin-admin/pkg/gormx"
 	"gin-admin/pkg/logger"
 )
 
 // The Run function initializes and starts a service with configuration and logger, and handles
 // cleanup upon exit.
 func Run(ctx context.Context, configFile string) error {
-	defer func() {
-		if err := logger.Sync(ctx); err != nil {
-			fmt.Printf("failed to sync logger: %s \n", err.Error())
-		}
-	}()
 
 	// Load configuration.
 	cfg := config.MustLoad(ctx, configFile)
 
 	// Initialize logger.
-	cleanLoggerFn, err := logger.Init(ctx, cfg.Logger.Config)
+	cleanLoggerFn, err := logger.Init(func(o *logger.Config) {
+
+		o.Level = cfg.Logger.Level
+		o.ConsoleEnable = cfg.Logger.Console.Enable
+
+		if cfg.Logger.File.Enable {
+			o.FileName = cfg.Logger.File.Path
+			o.FileMaxSize = cfg.Logger.File.MaxSize
+			o.FileMaxBackups = cfg.Logger.File.MaxBackups
+		}
+
+		if cfg.Logger.Database.Enable {
+			db, err := gormx.New(gormx.Config{
+				DBType:       cfg.DB.Type,
+				DSN:          cfg.DB.DSN,
+				MaxLifetime:  cfg.DB.MaxLifetime,
+				MaxIdleTime:  cfg.DB.MaxIdleTime,
+				MaxOpenConns: cfg.DB.MaxOpenConns,
+				MaxIdleConns: cfg.DB.MaxIdleConns,
+			})
+			if err == nil {
+				o.Database = db
+			}
+		}
+
+	})
 	if err != nil {
 		return err
 	}
-	ctx = logger.WithTag(ctx, logger.Tag_Main)
+
+	ctx = logger.WithAttrs(ctx, "tag", "main")
 
 	logger.Info(ctx, "starting service ...",
-		map[string]any{
-			"version": cfg.Version,
-			"pid":     os.Getpid(),
-			"config":  cfg.ConfigFile,
-			"env":     cfg.AppEnv,
-		},
+		"version", cfg.Version,
+		"pid", os.Getpid(),
+		"config", cfg.ConfigFile,
+		"env", cfg.AppEnv,
 	)
 
 	// Start pprof server.
@@ -48,7 +67,9 @@ func Run(ctx context.Context, configFile string) error {
 		go func() {
 			err := http.ListenAndServe(addr, nil)
 			if err != nil {
-				logger.Error(ctx, "failed to listen pprof server", err)
+				logger.Error(ctx, "failed to listen pprof server",
+					"error", err,
+				)
 			}
 		}()
 	}
@@ -69,7 +90,9 @@ func Run(ctx context.Context, configFile string) error {
 			}
 
 			if err := app.Release(ctx); err != nil {
-				logger.Error(ctx, "failed to release app context", err)
+				logger.Error(ctx, "failed to release app context",
+					"error", err,
+				)
 			}
 		}
 
@@ -95,7 +118,9 @@ func run(ctx context.Context, handler func(ctx context.Context) (func(), error))
 EXIT:
 	for {
 		sig := <-sc
-		logger.Info(ctx, "Received signal", map[string]any{"signal": sig.String()})
+		logger.Info(ctx, "Received signal",
+			"signal", sig.String(),
+		)
 
 		switch sig {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:

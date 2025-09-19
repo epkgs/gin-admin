@@ -51,7 +51,7 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 	// 	return nil, errors.BadRequest("Incorrect captcha")
 	// }
 
-	ctx = logger.WithTag(ctx, logger.Tag_Login)
+	ctx = logger.WithAttrs(ctx, "tag", "login")
 
 	u := a.q.User
 
@@ -84,7 +84,9 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 
 	err = a.userSvc.SetRoleIDsCache(ctx, userID, roleIDs, time.Duration(a.app.Config().Cache.Expiration.User)*time.Hour)
 	if err != nil {
-		logger.Error(ctx, "Failed to set cache", err)
+		logger.Error(ctx, "Failed to set cache",
+			"error", err,
+		)
 	}
 
 	// generate token
@@ -101,14 +103,11 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 	}
 
 	logger.Info(ctx, "Login success",
-
-		map[string]any{
-			"username":     req.Username,
-			"accessToken":  loginToken.AccessToken,
-			"refreshToken": loginToken.RefreshToken,
-			"tokenType":    loginToken.TokenType,
-			"expires":      loginToken.Expires,
-		},
+		"username", req.Username,
+		"accessToken", loginToken.AccessToken,
+		"refreshToken", loginToken.RefreshToken,
+		"tokenType", loginToken.TokenType,
+		"expires", loginToken.Expires,
 	)
 
 	return loginToken, nil
@@ -116,7 +115,7 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 
 func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.LoginToken, error) {
 
-	ctx = logger.WithTag(ctx, logger.Tag_Login)
+	ctx = logger.WithAttrs(ctx, "tag", "login")
 
 	claims, err := a.jwt.ParseToken(ctx, refreshToken)
 	if err != nil {
@@ -157,13 +156,11 @@ func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.Logi
 	}
 
 	logger.Info(ctx, "Login success",
-		map[string]any{
-			"username":     user.Username,
-			"accessToken":  loginToken.AccessToken,
-			"refreshToken": loginToken.RefreshToken,
-			"tokenType":    loginToken.TokenType,
-			"expires":      loginToken.Expires,
-		},
+		"username", user.Username,
+		"accessToken", loginToken.AccessToken,
+		"refreshToken", loginToken.RefreshToken,
+		"tokenType", loginToken.TokenType,
+		"expires", loginToken.Expires,
 	)
 
 	return loginToken, nil
@@ -175,7 +172,7 @@ func (a *Auth) Logout(ctx context.Context) error {
 		return nil
 	}
 
-	ctx = logger.WithTag(ctx, logger.Tag_Logout)
+	ctx = logger.WithAttrs(ctx, "tag", "logout")
 	if err := a.jwt.DestroyToken(ctx, userToken); err != nil {
 		return err
 	}
@@ -183,7 +180,9 @@ func (a *Auth) Logout(ctx context.Context) error {
 	userID := helper.GetUserID(ctx)
 	err := a.userSvc.DeleteRoleIDsCache(ctx, userID)
 	if err != nil {
-		logger.Error(ctx, "Failed to delete user cache", err)
+		logger.Error(ctx, "Failed to delete user cache",
+			"error", err,
+		)
 	}
 	logger.Info(ctx, "Logout success")
 

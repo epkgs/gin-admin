@@ -13,7 +13,6 @@ import (
 	"gin-admin/pkg/response"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type Config struct {
@@ -27,19 +26,18 @@ func New(config Config) gin.HandlerFunc {
 				ctx := c.Request.Context()
 
 				if e, ok := err.(error); ok && errors.Is(e, context.Canceled) {
-					ctx = logger.WithTag(ctx, logger.Tag_Request)
 					logger.Info(
 						ctx,
 						fmt.Sprintf("%v", err),
+						"tag", "request",
 					)
 					return
 				}
 
-				ctx = logger.WithTag(ctx, logger.Tag_Recovery)
-
-				values := map[string]any{
-					"stack": zap.StackSkip("stack", config.Skip),
-				}
+				ctx = logger.WithAttrs(ctx,
+					"tag", "recovery",
+					"error", err,
+				)
 
 				if gin.IsDebugging() {
 					httpRequest, _ := httputil.DumpRequest(c.Request, false)
@@ -50,15 +48,12 @@ func New(config Config) gin.HandlerFunc {
 							headers[idx] = current[0] + ": *"
 						}
 					}
-
-					values["headers"] = headers
+					ctx = logger.WithAttrs(ctx, "headers", headers)
 				}
 
 				logger.Error(
 					ctx,
 					fmt.Sprintf("[Recovery] %s panic recovered", time.Now().Format("2006/01/02 - 15:04:05")),
-					fmt.Errorf("%v", err),
-					values,
 				)
 
 				response.Error(c, errorx.ErrInternalServerError)

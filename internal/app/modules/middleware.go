@@ -1,14 +1,12 @@
 package modules
 
 import (
-	"fmt"
 	"gin-admin/internal/middleware/auth"
-	"gin-admin/internal/middleware/logger"
 	"gin-admin/internal/middleware/promx"
 	"gin-admin/internal/middleware/ratelimiter"
 	"gin-admin/internal/types"
 	"gin-admin/pkg/helper"
-	"strings"
+	"gin-admin/pkg/logger"
 	"sync"
 	"time"
 
@@ -78,7 +76,7 @@ func (m *Middlewares) Trace() gin.HandlerFunc {
 
 			traceID := c.GetHeader(requestHeaderKey)
 			if traceID == "" {
-				traceID = fmt.Sprintf("TRACE-%s", strings.ToUpper(xid.New().String()))
+				traceID = xid.New().String()
 			}
 
 			ctx := helper.WithTraceID(c.Request.Context(), traceID)
@@ -95,7 +93,7 @@ func (m *Middlewares) Logger() gin.HandlerFunc {
 	m.logger.once.Do(func() {
 		cfg := m.app.Config().Logger
 
-		m.logger.handler = logger.New(logger.Config{
+		m.logger.handler = logger.GinMiddleware(logger.GinMiddlewareConfig{
 			MaxRequestLen:  cfg.MaxRequestLen,
 			MaxResponseLen: cfg.MaxResponseLen,
 		})

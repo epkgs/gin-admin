@@ -91,9 +91,11 @@ func Error(c *gin.Context, err error) {
 	}
 
 	if res.HttpStatus >= 500 {
-		ctx = logger.WithTag(ctx, logger.Tag_System)
-		ctx = logger.WithStack(ctx, fmt.Sprintf("%+v", err))
-		logger.Error(ctx, http.StatusText(res.HttpStatus), err)
+		logger.Error(ctx, http.StatusText(res.HttpStatus),
+			"tag", "system",
+			"stack", fmt.Sprintf("%+v", err),
+			"error", err,
+		)
 	}
 
 	response(c, res)

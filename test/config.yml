@@ -102,24 +102,16 @@ Menu:
 
 # Logger Configuration
 Logger:
-  Debug: true                            # Debug mode
-  Level: "debug"                         # Log level: debug/info/warn/error/dpanic/panic/fatal
+  Level: "debug"                         # Log level: debug/info/warn/error
   CallerSkip: 1                          # Number of caller stack frames to skip
+  MaxRequestLen: 4096                    # Maximum length of request body
+  MaxResponseLen: 1024                   # Maximum length of response body
 
   File:
-    Enable: false                        # Enable file logger
+    Enable: true                         # Enable file logger
     Path: "log/ginadmin.log"             # Log file path
     MaxBackups: 20                       # Maximum number of backup log files (default: 20)
     MaxSize: 64                          # Maximum size of each log file in MB (default: 64)
 
   Database:
-    Enable: true                       # Enable log hook
-    Level: "info"                      # Hook log level
-    Type: "sqlite3"                    # Database type: sqlite3/mysql/postgres
-    DSN: "ginadmin.db"                 # Database connection string
-    MaxBuffer: 1024                    # Maximum buffer size
-    MaxThread: 2                       # Maximum number of threads
-    MaxOpenConns: 16                   # Maximum open connections
-    MaxIdleConns: 4                    # Maximum idle connections
-    MaxLifetime: 86400                 # Maximum connection lifetime in seconds
-    MaxIdleTime: 7200                  # Maximum connection idle time in seconds
+    Enable: true                         # Enable log hook

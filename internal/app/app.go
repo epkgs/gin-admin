@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -19,7 +20,6 @@ import (
 	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
-	"gin-admin/pkg/logger"
 	"gin-admin/pkg/response"
 	"gin-admin/pkg/utils/util"
 
@@ -145,7 +145,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 	}
 
 	addr := a.cfg.HTTP.Addr
-	logger.Info(ctx, fmt.Sprintf("HTTP server is listening on %s", addr))
+	slog.Info(fmt.Sprintf("HTTP server is listening on %s", addr))
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      e,
@@ -164,7 +164,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 		}
 
 		if err != nil && err != http.ErrServerClosed {
-			logger.Error(ctx, "Failed to listen http server", err)
+			slog.Error("Failed to listen http server", "error", err)
 		}
 	}()
 
@@ -174,7 +174,7 @@ func (a *App) InitHttp(ctx context.Context) error {
 
 		srv.SetKeepAlivesEnabled(false)
 		if err := srv.Shutdown(ctx); err != nil {
-			logger.Error(ctx, "Failed to shutdown http server", err)
+			slog.Error("Failed to shutdown http server", "error", err)
 		}
 	})
 

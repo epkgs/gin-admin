@@ -48,7 +48,10 @@ func NewMenu(app types.AppContext) *Menu {
 }
 
 func (a *Menu) InitIfNeed(ctx context.Context) error {
-	if a.app.Config().Menu.File == "" {
+
+	cfg := a.app.Config().Menu
+
+	if cfg.File == "" {
 		return nil
 	}
 
@@ -64,8 +67,11 @@ func (a *Menu) InitIfNeed(ctx context.Context) error {
 		return nil // 已有数据就跳过
 	}
 
-	if err := a.initFromFile(ctx, a.app.Config().Menu.File); err != nil {
-		logger.Error(ctx, "failed to init menu data", err, map[string]any{"file": a.app.Config().Menu.File})
+	if err := a.initFromFile(ctx, cfg.File); err != nil {
+		logger.Error(ctx, "failed to init menu data",
+			"error", err,
+			"file", cfg.File,
+		)
 	}
 
 	return a.roleSvc.RefreshUpdateTime(ctx)
@@ -80,7 +86,9 @@ func (a *Menu) initFromFile(ctx context.Context, menuFile string) error {
 	f, err := os.ReadFile(menuFile)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			logger.Warn(ctx, "Menu data file not found, skip init menu data from file", map[string]any{"file": menuFile})
+			logger.Warn(ctx, "Menu data file not found, skip init menu data from file",
+				"file", menuFile,
+			)
 			return nil
 		}
 		return err

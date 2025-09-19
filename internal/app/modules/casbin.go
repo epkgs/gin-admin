@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -17,7 +18,6 @@ import (
 	"gin-admin/internal/service"
 	"gin-admin/internal/types"
 	"gin-admin/pkg/cachex"
-	"gin-admin/pkg/logger"
 
 	"github.com/casbin/casbin/v2"
 )
@@ -126,7 +126,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 			},
 		})
 		if err != nil {
-			logger.Error(ctx, "Failed to query role menus", err)
+			slog.Error("Failed to query role menus", "error", err.Error())
 			continue
 		}
 		atomic.AddInt32(&resCount, int32(len(list.Items)))
@@ -143,7 +143,7 @@ func (a *Casbinx) load(ctx context.Context) error {
 		_ = os.Rename(policyFile, policyFile+".bak")
 		_ = os.MkdirAll(filepath.Dir(policyFile), 0755)
 		if err := os.WriteFile(policyFile, buf.Bytes(), 0666); err != nil {
-			logger.Error(ctx, "Failed to write policy file", err)
+			slog.Error("Failed to write policy file", "error", err)
 			return err
 		}
 		// set readonly
@@ -152,20 +152,18 @@ func (a *Casbinx) load(ctx context.Context) error {
 		modelFile := a.app.Config().Casbin.ModelFile
 		e, err := casbin.NewEnforcer(modelFile, policyFile)
 		if err != nil {
-			logger.Error(ctx, "Failed to create casbin enforcer", err)
+			slog.Error("Failed to create casbin enforcer", "error", err)
 			return err
 		}
 		e.EnableLog(a.app.Config().IsDebug())
 		a.enforcer.Store(e)
 	}
 
-	logger.Info(ctx, "Casbin load policy",
-		map[string]any{
-			"cost":      time.Since(start),
-			"roles":     len(roles),
-			"resources": resCount,
-			"bytes":     buf.Len(),
-		},
+	slog.Info("Casbin load policy",
+		"cost", time.Since(start),
+		"roles", len(roles),
+		"resources", resCount,
+		"bytes", buf.Len(),
 	)
 	return nil
 }
@@ -176,7 +174,7 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 	for range a.ticker.C {
 		updated, err := a.roleSVC.GetUpdateTime(ctx)
 		if err != nil {
-			logger.Error(ctx, "Failed to get role update time", err)
+			slog.Error("Failed to get role update time", "error", err)
 
 			if err := a.roleSVC.RefreshUpdateTime(ctx); err != nil {
 				panic(err)
@@ -186,7 +184,7 @@ func (a *Casbinx) autoLoad(ctx context.Context) {
 
 		if lastUpdated < updated {
 			if err := a.load(ctx); err != nil {
-				logger.Error(ctx, "Failed to load casbin policy", err)
+				slog.Error("Failed to load casbin policy", "error", err)
 			} else {
 				lastUpdated = updated
 			}

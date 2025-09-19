@@ -1,7 +1,5 @@
 package config
 
-import "gin-admin/pkg/logger"
-
 type Captcha struct {
 	Length int `default:"4"`
 	Width  int `default:"400"`
@@ -52,7 +50,20 @@ type Casbin struct {
 }
 
 type Logger struct {
-	logger.Config
+	Level      string `default:"info"` // debug/info/warn/error
+	CallerSkip int    `default:"1"`
+	Console    struct {
+		Enable bool `default:"true"`
+	}
+	File struct {
+		Enable     bool   `default:"false"`
+		Path       string `default:"log/ginadmin.log"`
+		MaxSize    int    `default:"20"` // Maximum number of backup log files
+		MaxBackups int    `default:"64"` // Maximum size of each log file in MB
+	}
+	Database struct {
+		Enable bool `default:"false"`
+	}
 	MaxRequestLen  int `default:"4096"`
 	MaxResponseLen int `default:"1024"`
 }

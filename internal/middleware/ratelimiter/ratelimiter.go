@@ -49,7 +49,9 @@ func New(config Config) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			logger.Error(ctx, "Rate limiter middleware error", err)
+			logger.Error(ctx, "Rate limiter middleware error",
+				"error", err,
+			)
 			response.Error(c, errorx.ErrInternalServerError)
 		} else if allowed {
 			c.Next()
