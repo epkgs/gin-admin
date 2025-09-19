@@ -83,8 +83,10 @@ func Warn(ctx context.Context, msg string, args ...any) {
 }
 
 func WithGroup(ctx context.Context, name string) context.Context {
-	logger := getLogger(ctx).WithGroup(name)
-	return WithLogger(ctx, logger)
+	attrs := getAttrs(ctx)
+	logger := getLogger(ctx)
+	ctx = context.WithValue(ctx, ctxValuesKey{}, []any{}) // 清空上下文的 attrs
+	return WithLogger(ctx, logger.With(attrs...).WithGroup(name))
 }
 
 func Group(key string, args ...any) slog.Attr {
