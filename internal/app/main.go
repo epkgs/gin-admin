@@ -52,7 +52,7 @@ func Run(ctx context.Context, configFile string) error {
 		return err
 	}
 
-	ctx = logger.WithAttrs(ctx, "tag", "main")
+	ctx = logger.With(ctx, "tag", "main")
 
 	logger.Info(ctx, "starting service ...",
 		"version", cfg.Version,

@@ -51,7 +51,7 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 	// 	return nil, errors.BadRequest("Incorrect captcha")
 	// }
 
-	ctx = logger.WithAttrs(ctx, "tag", "login")
+	ctx = logger.With(ctx, "tag", "login")
 
 	u := a.q.User
 
@@ -115,7 +115,7 @@ func (a *Auth) Login(ctx context.Context, req *dto.Login) (*dto.LoginToken, erro
 
 func (a *Auth) RefreshToken(ctx context.Context, refreshToken string) (*dto.LoginToken, error) {
 
-	ctx = logger.WithAttrs(ctx, "tag", "login")
+	ctx = logger.With(ctx, "tag", "login")
 
 	claims, err := a.jwt.ParseToken(ctx, refreshToken)
 	if err != nil {
@@ -172,7 +172,7 @@ func (a *Auth) Logout(ctx context.Context) error {
 		return nil
 	}
 
-	ctx = logger.WithAttrs(ctx, "tag", "logout")
+	ctx = logger.With(ctx, "tag", "logout")
 	if err := a.jwt.DestroyToken(ctx, userToken); err != nil {
 		return err
 	}

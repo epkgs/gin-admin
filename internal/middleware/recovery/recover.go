@@ -34,7 +34,7 @@ func New(config Config) gin.HandlerFunc {
 					return
 				}
 
-				ctx = logger.WithAttrs(ctx,
+				ctx = logger.With(ctx,
 					"tag", "recovery",
 					"error", err,
 				)
@@ -48,7 +48,7 @@ func New(config Config) gin.HandlerFunc {
 							headers[idx] = current[0] + ": *"
 						}
 					}
-					ctx = logger.WithAttrs(ctx, "headers", headers)
+					ctx = logger.With(ctx, "headers", headers)
 				}
 
 				logger.Error(

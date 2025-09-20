@@ -121,7 +121,7 @@ func GinMiddleware(cfg GinMiddlewareConfig) gin.HandlerFunc {
 		resStatus := c.Writer.Status()
 
 		// 构建基础日志属性
-		ctx = WithAttrs(ctx,
+		ctx = With(ctx,
 			slog.String("tag", "request"),
 			slog.String("trace_id", helper.GetTraceID(ctx)),
 			slog.String("method", c.Request.Method),
@@ -146,7 +146,7 @@ func GinMiddleware(cfg GinMiddlewareConfig) gin.HandlerFunc {
 				system = ua.Platform()
 			}
 
-			ctx = WithAttrs(ctx,
+			ctx = With(ctx,
 				slog.String("user_agent", userAgent),
 				slog.String("browser", browser),
 				slog.String("system", system),
@@ -167,7 +167,7 @@ func GinMiddleware(cfg GinMiddlewareConfig) gin.HandlerFunc {
 		// 添加请求体（如果存在且符合长度要求）
 		if len(requestBody) > 0 {
 			val := parseAttrValue(contentType, requestBody)
-			ctx = WithAttrs(ctx, slog.Any("request", val))
+			ctx = With(ctx, slog.Any("request", val))
 		}
 
 		// 添加响应体（如果存在且符合长度要求）
@@ -175,7 +175,7 @@ func GinMiddleware(cfg GinMiddlewareConfig) gin.HandlerFunc {
 		if len(responseBody) > 0 && len(responseBody) <= cfg.MaxResponseLen {
 			contentType := c.Writer.Header().Get("Content-Type")
 			val := parseAttrValue(contentType, responseBody)
-			ctx = WithAttrs(ctx, slog.Any("response", val))
+			ctx = With(ctx, slog.Any("response", val))
 		}
 
 		// 根据状态码选择日志级别
