@@ -83,13 +83,9 @@ func (a *App) AddCleaner(ctx context.Context, cleaner func()) {
 	a.cleaners = append(a.cleaners, cleaner)
 }
 
-func (a *App) autoMigrate(_ context.Context) error {
-	return a.db.AutoMigrate(model.Models...)
-}
-
 func (a *App) Init(ctx context.Context) error {
 	if a.Config().DB.AutoMigrate {
-		if err := a.autoMigrate(ctx); err != nil {
+		if err := a.db.AutoMigrate(model.Models...); err != nil {
 			return err
 		}
 
