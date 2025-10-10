@@ -3,8 +3,8 @@ package locales
 import "github.com/epkgs/i18n"
 
 var (
-	Def  = i18n.NewBundle("default")
-	DB   = i18n.NewBundle("database")
-	Http = i18n.NewBundle("http")
-	User = i18n.NewBundle("user")
+	Def  = i18n.Bundle("default")
+	DB   = i18n.Bundle("database")
+	Http = i18n.Bundle("http")
+	User = i18n.Bundle("user")
 )
