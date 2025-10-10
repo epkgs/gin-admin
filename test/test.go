@@ -43,6 +43,7 @@ func init() {
 	app := app.New(ctx, cfg)
 
 	if err := app.Init(ctx); err != nil {
+		app.Release(ctx)
 		panic(err)
 	}
 

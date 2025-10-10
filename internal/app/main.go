@@ -75,6 +75,7 @@ func Run(ctx context.Context, configFile string) error {
 	app.AddCleaner(ctx, cleanLoggerFn)
 
 	if err := app.Init(ctx); err != nil {
+		app.Release(ctx)
 		return err
 	}
 

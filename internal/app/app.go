@@ -101,7 +101,7 @@ func (a *App) Init(ctx context.Context) error {
 
 	// Init menu data
 	if err := service.NewMenu(a).InitIfNeed(ctx); err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
