@@ -33,24 +33,25 @@
 
 ## 目录结构
 ```
-.
-├── app                 # 应用初始化
-│   ├── api             # API控制器
-│   └── modules         # app模块
 ├── cmd                 # 命令行工具
-├── config              # 配置解析
-├── errorx              # 错误处理
+├── configs             # 配置文件
+├── internal
+│   ├── api             # API控制器
+|   ├── app             # App 主框架
+│   │   └── modules     # App模块
+|   ├── config          # 配置解析
+|   ├── dao             # 业务对象，由 Gorm Gen 生成
+|   ├── dto             # 数据传输对象，用于接收前端参数
+|   ├── errorx          # 错误处理
+|   ├── middleware      # 中间件
+|   ├── model           # 持久化对象，对应数据库实体
+|   ├── service         # 业务逻辑层
+|   ├── swagger         # API文档
+|   └── types           # 接口定义
 ├── locales             # 多语言文件
-├── model               # 数据模型
-│   ├── bo              # 业务对象，由 Gorm Gen 生成
-│   ├── dto             # 数据传输对象，用于接收前端参数
-│   └── po              # 持久化对象，对应数据库实体
 ├── pkg                 # 公共组件库
 ├── scripts             # 脚本文件
-├── service             # 业务逻辑层
-├── swagger             # API文档
-├── test                # 测试文件
-└── types               # 接口定义
+└── test                # 测试文件
 ```
 
 ## 快速开始
