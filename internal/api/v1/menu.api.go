@@ -15,6 +15,8 @@ type Menu struct {
 	MenuSVC *service.Menu
 }
 
+var _ types.RoutableHandler = (*Menu)(nil)
+
 func NewMenu(app types.AppContext) *Menu {
 	return &Menu{
 		app:     app,
@@ -22,7 +24,7 @@ func NewMenu(app types.AppContext) *Menu {
 	}
 }
 
-func (a *Menu) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *Menu) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 
 	g := group.Group("menus")
 	g.Use(

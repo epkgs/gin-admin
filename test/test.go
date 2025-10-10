@@ -47,10 +47,7 @@ func init() {
 	}
 
 	engine = gin.New()
-	err := api.RegisterRouters(app, engine)
-	if err != nil {
-		panic(err)
-	}
+	api.RegRoutes(app, engine)
 }
 
 func ApiTester(t *testing.T) *httpexpect.Expect {

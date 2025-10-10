@@ -15,6 +15,8 @@ type Logger struct {
 	LoggerSVC *service.Logger
 }
 
+var _ types.RoutableHandler = (*Logger)(nil)
+
 func NewLogger(app types.AppContext) *Logger {
 	return &Logger{
 		app:       app,
@@ -22,7 +24,7 @@ func NewLogger(app types.AppContext) *Logger {
 	}
 }
 
-func (a *Logger) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *Logger) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 	g := group.Group("loggers")
 	g.Use(
 		a.app.Middlewares().Auth(),

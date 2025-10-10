@@ -17,6 +17,8 @@ type Auth struct {
 	AuthSVC *service.Auth
 }
 
+var _ types.RoutableHandler = (*Auth)(nil)
+
 func NewAuth(app types.AppContext) *Auth {
 	return &Auth{
 		app:     app,
@@ -24,7 +26,7 @@ func NewAuth(app types.AppContext) *Auth {
 	}
 }
 
-func (a *Auth) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *Auth) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 
 	g := group.Group("auth")
 

@@ -15,6 +15,8 @@ type User struct {
 	UserSVC *service.User
 }
 
+var _ types.RoutableHandler = (*User)(nil)
+
 func NewUser(app types.AppContext) *User {
 	return &User{
 		app:     app,
@@ -22,7 +24,7 @@ func NewUser(app types.AppContext) *User {
 	}
 }
 
-func (a *User) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *User) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 
 	g := group.Group("users")
 	g.Use(

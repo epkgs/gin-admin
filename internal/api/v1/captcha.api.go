@@ -14,6 +14,8 @@ type Captcha struct {
 	CaptchaSVC *service.Captcha
 }
 
+var _ types.RoutableHandler = (*Captcha)(nil)
+
 func NewCaptcha(app types.AppContext) *Captcha {
 	return &Captcha{
 		app:        app,
@@ -21,7 +23,7 @@ func NewCaptcha(app types.AppContext) *Captcha {
 	}
 }
 
-func (a *Captcha) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *Captcha) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 	g := group.Group("captcha")
 
 	g.GET("id", a.GetCaptcha)

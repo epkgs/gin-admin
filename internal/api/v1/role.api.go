@@ -15,6 +15,8 @@ type Role struct {
 	RoleSVC *service.Role
 }
 
+var _ types.RoutableHandler = (*Role)(nil)
+
 func NewRole(app types.AppContext) *Role {
 	return &Role{
 		app:     app,
@@ -22,7 +24,7 @@ func NewRole(app types.AppContext) *Role {
 	}
 }
 
-func (a *Role) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *Role) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 
 	g := group.Group("roles")
 	g.Use(

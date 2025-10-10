@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	sdmysql "github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"

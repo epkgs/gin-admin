@@ -4,39 +4,34 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"gin-admin/internal/api"
 	"gin-admin/internal/app/modules"
 	"gin-admin/internal/config"
-	"gin-admin/internal/errorx"
-	"gin-admin/internal/middleware/recovery"
 	"gin-admin/internal/model"
 	"gin-admin/internal/service"
 	_ "gin-admin/internal/swagger"
 	"gin-admin/internal/types"
-	"gin-admin/locales"
 	"gin-admin/pkg/cachex"
 	"gin-admin/pkg/jwtx"
-	"gin-admin/pkg/response"
+	"gin-admin/pkg/logger"
 	"gin-admin/pkg/utils/util"
 
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
 type App struct {
-	cfg    *config.Config
-	db     *gorm.DB
-	cacher cachex.Cacher
-	jwt    jwtx.Auther
-	casbin types.Casbinx
-
+	cfg         *config.Config
+	db          *gorm.DB
+	cacher      cachex.Cacher
+	jwt         jwtx.Auther
+	casbin      types.Casbinx
 	middlewares *modules.Middlewares
+	http        *http.Server
 
 	cleaners []func()
 }
@@ -54,8 +49,8 @@ func New(ctx context.Context, c *config.Config) *App {
 	app.db = util.Must(modules.NewDB(ctx, app))
 	app.jwt = util.Must(modules.NewJWT(ctx, app))
 	app.casbin = util.Must(modules.NewCasbinx(ctx, app))
-
 	app.middlewares = modules.NewMiddlewares(app)
+	app.http = util.Must(modules.NewHttp(ctx, app))
 
 	return app
 }
@@ -116,68 +111,51 @@ func (a *App) Init(ctx context.Context) error {
 	return nil
 }
 
-func (a *App) InitHttp(ctx context.Context) error {
-	if a.cfg.IsDebug() {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	e := gin.New()
-	e.GET("/health", func(c *gin.Context) {
-		response.OK(c)
-	})
-	e.Use(recovery.New(recovery.Config{Skip: 3}))
-	e.NoMethod(func(c *gin.Context) {
-		response.Error(c, errorx.ErrMethodNotAllowed)
-	})
-	e.NoRoute(func(c *gin.Context) {
-		response.Error(c, errorx.ErrNotFound.WithMsg(locales.Def.Str("Route not found")))
-	})
-
-	if err := api.RegisterRouters(a, e); err != nil {
-		return err
-	}
-
-	// Register swagger
-	if a.cfg.Swagger.Enable {
-		g := e.Group("") // .Use(a.middlewares.Auth())
-		g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	}
-
-	addr := a.cfg.HTTP.Addr
-	slog.Info(fmt.Sprintf("HTTP server is listening on %s", addr))
-	srv := &http.Server{
-		Addr:         addr,
-		Handler:      e,
-		ReadTimeout:  time.Second * time.Duration(a.cfg.HTTP.ReadTimeout),
-		WriteTimeout: time.Second * time.Duration(a.cfg.HTTP.WriteTimeout),
-		IdleTimeout:  time.Second * time.Duration(a.cfg.HTTP.IdleTimeout),
-	}
+func (a *App) ListenAndServe(ctx context.Context) error {
+	state := 1
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	go func() {
+		addr := a.cfg.HTTP.Addr
+		logger.Info(ctx, fmt.Sprintf("HTTP server is listening on %s", addr))
+
 		var err error
 		if a.cfg.HTTP.CertFile != "" && a.cfg.HTTP.KeyFile != "" {
-			srv.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
-			err = srv.ListenAndServeTLS(a.cfg.HTTP.CertFile, a.cfg.HTTP.KeyFile)
+			a.http.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+			err = a.http.ListenAndServeTLS(a.cfg.HTTP.CertFile, a.cfg.HTTP.KeyFile)
 		} else {
-			err = srv.ListenAndServe()
+			err = a.http.ListenAndServe()
 		}
 
 		if err != nil && err != http.ErrServerClosed {
-			slog.Error("Failed to listen http server", "error", err)
+			logger.Error(ctx, "Failed to listen http server", "error", err)
+			close(sc) // 主动关闭信号通道以触发服务退出
 		}
 	}()
 
-	a.AddCleaner(ctx, func() {
-		ctx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(a.cfg.HTTP.ShutdownTimeout))
-		defer cancel()
+EXIT:
 
-		srv.SetKeepAlivesEnabled(false)
-		if err := srv.Shutdown(ctx); err != nil {
-			slog.Error("Failed to shutdown http server", "error", err)
+	for {
+		sig := <-sc
+		logger.Info(ctx, "Received signal",
+			"signal", sig.String(),
+		)
+
+		switch sig {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+			state = 0
+			break EXIT
+		case syscall.SIGHUP:
+		default:
+			break EXIT
 		}
-	})
+	}
 
+	a.Release(ctx)
+	logger.Info(ctx, "Server exit, bye...")
+	time.Sleep(time.Millisecond * 100)
+	os.Exit(state)
 	return nil
 }
 

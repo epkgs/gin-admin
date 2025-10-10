@@ -13,13 +13,15 @@ type API struct {
 	engine *gin.Engine
 }
 
+var _ types.RoutableHandler = (*API)(nil)
+
 func NewAPI(app types.AppContext) *API {
 	return &API{
 		app: app,
 	}
 }
 
-func (a *API) RegisterRouter(group *gin.RouterGroup, engine *gin.Engine) {
+func (a *API) RegRoutes(group *gin.RouterGroup, engine *gin.Engine) {
 
 	g := group.Group("apis")
 	g.Use(

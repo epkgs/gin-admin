@@ -39,3 +39,7 @@ type Middlewares interface {
 	RateLimiter() gin.HandlerFunc
 	Prometheus() gin.HandlerFunc
 }
+
+type RoutableHandler interface {
+	RegRoutes(group *gin.RouterGroup, engine *gin.Engine)
+}

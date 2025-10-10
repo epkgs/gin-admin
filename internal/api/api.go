@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRouters(app types.AppContext, e *gin.Engine) error {
+func RegRoutes(app types.AppContext, e *gin.Engine) {
 	apiV1 := e.Group("/api/v1")
 
 	apiV1.Use(
@@ -20,25 +20,11 @@ func RegisterRouters(app types.AppContext, e *gin.Engine) error {
 		app.Middlewares().Prometheus(),
 	)
 
-	registerRouters(apiV1, e,
-		v1.NewAuth(app),
-		v1.NewCaptcha(app),
-		v1.NewLogger(app),
-		v1.NewMenu(app),
-		v1.NewRole(app),
-		v1.NewUser(app),
-		v1.NewAPI(app),
-	)
-
-	return nil
-}
-
-type routerRegister interface {
-	RegisterRouter(group *gin.RouterGroup, engine *gin.Engine)
-}
-
-func registerRouters(group *gin.RouterGroup, engine *gin.Engine, registers ...routerRegister) {
-	for _, register := range registers {
-		register.RegisterRouter(group, engine)
-	}
+	v1.NewAuth(app).RegRoutes(apiV1, e)
+	v1.NewCaptcha(app).RegRoutes(apiV1, e)
+	v1.NewLogger(app).RegRoutes(apiV1, e)
+	v1.NewMenu(app).RegRoutes(apiV1, e)
+	v1.NewRole(app).RegRoutes(apiV1, e)
+	v1.NewUser(app).RegRoutes(apiV1, e)
+	v1.NewAPI(app).RegRoutes(apiV1, e)
 }
